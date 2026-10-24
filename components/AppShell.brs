@@ -132,7 +132,21 @@ sub onLibraryItemRequested()
     requested = m.libraryView.itemRequested
     resolved = resolveCatalogItem(requested)
     if resolved = invalid then return
+    if requested.progress_seconds <> invalid and requested.progress_seconds > 0 then
+        playCatalogItem(resolved, requested.progress_seconds)
+        return
+    end if
     openCatalogItem(resolved)
+end sub
+
+sub playCatalogItem(item as Object, resumePosition as Integer)
+    if item = invalid or item.stream_url = invalid or item.stream_url = "" then return
+    m.playerView.contentTitle = item.title
+    m.playerView.contentId = item.id
+    m.playerView.contentCategory = item.category
+    m.playerView.resumePosition = resumePosition
+    m.playerView.streamUrl = item.stream_url
+    m.playerView.visible = true
 end sub
 
 sub openCatalogItem(item as Object)
@@ -156,11 +170,7 @@ end function
 sub onLivePlayRequested()
     item = m.liveTVView.playRequested
     if item = invalid or item.stream_url = invalid or item.stream_url = "" then return
-    m.playerView.contentTitle = item.title
-    m.playerView.contentId = item.id
-    m.playerView.contentCategory = item.category
-    m.playerView.streamUrl = item.stream_url
-    m.playerView.visible = true
+    playCatalogItem(item, 0)
 end sub
 
 sub onSearchKeyboardSelected()
@@ -233,11 +243,7 @@ sub onPlayRequested()
     item = m.detailView.playRequested
     if item = invalid then return
     if item.stream_url = invalid or item.stream_url = "" then return
-    m.playerView.contentTitle = item.title
-    m.playerView.contentId = item.id
-    m.playerView.contentCategory = item.category
-    m.playerView.streamUrl = item.stream_url
-    m.playerView.visible = true
+    playCatalogItem(item, 0)
 end sub
 
 sub onPlayerClosed()

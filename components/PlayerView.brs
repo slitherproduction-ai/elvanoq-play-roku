@@ -33,6 +33,7 @@ end sub
 sub onStreamChanged()
     if m.top.streamUrl = "" then return
     m.lastPersistedSecond = -15
+    m.shouldRestorePosition = m.top.resumePosition > 0
     if isParentallyBlocked(m.top.contentCategory) then
         m.video.control = "stop"
         m.hint.text = "Conteúdo protegido. Valide o PIN em Ajustes para assistir."
@@ -48,6 +49,11 @@ end sub
 
 sub onVideoState()
     if m.video.state = "playing" then
+        if m.shouldRestorePosition then
+            m.video.seek = m.top.resumePosition
+            m.shouldRestorePosition = false
+            m.hint.text = "Retomando de onde você parou."
+        end if
         refreshTrackStatus()
         showOsd()
     else if m.video.state = "finished" then
