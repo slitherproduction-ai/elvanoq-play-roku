@@ -1,4 +1,5 @@
 sub init()
+    m.localState = loadLocalState()
     m.focusRail = m.top.findNode("focusRail")
     m.sectionEyebrow = m.top.findNode("sectionEyebrow")
     m.sectionTitle = m.top.findNode("sectionTitle")
@@ -59,13 +60,32 @@ sub showSection()
         { title: "Filmes", description: "Catálogo de filmes, detalhes, favoritos e continuar assistindo.", hint: "A lista sincronizada do Portal abastecerá este catálogo." },
         { title: "Séries", description: "Séries, temporadas expansíveis e episódios em uma experiência otimizada para controle remoto.", hint: "A navegação mantém o foco sempre visível." },
         { title: "Busca", description: "Busca global por canais, filmes, séries e episódios.", hint: "Digite usando o teclado virtual do Roku quando o catálogo estiver disponível." },
-        { title: "Minha Lista", description: "Favoritos, assistir mais tarde e histórico de reprodução deste dispositivo.", hint: "Os dados serão persistidos localmente e sincronizados quando aplicável." },
+        { title: "Minha Lista", description: libraryDescription(), hint: "Favoritos, assistir mais tarde, continuar e histórico ficam neste Roku sem dados sensíveis." },
         { title: "Ajustes", description: "Perfil, controle parental, suporte e informações do dispositivo.", hint: "As opções de licença continuam disponíveis no Portal ELVANOQ." }
     ]
     section = sections[m.selectedIndex]
     m.sectionTitle.text = section.title
     m.sectionDescription.text = section.description
     m.sectionHint.text = section.hint
+end sub
+
+function libraryDescription() as String
+    return str(m.localState.favorites.count()) + " favoritos, " + str(m.localState.watch_later.count()) + " para assistir mais tarde e " + str(m.localState.continue_watching.count()) + " em andamento."
+end function
+
+sub saveFavorite(item as Object)
+    m.localState.favorites = upsertLocalItem(m.localState.favorites, item)
+    saveLocalState(m.localState)
+end sub
+
+sub removeFavorite(itemId as String)
+    m.localState.favorites = removeLocalItem(m.localState.favorites, itemId)
+    saveLocalState(m.localState)
+end sub
+
+sub saveProgress(item as Object)
+    m.localState.continue_watching = upsertLocalItem(m.localState.continue_watching, item)
+    saveLocalState(m.localState)
 end sub
 
 sub applyPlaylist(payload as Object)

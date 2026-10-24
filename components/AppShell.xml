@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="AppShell" extends="Group">
   <script type="text/brightscript" uri="pkg:/components/AppShell.brs" />
+  <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <children>
     <Rectangle id="rail" width="300" height="1080" color="0x081827F2" />
     <Poster id="brandMark" uri="pkg:/images/elvanoq-wordmark.png" translation="32,48" width="236" height="79" />

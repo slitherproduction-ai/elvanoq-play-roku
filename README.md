@@ -19,6 +19,10 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 O app persiste apenas metadados não sensíveis da lista para identificar a sincronização local. URLs, usuários e senhas não são gravados no registro local.
 
+## Estado local
+
+Favoritos, assistir mais tarde, continuar assistindo, histórico e preferências parentais têm uma base local por dispositivo. As coleções usam identificador de item para evitar duplicações e não armazenam credenciais, URLs ou identificadores técnicos.
+
 ## Player Roku
 
 O componente PlayerView usa o player nativo Roku e está preparado para receber uma URL de stream autorizada pelo fluxo de listas. Ele oferece saída pelo botão Voltar e OSD reaberto por OK. A reprodução real será validada com uma lista autorizada em aparelho físico.

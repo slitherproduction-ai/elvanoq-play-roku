@@ -26,6 +26,7 @@ jobs:
         run: |
           test -f manifest
           test -f source/main.brs
+          test -f source/LocalState.brs
           test -f components/MainScene.xml
           test -f components/MainScene.brs
           test -f components/AppShell.xml
