@@ -8,6 +8,7 @@ sub init()
     m.controlFocus = m.top.findNode("controlFocus")
     m.controls = m.top.findNode("controls")
     m.osdBackground = m.top.findNode("osdBackground")
+    m.osdTimer = m.top.findNode("osdTimer")
     m.title.font = "font:MediumBoldSystemFont"
     m.hint.font = "font:SmallSystemFont"
     m.trackStatus.font = "font:SmallSystemFont"
@@ -20,6 +21,7 @@ sub init()
     m.video.notificationInterval = 1
     m.video.observeField("state", "onVideoState")
     m.video.observeField("position", "onPositionChanged")
+    m.osdTimer.observeField("fire", "onOsdTimerFired")
     m.top.observeField("streamUrl", "onStreamChanged")
     m.top.observeField("contentTitle", "onTitleChanged")
     m.selectedControl = 1
@@ -151,9 +153,15 @@ sub showOsd()
     m.timeLabel.visible = true
     m.controlFocus.visible = true
     m.controls.visible = true
+    if m.video.state = "playing" then m.osdTimer.control = "start"
+end sub
+
+sub onOsdTimerFired()
+    if m.video.state = "playing" then hideOsd()
 end sub
 
 sub hideOsd()
+    m.osdTimer.control = "stop"
     m.osdBackground.visible = false
     m.title.visible = false
     m.hint.visible = false

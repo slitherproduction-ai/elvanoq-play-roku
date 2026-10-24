@@ -17,6 +17,7 @@
   <children>
     <Rectangle width="1920" height="1080" color="0x000000FF" />
     <Video id="video" width="1920" height="1080" enableUI="false" />
+    <Timer id="osdTimer" duration="5" repeat="false" />
     <Rectangle id="osdBackground" translation="0,0" width="1920" height="1080" color="0x06111F99" />
     <Label id="title" translation="70,58" width="1500" height="52" />
     <Label id="hint" translation="70,118" text="OK: controles  •  Voltar: sair" width="1500" height="36" />
