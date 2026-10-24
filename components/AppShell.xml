@@ -21,5 +21,7 @@
     <Label id="sectionHint" translation="390,890" width="1100" height="40" />
     <HomeView id="homeView" visible="false" />
     <LiveTVView id="liveTVView" visible="false" />
+    <BrowseView id="moviesView" kind="movies" visible="false" />
+    <BrowseView id="seriesView" kind="series" visible="false" />
   </children>
 </component>
