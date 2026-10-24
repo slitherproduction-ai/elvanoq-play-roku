@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="LibraryView" extends="Group">
+  <script type="text/brightscript" uri="pkg:/components/LibraryView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
+  <children>
+    <Rectangle translation="300,0" width="1620" height="1080" color="0x06111FFF" />
+    <Label id="title" translation="390,100" text="Minha Lista" width="700" height="62" />
+    <Label id="tabs" translation="390,200" width="1100" height="38" />
+    <Rectangle id="tabFocus" translation="390,246" width="220" height="6" color="0x2E91EFFF" />
+    <Label id="items" translation="390,310" width="1180" height="580" wrap="true" />
+    <Label id="hint" translation="390,930" text="←/→: trocar coleção" width="900" height="36" />
+  </children>
+</component>

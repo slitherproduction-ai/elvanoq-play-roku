@@ -46,6 +46,8 @@ jobs:
           test -f components/BrowseView.brs
           test -f components/SearchView.xml
           test -f components/SearchView.brs
+          test -f components/LibraryView.xml
+          test -f components/LibraryView.brs
           test -f components/ParentalView.xml
           test -f components/ParentalView.brs
           test -f components/DetailView.xml
@@ -58,7 +60,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import xml.etree.ElementTree as ET
-          for path in ('components/MainScene.xml', 'components/AppShell.xml', 'components/HomeView.xml', 'components/LiveTVView.xml', 'components/BrowseView.xml', 'components/SearchView.xml', 'components/ParentalView.xml', 'components/DetailView.xml', 'components/PlayerView.xml', 'components/PortalService.xml', 'components/CatalogService.xml', 'components/MetadataService.xml'):
+          for path in ('components/MainScene.xml', 'components/AppShell.xml', 'components/HomeView.xml', 'components/LiveTVView.xml', 'components/BrowseView.xml', 'components/SearchView.xml', 'components/LibraryView.xml', 'components/ParentalView.xml', 'components/DetailView.xml', 'components/PlayerView.xml', 'components/PortalService.xml', 'components/CatalogService.xml', 'components/MetadataService.xml'):
               ET.parse(path)
               print(f'valid XML: {path}')
           PY

@@ -10,6 +10,7 @@ sub init()
     m.moviesView = m.top.findNode("moviesView")
     m.seriesView = m.top.findNode("seriesView")
     m.searchView = m.top.findNode("searchView")
+    m.libraryView = m.top.findNode("libraryView")
     m.parentalView = m.top.findNode("parentalView")
     m.detailView = m.top.findNode("detailView")
     m.playerView = m.top.findNode("playerView")
@@ -47,6 +48,7 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
     if m.playerView.visible then return m.playerView.callFunc("handleKey", { key: key, press: press })
     if m.detailView.visible then return m.detailView.callFunc("handleKey", { key: key, press: press })
+    if m.selectedIndex = 5 then return m.libraryView.callFunc("handleKey", { key: key, press: press })
     if m.selectedIndex = 6 then
         if key >= "0" and key <= "9" then
             m.parentalView.callFunc("enterDigit", key)
@@ -71,6 +73,10 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
             return true
         end if
     end if
+    if m.selectedIndex = 4 and key = "OK" then
+        openSearchKeyboard()
+        return true
+    end if
     if key = "down" and m.selectedIndex < m.navItems.count() - 1 then
         m.selectedIndex = m.selectedIndex + 1
         showSection()
@@ -83,6 +89,22 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     end if
     return key = "OK"
 end function
+
+sub openSearchKeyboard()
+    dialog = CreateObject("roSGNode", "KeyboardDialog")
+    dialog.title = "Buscar no ELVANOQ Play"
+    dialog.message = "Filmes, séries e canais da sua lista"
+    dialog.buttons = ["Buscar", "Cancelar"]
+    dialog.observeField("buttonSelected", "onSearchKeyboardSelected")
+    m.searchKeyboard = dialog
+    m.top.getScene().dialog = dialog
+end sub
+
+sub onSearchKeyboardSelected()
+    if m.searchKeyboard.buttonSelected = 0 then m.searchView.callFunc("setQuery", m.searchKeyboard.text)
+    m.top.getScene().dialog = invalid
+    m.searchKeyboard = invalid
+end sub
 
 sub onBrowseItemSelected()
     selected = invalid
@@ -170,6 +192,7 @@ sub showSection()
     m.moviesView.visible = isMovies
     m.seriesView.visible = isSeries
     m.searchView.visible = isSearch
+    m.libraryView.visible = m.selectedIndex = 5
     m.parentalView.visible = isSettings
     if not isLive then m.liveTVView.callFunc("stopPreview")
     m.sectionEyebrow.visible = not isHome and not isLive and not isMovies and not isSeries and not isSearch and not isSettings
@@ -203,6 +226,7 @@ sub showSection()
     if isMovies and m.catalog <> invalid then m.moviesView.callFunc("setCatalog", { items: m.catalog })
     if isSeries and m.catalog <> invalid then m.seriesView.callFunc("setCatalog", { items: m.catalog })
     if isSearch and m.catalog <> invalid then m.searchView.callFunc("setCatalog", { items: m.catalog })
+    if m.selectedIndex = 5 then m.libraryView.callFunc("refresh")
 end sub
 
 function libraryDescription() as String

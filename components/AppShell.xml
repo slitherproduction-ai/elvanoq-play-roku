@@ -29,6 +29,7 @@
     <BrowseView id="moviesView" kind="movies" visible="false" />
     <BrowseView id="seriesView" kind="series" visible="false" />
     <SearchView id="searchView" visible="false" />
+    <LibraryView id="libraryView" visible="false" />
     <ParentalView id="parentalView" visible="false" />
     <DetailView id="detailView" visible="false" />
     <PlayerView id="playerView" visible="false" />
