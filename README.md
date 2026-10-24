@@ -10,10 +10,11 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 1. Na abertura, o app obtém exclusivamente roDeviceInfo.GetChannelClientId().
 2. O identificador técnico é transformado somente para apresentação em um código visual no padrão ROKU-XXXXXXXX-XXXXXXXX.
-3. O app chama roku-device-register, seguido de roku-license-status.
-4. Enquanto estiver pendente, o status é consultado a cada 60 segundos, sem bloquear a tela.
-5. O cliente abre elvanoqplay.app e vincula a TV com o Código Roku mostrado.
-6. Quando a licença fica ativa, o app prepara a transição para a Home.
+3. Na primeira abertura, o app cria uma chave aleatória persistente no registro local do Roku. Ela não é mostrada ao cliente.
+4. O app chama roku-device-register, seguido de roku-license-status, enviando a chave somente por HTTPS ao Portal.
+5. Enquanto estiver pendente, o status é consultado a cada 60 segundos, sem bloquear a tela.
+6. O cliente abre elvanoqplay.app e vincula a TV com o Código Roku mostrado.
+7. Quando a licença fica ativa, o app prepara a transição para a Home.
 
 O identificador técnico nunca é exibido completo, registrado em logs ou tratado como endereço físico.
 

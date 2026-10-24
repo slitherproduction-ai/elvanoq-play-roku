@@ -4,7 +4,7 @@ end sub
 
 sub run()
     result = { action: m.top.action, ok: false, state: "error", message: "Não foi possível consultar o Portal.", httpStatus: 0 }
-    if m.top.rokuClientId = "" or m.top.deviceCode = "" or m.top.action = "" then
+    if m.top.rokuClientId = "" or m.top.deviceCode = "" or m.top.deviceKey = "" or m.top.action = "" then
         result.message = "Dados de ativação indisponíveis neste momento."
         m.top.result = result
         return
@@ -17,7 +17,7 @@ sub run()
     transfer.SetUrl("https://xrrgjssvdqvtrqhxpask.supabase.co/functions/v1/portal-control")
     transfer.AddHeader("Content-Type", "application/json")
     transfer.AddHeader("Accept", "application/json")
-    payload = { action: m.top.action, rokuClientId: m.top.rokuClientId, deviceCode: m.top.deviceCode, platform: "roku" }
+    payload = { action: m.top.action, rokuClientId: m.top.rokuClientId, deviceCode: m.top.deviceCode, device_key: m.top.deviceKey, platform: "roku" }
     responseText = transfer.PostFromString(FormatJson(payload))
     result.httpStatus = transfer.GetResponseCode()
 

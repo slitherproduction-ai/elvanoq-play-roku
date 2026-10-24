@@ -16,9 +16,10 @@ sub init()
     m.homeStatus.font = "font:LargeBoldSystemFont"
     m.licenseTimer.observeField("fire", "onLicenseTimer")
     m.clientId = CreateObject("roDeviceInfo").GetChannelClientId()
+    m.deviceKey = getOrCreateDeviceKey()
     m.deviceCodeValue = formatDeviceCode(m.clientId)
     m.deviceCode.text = m.deviceCodeValue
-    if m.clientId = "" or m.deviceCodeValue = "ROKU-CÓDIGO-INDISPONÍVEL" then
+    if m.clientId = "" or m.deviceKey = "" or m.deviceCodeValue = "ROKU-CÓDIGO-INDISPONÍVEL" then
         m.status.text = "Não foi possível preparar a ativação deste Roku. Reinicie o aplicativo."
         return
     end if
@@ -38,6 +39,7 @@ sub requestPortal(action as String)
     request.action = action
     request.rokuClientId = m.clientId
     request.deviceCode = m.deviceCodeValue
+    request.deviceKey = m.deviceKey
     request.observeField("result", "onPortalResult")
     m.portalRequest = request
     request.control = "RUN"
@@ -108,4 +110,17 @@ function formatDeviceCode(clientId as String) as String
     end for
     if len(normalized) < 16 then return "ROKU-CÓDIGO-INDISPONÍVEL"
     return "ROKU-" + left(normalized, 8) + "-" + mid(normalized, 9, 8)
+end function
+
+function getOrCreateDeviceKey() as String
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    savedKey = section.Read("device_key")
+    if savedKey <> invalid and savedKey <> "" then return savedKey
+
+    generatedKey = CreateObject("roDeviceInfo").GetRandomUUID()
+    generatedKey = replace(generatedKey, "-", "")
+    if generatedKey = "" then return ""
+    section.Write("device_key", generatedKey)
+    section.Flush()
+    return generatedKey
 end function
