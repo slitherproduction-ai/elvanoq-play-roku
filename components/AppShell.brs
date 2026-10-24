@@ -17,6 +17,7 @@ sub init()
     m.moviesView.observeField("selectedItem", "onBrowseItemSelected")
     m.seriesView.observeField("selectedItem", "onBrowseItemSelected")
     m.liveTVView.observeField("playRequested", "onLivePlayRequested")
+    m.homeView.observeField("playRequested", "onHomePlayRequested")
     m.searchView.observeField("selectedItem", "onSearchItemSelected")
     m.libraryView.observeField("itemRequested", "onLibraryItemRequested")
     m.detailView.observeField("closeRequested", "onDetailClosed")
@@ -52,6 +53,7 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
     if m.playerView.visible then return m.playerView.callFunc("handleKey", { key: key, press: press })
     if m.detailView.visible then return m.detailView.callFunc("handleKey", { key: key, press: press })
+    if m.selectedIndex = 0 and m.homeView.callFunc("handleKey", { key: key, press: press }) then return true
     if m.selectedIndex = 5 then return m.libraryView.callFunc("handleKey", { key: key, press: press })
     if m.selectedIndex = 4 then
         if m.searchView.callFunc("handleKey", { key: key, press: press }) then return true
@@ -114,6 +116,10 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     end if
     return key = "OK"
 end function
+
+sub onHomePlayRequested()
+    playCatalogItem(m.homeView.playRequested, 0)
+end sub
 
 sub openSearchKeyboard()
     dialog = CreateObject("roSGNode", "KeyboardDialog")

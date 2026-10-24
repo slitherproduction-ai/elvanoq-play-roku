@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="HomeView" extends="Group">
+  <interface>
+    <field id="playRequested" type="assocarray" alwaysNotify="true" />
+  </interface>
   <script type="text/brightscript" uri="pkg:/components/HomeView.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <children>
@@ -11,8 +14,9 @@
     <Label id="heroMeta" translation="390,245" width="780" height="34" />
     <Label id="heroDescription" translation="390,298" width="740" height="76" wrap="true" />
     <Rectangle id="watchButton" translation="390,404" width="190" height="56" color="0xFFFFFFFF" />
-    <Label id="watchLabel" translation="420,420" text="▶  Assistir" width="150" height="32" />
     <Rectangle id="detailsButton" translation="596,404" width="200" height="56" color="0x1D3656FF" />
+    <Rectangle id="actionFocus" translation="384,398" width="202" height="68" color="0x2E91EFAA" />
+    <Label id="watchLabel" translation="420,420" text="▶  Assistir" width="150" height="32" />
     <Label id="detailsLabel" translation="622,420" text="+  Minha Lista" width="164" height="32" />
     <Label id="continueTitle" translation="390,600" text="Continuar assistindo" width="900" height="44" />
     <Label id="continueHint" translation="390,644" text="Retome de onde parou" width="600" height="28" />

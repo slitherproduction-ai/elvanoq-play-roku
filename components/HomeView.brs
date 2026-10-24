@@ -6,6 +6,7 @@ sub init()
     m.heroDescription = m.top.findNode("heroDescription")
     m.watchLabel = m.top.findNode("watchLabel")
     m.detailsLabel = m.top.findNode("detailsLabel")
+    m.actionFocus = m.top.findNode("actionFocus")
     m.continueTitle = m.top.findNode("continueTitle")
     m.continueHint = m.top.findNode("continueHint")
     m.catalogTitle = m.top.findNode("catalogTitle")
@@ -29,6 +30,8 @@ sub init()
     m.continueHint.color = "0x8FA9C4FF"
     m.emptyState.font = "font:MediumSystemFont"
     m.emptyState.color = "0xB9CBE0FF"
+    m.selectedAction = 0
+    updateActionFocus()
 end sub
 
 sub setCatalog(payload as Object)
@@ -54,6 +57,7 @@ sub setCatalog(payload as Object)
         m.eyebrow.text = "DESTAQUE ELVANOQ"
     end if
     m.heroTitle.text = hero.title
+    m.hero = hero
     m.heroMeta.text = hero.category + "  •  Disponível na sua lista"
     m.heroDescription.text = "Conteúdo disponível na sua lista autorizada. Retome, favorite e navegue de forma segura no ELVANOQ Play."
     if hero.logo <> invalid then m.heroImage.uri = hero.logo
@@ -72,6 +76,78 @@ sub setCatalog(payload as Object)
     end if
     m.catalogTitle.text = "Canais em destaque"
     m.catalogGrid.content = buildContent(items, 7)
+    updateActionCopy()
+end sub
+
+function handleKey(event as Object) as Boolean
+    if event.press <> true or m.hero = invalid then return false
+    if event.key = "right" and m.selectedAction = 0 then
+        m.selectedAction = 1
+        updateActionFocus()
+        return true
+    end if
+    if event.key = "left" and m.selectedAction = 1 then
+        m.selectedAction = 0
+        updateActionFocus()
+        return true
+    end if
+    if event.key = "OK" then
+        if m.selectedAction = 0 then
+            m.top.playRequested = m.hero
+        else
+            toggleHeroFavorite()
+        end if
+        return true
+    end if
+    return false
+end function
+
+sub updateActionFocus()
+    if m.selectedAction = 0 then
+        m.actionFocus.translation = [384, 398]
+        m.actionFocus.width = 202
+    else
+        m.actionFocus.translation = [590, 398]
+        m.actionFocus.width = 212
+    end if
+end sub
+
+sub updateActionCopy()
+    if m.hero = invalid then return
+    state = loadLocalState()
+    isFavorite = false
+    for each item in state.favorites
+        if item.id = m.hero.id then
+            isFavorite = true
+            exit for
+        end if
+    end for
+    if isFavorite then
+        m.detailsLabel.text = "✓  Na Minha Lista"
+    else
+        m.detailsLabel.text = "+  Minha Lista"
+    end if
+end sub
+
+sub toggleHeroFavorite()
+    if m.hero = invalid then return
+    state = loadLocalState()
+    exists = false
+    for each item in state.favorites
+        if item.id = m.hero.id then
+            exists = true
+            exit for
+        end if
+    end for
+    if exists then
+        state.favorites = removeLocalItem(state.favorites, m.hero.id)
+        m.heroMeta.text = m.hero.category + "  •  Removido da Minha Lista"
+    else
+        state.favorites = upsertLocalItem(state.favorites, m.hero)
+        m.heroMeta.text = m.hero.category + "  •  Adicionado à Minha Lista"
+    end if
+    saveLocalState(state)
+    updateActionCopy()
 end sub
 
 function resolveLocalItems(savedItems as Object, catalogItems as Object) as Object
