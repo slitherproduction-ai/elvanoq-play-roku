@@ -12,10 +12,13 @@
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
   <children>
     <Rectangle width="1920" height="1080" color="0x06111FFF" />
+    <Rectangle translation="0,0" width="1920" height="520" color="0x0B1C31FF" />
+    <Rectangle translation="1020,55" width="750" height="850" color="0x102944FF" />
     <Poster id="poster" translation="1160,86" width="560" height="790" loadDisplayMode="scaleToFill" />
     <Label id="eyebrow" translation="150,115" text="DETALHES" width="500" height="28" />
     <Label id="title" translation="150,160" width="860" height="78" />
     <Label id="meta" translation="150,255" width="860" height="32" />
+    <Label id="genreLabel" translation="150,292" width="860" height="28" />
     <Label id="overview" translation="150,320" width="860" height="120" wrap="true" />
     <Rectangle id="watchFocus" translation="150,500" width="220" height="58" color="0xFFFFFFFF" />
     <Label id="watchLabel" translation="182,516" text="▶  Assistir" width="180" height="32" />
@@ -26,8 +29,9 @@
     <Label id="actionStatus" translation="150,590" width="850" height="40" />
     <Label id="similarTitle" translation="150,710" text="Mais como este" width="600" height="42" />
     <Label id="similarHint" translation="150,760" text="Recomendações serão enriquecidas com TMDB quando configurado." width="820" height="32" wrap="true" />
-    <Label id="seriesLabel" translation="150,650" width="900" height="42" visible="false" />
-    <Label id="seasonHint" translation="150,688" width="900" height="28" visible="false" />
+    <Rectangle id="seasonPanel" translation="130,638" width="850" height="100" color="0x0C2036FF" visible="false" />
+    <Label id="seriesLabel" translation="150,654" width="900" height="42" visible="false" />
+    <Label id="seasonHint" translation="150,700" width="900" height="28" visible="false" />
     <Label id="episodeLabel" translation="150,805" width="900" height="100" wrap="true" visible="false" />
   </children>
 </component>

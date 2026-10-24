@@ -2,12 +2,14 @@ sub init()
     m.poster = m.top.findNode("poster")
     m.title = m.top.findNode("title")
     m.meta = m.top.findNode("meta")
+    m.genreLabel = m.top.findNode("genreLabel")
     m.overview = m.top.findNode("overview")
     m.watchFocus = m.top.findNode("watchFocus")
     m.actionStatus = m.top.findNode("actionStatus")
     m.seriesLabel = m.top.findNode("seriesLabel")
     m.seasonHint = m.top.findNode("seasonHint")
     m.episodeLabel = m.top.findNode("episodeLabel")
+    m.seasonPanel = m.top.findNode("seasonPanel")
     m.selectedAction = 0
     m.selectedSeasonIndex = 0
     m.top.observeField("item", "onItemChanged")
@@ -17,6 +19,8 @@ sub init()
     m.title.font = "font:LargeBoldSystemFont"
     m.meta.font = "font:SmallSystemFont"
     m.meta.color = "0x9AB2CCFF"
+    m.genreLabel.font = "font:SmallSystemFont"
+    m.genreLabel.color = "0x73B7FFFF"
     m.overview.font = "font:MediumSystemFont"
     m.overview.color = "0xD7E3F0FF"
     m.top.findNode("watchLabel").font = "font:MediumBoldSystemFont"
@@ -49,17 +53,35 @@ sub onMetadataChanged()
     if details.release_date <> invalid and details.vote_average <> invalid then
         m.meta.text = details.release_date + "  •  Avaliação " + str(details.vote_average)
     end if
+    if details.genres <> invalid and details.genres.count() > 0 then m.genreLabel.text = genreSummary(details.genres)
     if details.poster_path <> invalid and details.poster_path <> "" then m.poster.uri = "https://image.tmdb.org/t/p/w780" + details.poster_path
     if details.seasons <> invalid and details.seasons.count() > 0 then
         m.seasons = details.seasons
         m.selectedSeasonIndex = 0
         m.seriesLabel.visible = true
         m.seasonHint.visible = true
+        m.seasonPanel.visible = true
         updateSeasonSelection()
     end if
     if details.trailer <> invalid then m.actionStatus.text = "Trailer oficial disponível."
     if details.recommendations <> invalid and details.recommendations.count() > 0 then m.top.findNode("similarHint").text = recommendationSummary(details.recommendations)
 end sub
+
+function genreSummary(genres as Object) as String
+    summary = ""
+    lastIndex = genres.count() - 1
+    if lastIndex > 3 then lastIndex = 3
+    for index = 0 to lastIndex
+        genre = genres[index]
+        if index > 0 then summary = summary + "  •  "
+        if type(genre) = "roAssociativeArray" and genre.name <> invalid then
+            summary = summary + genre.name
+        else
+            summary = summary + genre
+        end if
+    end for
+    return summary
+end function
 
 function seasonSummary(seasons as Object) as String
     summary = "Temporadas: "
@@ -111,9 +133,11 @@ sub onItemChanged()
     item = m.top.item
     m.title.text = item.title
     m.meta.text = item.category + "  •  Conteúdo da sua lista"
+    m.genreLabel.text = ""
     m.overview.text = "Informações complementares, elenco, trailer e recomendações serão exibidos quando os metadados estiverem disponíveis."
     if item.logo <> invalid then m.poster.uri = item.logo
     m.actionStatus.text = ""
+    m.seasonPanel.visible = false
 end sub
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
