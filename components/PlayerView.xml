@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="PlayerView" extends="Group">
+  <interface>
+    <field id="streamUrl" type="string" />
+    <field id="contentTitle" type="string" />
+    <field id="closeRequested" type="boolean" alwaysNotify="true" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/components/PlayerView.brs" />
+  <children>
+    <Rectangle width="1920" height="1080" color="0x000000FF" />
+    <Video id="video" width="1920" height="1080" enableUI="false" />
+    <Rectangle id="osdBackground" translation="0,0" width="1920" height="180" color="0x06111FE6" />
+    <Label id="title" translation="70,58" width="1500" height="52" />
+    <Label id="hint" translation="70,118" text="OK: controles  •  Voltar: sair" width="900" height="36" />
+  </children>
+</component>

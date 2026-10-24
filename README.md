@@ -17,6 +17,12 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 7. Quando a licença fica ativa, o app prepara a transição para a Home.
 8. Após a ativação, o app solicita roku-playlist-sync para receber a configuração da lista. As credenciais retornadas não são mostradas nem registradas em logs.
 
+O app persiste apenas metadados não sensíveis da lista para identificar a sincronização local. URLs, usuários e senhas não são gravados no registro local.
+
+## Player Roku
+
+O componente PlayerView usa o player nativo Roku e está preparado para receber uma URL de stream autorizada pelo fluxo de listas. Ele oferece saída pelo botão Voltar e OSD reaberto por OK. A reprodução real será validada com uma lista autorizada em aparelho físico.
+
 O identificador técnico nunca é exibido completo, registrado em logs ou tratado como endereço físico.
 
 ## Estados tratados

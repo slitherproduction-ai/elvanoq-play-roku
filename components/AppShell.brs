@@ -70,6 +70,7 @@ end sub
 
 sub applyPlaylist(payload as Object)
     if payload = invalid or type(payload) <> "roAssociativeArray" then return
+    savePlaylistMetadata(payload)
     if payload.display_name <> invalid and payload.display_name <> "" then
         m.playlistName = payload.display_name
         if m.selectedIndex = 0 then
@@ -77,4 +78,16 @@ sub applyPlaylist(payload as Object)
             m.sectionHint.text = "A sincronização foi concluída com segurança."
         end if
     end if
+end sub
+
+sub savePlaylistMetadata(payload as Object)
+    metadata = { synced_at: CreateObject("roDateTime").ToISOString() }
+    if payload.display_name <> invalid then metadata.display_name = payload.display_name
+    if payload.server_code <> invalid then metadata.server_code = payload.server_code
+    if payload.playlist <> invalid and type(payload.playlist) = "roAssociativeArray" then
+        if payload.playlist.source_type <> invalid then metadata.source_type = payload.playlist.source_type
+    end if
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    section.Write("playlist_metadata", FormatJson(metadata))
+    section.Flush()
 end sub
