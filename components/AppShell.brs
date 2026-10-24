@@ -16,6 +16,7 @@ sub init()
     m.playerView = m.top.findNode("playerView")
     m.moviesView.observeField("selectedItem", "onBrowseItemSelected")
     m.seriesView.observeField("selectedItem", "onBrowseItemSelected")
+    m.liveTVView.observeField("playRequested", "onLivePlayRequested")
     m.detailView.observeField("closeRequested", "onDetailClosed")
     m.detailView.observeField("playRequested", "onPlayRequested")
     m.detailView.observeField("seasonRequested", "onSeasonRequested")
@@ -68,8 +69,26 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
             m.liveTVView.callFunc("moveChannel", -1)
             return true
         end if
-        if key = "OK" or key = "right" then
-            m.liveTVView.callFunc("playSelected")
+        if key = "left" then
+            m.liveTVView.callFunc("moveFocus", "categories")
+            return true
+        end if
+        if key = "right" then
+            m.liveTVView.callFunc("activateRight")
+            return true
+        end if
+        if key = "OK" then
+            m.liveTVView.callFunc("confirmSelection")
+            return true
+        end if
+        if key = "options" then
+            m.liveTVView.callFunc("toggleFavorite")
+            return true
+        end if
+        if key = "back" then
+            m.liveTVView.callFunc("stopPreview")
+            m.selectedIndex = 0
+            showSection()
             return true
         end if
     end if
@@ -98,6 +117,16 @@ sub openSearchKeyboard()
     dialog.observeField("buttonSelected", "onSearchKeyboardSelected")
     m.searchKeyboard = dialog
     m.top.getScene().dialog = dialog
+end sub
+
+sub onLivePlayRequested()
+    item = m.liveTVView.playRequested
+    if item = invalid or item.stream_url = invalid or item.stream_url = "" then return
+    m.playerView.contentTitle = item.title
+    m.playerView.contentId = item.id
+    m.playerView.contentCategory = item.category
+    m.playerView.streamUrl = item.stream_url
+    m.playerView.visible = true
 end sub
 
 sub onSearchKeyboardSelected()

@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.7
+0.1.8
 
 ## Fluxo de ativação
 
@@ -35,7 +35,7 @@ Quando a licença está ativa, a tela consulta `roku-metadata` no Portal para en
 
 Para séries, o mesmo fluxo solicita temporadas e episódios reais. No controle remoto, ↑/↓ troca a temporada selecionada na própria tela de detalhes. Trailer e recomendações só aparecem quando retornados pelo TMDB; não há catálogo ou episódios inventados no canal. A reprodução de episódios depende de a lista autorizada fornecer a URL desse episódio.
 
-Em Busca, OK abre o teclado nativo do Roku e filtra somente o catálogo autorizado. Minha Lista alterna com ←/→ entre assistir mais tarde, favoritos, continuar assistindo e histórico locais.
+Em Busca, OK abre o teclado nativo do Roku e filtra somente o catálogo autorizado. Minha Lista alterna com ←/→ entre assistir mais tarde, favoritos, continuar assistindo e histórico locais. Em TV ao Vivo, ← alterna para as categorias, ↑/↓ seleciona a categoria ou o canal em foco, → inicia a prévia, OK abre o canal no player e * adiciona/remove o canal de Favoritos. A prévia é parada ao trocar de categoria, sair da área ou abrir o player.
 
 O componente PlayerView usa o player nativo Roku e oferece saída pelo botão Voltar, avanço/retorno de 10 segundos em VOD, pausa, progresso persistido a cada 15 segundos e histórico local. O OSD apresenta as opções de áudio e legenda somente quando o stream informa faixas compatíveis; a seleção usa os identificadores nativos retornados pelo Video node. Informações enriquecidas (sinopse, elenco, trailer e recomendações) permanecem condicionadas à integração TMDB; o app não inventa metadados quando ela não está configurada. A reprodução real será validada com uma lista autorizada em aparelho físico.
 
@@ -53,6 +53,6 @@ Ativo, pendente, expirado, bloqueado, offline e erro de API.
 4. Vincule o código e aguarde a próxima consulta de licença.
 5. Valide os cenários pendente, ativo, expirado, bloqueado, sem rede e resposta inválida.
 6. Com uma lista autorizada que contenha categorias de filmes ou séries, abra um item, inclua-o em Minha Lista e em Assistir mais tarde e confirme a persistência após reiniciar o canal.
-7. Só em Roku físico, valide abertura do PlayerView, retorno pelo botão Voltar e conteúdo protegido com uma categoria bloqueada.
+7. Só em Roku físico, valide a troca de foco entre categorias e canais, filtro de categoria, favorito com o botão *, prévia em →, abertura em tela cheia com OK, retorno pelo botão Voltar e conteúdo protegido com uma categoria bloqueada.
 
 Este repositório não inclui pacote de sideload e não publica na Roku Channel Store.

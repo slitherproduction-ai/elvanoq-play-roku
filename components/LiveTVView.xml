@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="LiveTVView" extends="Group">
+  <interface>
+    <field id="playRequested" type="assocarray" alwaysNotify="true" />
+  </interface>
   <script type="text/brightscript" uri="pkg:/components/LiveTVView.brs" />
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
+  <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <children>
     <Rectangle translation="300,0" width="1620" height="1080" color="0x06111FFF" />
     <Label id="title" translation="350,72" text="TV ao Vivo" width="500" height="54" />
     <Label id="subtitle" translation="350,126" text="Categorias e canais da sua lista" width="600" height="30" />
     <Rectangle translation="350,190" width="225" height="720" color="0x0C2036FF" />
     <Label id="categoriesTitle" translation="378,216" text="CATEGORIAS" width="170" height="30" />
+    <Rectangle id="categoryFocus" translation="364,256" width="198" height="36" color="0x1965D6FF" visible="false" />
     <Label id="category01" translation="378,265" width="175" height="30" />
     <Label id="category02" translation="378,305" width="175" height="30" />
     <Label id="category03" translation="378,345" width="175" height="30" />
