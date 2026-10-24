@@ -54,7 +54,13 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     if m.playerView.visible then return m.playerView.callFunc("handleKey", { key: key, press: press })
     if m.detailView.visible then return m.detailView.callFunc("handleKey", { key: key, press: press })
     if m.selectedIndex = 0 and m.homeView.callFunc("handleKey", { key: key, press: press }) then return true
-    if m.selectedIndex = 5 then return m.libraryView.callFunc("handleKey", { key: key, press: press })
+    if m.selectedIndex = 5 then
+        if key = "back" then
+            returnToHome()
+            return true
+        end if
+        return m.libraryView.callFunc("handleKey", { key: key, press: press })
+    end if
     if m.selectedIndex = 4 then
         if m.searchView.callFunc("handleKey", { key: key, press: press }) then return true
         if key = "OK" or key = "options" then
@@ -69,6 +75,7 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
         end if
         if key = "back" then
             m.parentalView.callFunc("clearDigit")
+            returnToHome()
             return true
         end if
         if m.parentalView.callFunc("handleKey", { key: key, press: press }) then return true
@@ -100,10 +107,13 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
         end if
         if key = "back" then
             m.liveTVView.callFunc("stopPreview")
-            m.selectedIndex = 0
-            showSection()
+            returnToHome()
             return true
         end if
+    end if
+    if key = "back" and m.selectedIndex <> 0 then
+        returnToHome()
+        return true
     end if
     if key = "down" and m.selectedIndex < m.navItems.count() - 1 then
         m.selectedIndex = m.selectedIndex + 1
@@ -117,6 +127,11 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     end if
     return key = "OK"
 end function
+
+sub returnToHome()
+    m.selectedIndex = 0
+    showSection()
+end sub
 
 sub onHomePlayRequested()
     playCatalogItem(m.homeView.playRequested, 0)
