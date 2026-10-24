@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.23
+0.1.24
 
 ## Fluxo de ativação
 
@@ -40,6 +40,8 @@ O PlayerView também aplica essa verificação centralmente: acessos futuros por
 ## Player Roku
 
 Filmes e séries da lista abrem uma tela de detalhes com as ações Assistir, Minha Lista e Assistir mais tarde. As duas últimas são persistidas localmente, sem URL nem credenciais. A ação Assistir aplica a política parental e encaminha apenas a URL de stream disponível em memória ao PlayerView.
+
+Na tela de detalhes, Minha Lista e Assistir mais tarde são alternâncias: OK adiciona quando o item ainda não existe e remove quando já está salvo. Os rótulos exibem o estado atual da coleção local.
 
 Quando a licença está ativa, a tela consulta `roku-metadata` no Portal para enriquecer título, sinopse, pôster e avaliação. O Portal valida o aparelho e usa o segredo TMDB exclusivamente no servidor; o canal nunca recebe, armazena ou registra esse token.
 

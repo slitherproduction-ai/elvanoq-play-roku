@@ -5,6 +5,8 @@ sub init()
     m.genreLabel = m.top.findNode("genreLabel")
     m.overview = m.top.findNode("overview")
     m.watchFocus = m.top.findNode("watchFocus")
+    m.listLabel = m.top.findNode("listLabel")
+    m.laterLabel = m.top.findNode("laterLabel")
     m.actionStatus = m.top.findNode("actionStatus")
     m.seriesLabel = m.top.findNode("seriesLabel")
     m.seasonHint = m.top.findNode("seasonHint")
@@ -25,8 +27,8 @@ sub init()
     m.overview.color = "0xD7E3F0FF"
     m.top.findNode("watchLabel").font = "font:MediumBoldSystemFont"
     m.top.findNode("watchLabel").color = "0x06111FFF"
-    m.top.findNode("listLabel").font = "font:MediumSystemFont"
-    m.top.findNode("laterLabel").font = "font:SmallSystemFont"
+    m.listLabel.font = "font:MediumSystemFont"
+    m.laterLabel.font = "font:SmallSystemFont"
     m.actionStatus.font = "font:SmallSystemFont"
     m.actionStatus.color = "0x8FA9C4FF"
     m.seriesLabel.font = "font:SmallSystemFont"
@@ -138,7 +140,31 @@ sub onItemChanged()
     if item.logo <> invalid then m.poster.uri = item.logo
     m.actionStatus.text = ""
     m.seasonPanel.visible = false
+    updateCollectionLabels()
 end sub
+
+sub updateCollectionLabels()
+    if m.top.item = invalid then return
+    state = loadLocalState()
+    if collectionContains(state.favorites, m.top.item.id) then
+        m.listLabel.text = "✓ Minha Lista"
+    else
+        m.listLabel.text = "+ Minha Lista"
+    end if
+    if collectionContains(state.watch_later, m.top.item.id) then
+        m.laterLabel.text = "✓ Assistir mais tarde"
+    else
+        m.laterLabel.text = "Assistir mais tarde"
+    end if
+end sub
+
+function collectionContains(items as Object, itemId as String) as Boolean
+    if items = invalid then return false
+    for each current in items
+        if current.id = itemId then return true
+    end for
+    return false
+end function
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
@@ -198,13 +224,25 @@ sub runAction()
         end if
     else if m.selectedAction = 1 then
         state = loadLocalState()
-        state.favorites = upsertLocalItem(state.favorites, item)
+        if collectionContains(state.favorites, item.id) then
+            state.favorites = removeLocalItem(state.favorites, item.id)
+            m.actionStatus.text = "Removido dos favoritos."
+        else
+            state.favorites = upsertLocalItem(state.favorites, item)
+            m.actionStatus.text = "Adicionado aos favoritos."
+        end if
         saveLocalState(state)
-        m.actionStatus.text = "Adicionado aos favoritos."
+        updateCollectionLabels()
     else
         state = loadLocalState()
-        state.watch_later = upsertLocalItem(state.watch_later, item)
+        if collectionContains(state.watch_later, item.id) then
+            state.watch_later = removeLocalItem(state.watch_later, item.id)
+            m.actionStatus.text = "Removido de assistir mais tarde."
+        else
+            state.watch_later = upsertLocalItem(state.watch_later, item)
+            m.actionStatus.text = "Adicionado para assistir mais tarde."
+        end if
         saveLocalState(state)
-        m.actionStatus.text = "Adicionado para assistir mais tarde."
+        updateCollectionLabels()
     end if
 end sub
