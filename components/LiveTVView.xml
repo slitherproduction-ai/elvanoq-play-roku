@@ -2,6 +2,7 @@
 <component name="LiveTVView" extends="Group">
   <interface>
     <field id="playRequested" type="assocarray" alwaysNotify="true" />
+    <field id="epg" type="assocarray" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/LiveTVView.brs" />
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />

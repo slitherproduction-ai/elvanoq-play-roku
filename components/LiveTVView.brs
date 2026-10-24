@@ -14,6 +14,7 @@ sub init()
     m.selectedCategoryIndex = 0
     m.focusColumn = "channels"
     m.localState = loadLocalState()
+    m.epg = {}
     m.categoryLabels = []
     m.channelLabels = []
     m.channelLogos = []
@@ -42,6 +43,12 @@ sub init()
     m.epgNow.font = "font:SmallSystemFont"
     m.epgNext.font = "font:SmallSystemFont"
     m.emptyState.font = "font:SmallSystemFont"
+end sub
+
+sub setEpg(entries as Object)
+    if entries = invalid or type(entries) <> "roAssociativeArray" then return
+    m.epg = entries
+    updateSelection()
 end sub
 
 sub setCatalog(payload as Object)
@@ -180,8 +187,19 @@ sub updateSelection()
     favoriteHint = ""
     if isFavorite(selected.id) then favoriteHint = "  •  ★ Favorito"
     m.previewHint.text = "→ prévia  •  OK tela cheia  •  * favorito" + favoriteHint
-    m.epgNow.text = "Programação disponível após sincronizar XMLTV."
-    m.epgNext.text = "Próximo: —"
+    epgId = ""
+    if selected.tvg_id <> invalid and selected.tvg_id <> "" then epgId = selected.tvg_id
+    if epgId <> "" and m.epg[epgId] <> invalid and m.epg[epgId].count() > 0 then
+        m.epgNow.text = "Guia: " + m.epg[epgId][0]
+        if m.epg[epgId].count() > 1 then
+            m.epgNext.text = "Seguinte: " + m.epg[epgId][1]
+        else
+            m.epgNext.text = "Seguinte: —"
+        end if
+    else
+        m.epgNow.text = "Programação disponível após sincronizar XMLTV."
+        m.epgNext.text = "Próximo: —"
+    end if
 end sub
 
 sub playSelected()

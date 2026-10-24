@@ -377,11 +377,26 @@ sub onCatalogResult()
     if result = invalid or result.ok <> true then return
     m.catalog = result.channels
     m.categories = result.categories
+    if result.epgUrl <> invalid and result.epgUrl <> "" then loadEpg(result.epgUrl)
     if m.selectedIndex = 0 then m.homeView.callFunc("setCatalog", { items: m.catalog, categories: m.categories })
     if m.selectedIndex = 1 then m.liveTVView.callFunc("setCatalog", { items: m.catalog, categories: m.categories })
     if m.selectedIndex = 2 then m.moviesView.callFunc("setCatalog", { items: m.catalog })
     if m.selectedIndex = 3 then m.seriesView.callFunc("setCatalog", { items: m.catalog })
     if m.selectedIndex = 4 then m.searchView.callFunc("setCatalog", { items: m.catalog })
+end sub
+
+sub loadEpg(epgUrl as String)
+    service = CreateObject("roSGNode", "EpgService")
+    service.epgUrl = epgUrl
+    service.observeField("result", "onEpgResult")
+    m.epgService = service
+    service.control = "RUN"
+end sub
+
+sub onEpgResult()
+    result = m.epgService.result
+    if result = invalid or result.ok <> true then return
+    m.liveTVView.callFunc("setEpg", result.entries)
 end sub
 
 sub savePlaylistMetadata(payload as Object)

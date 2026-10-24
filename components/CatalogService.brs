@@ -28,6 +28,7 @@ sub run()
     result.ok = true
     result.channels = parsed.items
     result.categories = parsed.categories
+    result.epgUrl = playlistEpgUrl(m.top.playlist)
     result.message = "Catálogo atualizado."
     m.top.result = result
 end sub
@@ -44,6 +45,18 @@ function playlistUrl(playlist as Object) as String
     return ""
 end function
 
+function playlistEpgUrl(playlist as Object) as String
+    if playlist = invalid or type(playlist) <> "roAssociativeArray" then return ""
+    if playlist.epg_url <> invalid and playlist.epg_url <> "" then return playlist.epg_url
+    if playlist.xmltv_url <> invalid and playlist.xmltv_url <> "" then return playlist.xmltv_url
+    if playlist.credentials <> invalid and type(playlist.credentials) = "roAssociativeArray" then
+        credentials = playlist.credentials
+        if credentials.epg_url <> invalid and credentials.epg_url <> "" then return credentials.epg_url
+        if credentials.xmltv_url <> invalid and credentials.xmltv_url <> "" then return credentials.xmltv_url
+    end if
+    return ""
+end function
+
 function parseM3u(body as String) as Object
     items = []
     categories = {}
@@ -56,6 +69,8 @@ function parseM3u(body as String) as Object
                 title: extinfTitle(line)
                 group: extinfAttribute(line, "group-title")
                 logo: extinfAttribute(line, "tvg-logo")
+                tvg_id: extinfAttribute(line, "tvg-id")
+                tvg_name: extinfAttribute(line, "tvg-name")
             }
         else if pending <> invalid and line <> "" and left(line, 1) <> "#" then
             if items.count() < 1500 then

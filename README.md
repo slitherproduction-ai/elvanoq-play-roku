@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.20
+0.1.21
 
 ## Fluxo de ativação
 
@@ -28,6 +28,8 @@ Bloqueios parentais são separados por lista ativa e verificados antes de inicia
 Em Ajustes, digite o PIN e use ↑/↓ para escolher uma categoria da lista atual; OK bloqueia ou desbloqueia a categoria. As regras permanecem isoladas por lista ativa e são verificadas antes de preview, player, busca, Home e coleções locais.
 
 Em TV ao Vivo, a lista central exibe logotipo e nome do canal quando o M3U autorizado fornecer `tvg-logo`; caso contrário, o app mantém a linha limpa e legível, sem imagem substituta enganosa.
+
+Quando a configuração da lista autorizada fornecer `epg_url` ou `xmltv_url`, o app baixa o XMLTV em tarefa HTTP separada e correlaciona a programação pelo `tvg-id` do M3U. A tela mostra apenas os primeiros itens retornados para aquele canal; sem URL ou correspondência, mantém o estado explícito de guia indisponível. A origem XMLTV não é gravada no registro local.
 
 O PlayerView também aplica essa verificação centralmente: acessos futuros por Home, busca, favoritos, histórico, deep link ou troca rápida não podem iniciar conteúdo protegido sem PIN válido.
 
