@@ -23,6 +23,8 @@ O app persiste apenas metadados não sensíveis da lista para identificar a sinc
 
 Favoritos, assistir mais tarde, continuar assistindo, histórico e preferências parentais têm uma base local por dispositivo. As coleções usam identificador de item para evitar duplicações e não armazenam credenciais, URLs ou identificadores técnicos.
 
+Bloqueios parentais são separados por lista ativa e verificados antes de iniciar preview ou reprodução. Uma sessão validada por PIN libera apenas o uso atual do aplicativo.
+
 ## Player Roku
 
 O componente PlayerView usa o player nativo Roku e está preparado para receber uma URL de stream autorizada pelo fluxo de listas. Ele oferece saída pelo botão Voltar e OSD reaberto por OK. A reprodução real será validada com uma lista autorizada em aparelho físico.

@@ -91,6 +91,10 @@ end sub
 sub playSelected()
     if m.channels.count() = 0 then return
     selected = m.channels[m.selectedIndex]
+    if isParentallyBlocked(selected.category) then
+        m.previewHint.text = "Conteúdo protegido. Valide o PIN em Ajustes para continuar."
+        return
+    end if
     content = CreateObject("roSGNode", "ContentNode")
     content.url = selected.stream_url
     content.title = selected.title

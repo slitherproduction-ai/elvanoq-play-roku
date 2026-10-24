@@ -8,6 +8,10 @@ sub init()
     m.status.font = "font:SmallSystemFont"
     m.status.color = "0x8FA9C4FF"
     m.top.findNode("lockedCategories").font = "font:MediumSystemFont"
+    m.scopeStatus = m.top.findNode("scopeStatus")
+    m.scopeStatus.font = "font:SmallSystemFont"
+    m.scopeStatus.color = "0x8FA9C4FF"
+    m.scopeStatus.text = "Bloqueios são separados por lista ativa."
 end sub
 
 sub enterDigit(digit as String)

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="ParentalView" extends="Group">
   <script type="text/brightscript" uri="pkg:/components/ParentalView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
   <children>
     <Rectangle translation="300,0" width="1620" height="1080" color="0x06111FFF" />
     <Label id="title" translation="390,150" text="Controle Parental" width="800" height="62" />
@@ -28,5 +29,6 @@
     <Rectangle translation="510,705" width="105" height="58" color="0x1D3656FF" />
     <Label translation="552,720" text="0" width="30" height="32" />
     <Label id="lockedCategories" translation="900,510" text="Categorias bloqueáveis\nCanais  •  Filmes  •  Séries" width="620" height="100" wrap="true" />
+    <Label id="scopeStatus" translation="900,650" width="620" height="70" wrap="true" />
   </children>
 </component>

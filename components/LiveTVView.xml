@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="LiveTVView" extends="Group">
   <script type="text/brightscript" uri="pkg:/components/LiveTVView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
   <children>
     <Rectangle translation="300,0" width="1620" height="1080" color="0x06111FFF" />
     <Label id="title" translation="350,72" text="TV ao Vivo" width="500" height="54" />
