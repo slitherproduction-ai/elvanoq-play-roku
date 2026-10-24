@@ -9,6 +9,7 @@ sub init()
     m.liveTVView = m.top.findNode("liveTVView")
     m.moviesView = m.top.findNode("moviesView")
     m.seriesView = m.top.findNode("seriesView")
+    m.searchView = m.top.findNode("searchView")
     m.navItems = [
         m.top.findNode("navHome"),
         m.top.findNode("navLive"),
@@ -67,15 +68,17 @@ sub showSection()
     isLive = m.selectedIndex = 1
     isMovies = m.selectedIndex = 2
     isSeries = m.selectedIndex = 3
+    isSearch = m.selectedIndex = 4
     m.homeView.visible = isHome
     m.liveTVView.visible = isLive
     m.moviesView.visible = isMovies
     m.seriesView.visible = isSeries
+    m.searchView.visible = isSearch
     if not isLive then m.liveTVView.callFunc("stopPreview")
-    m.sectionEyebrow.visible = not isHome and not isLive and not isMovies and not isSeries
-    m.sectionTitle.visible = not isHome and not isLive and not isMovies and not isSeries
-    m.sectionDescription.visible = not isHome and not isLive and not isMovies and not isSeries
-    m.sectionHint.visible = not isHome and not isLive and not isMovies and not isSeries
+    m.sectionEyebrow.visible = not isHome and not isLive and not isMovies and not isSeries and not isSearch
+    m.sectionTitle.visible = not isHome and not isLive and not isMovies and not isSeries and not isSearch
+    m.sectionDescription.visible = not isHome and not isLive and not isMovies and not isSeries and not isSearch
+    m.sectionHint.visible = not isHome and not isLive and not isMovies and not isSeries and not isSearch
     for index = 0 to m.navItems.count() - 1
         if index = m.selectedIndex then
             m.navItems[index].color = "0xFFFFFFFF"
@@ -102,6 +105,7 @@ sub showSection()
     if isLive and m.catalog <> invalid then m.liveTVView.callFunc("setCatalog", { items: m.catalog, categories: m.categories })
     if isMovies and m.catalog <> invalid then m.moviesView.callFunc("setCatalog", { items: m.catalog })
     if isSeries and m.catalog <> invalid then m.seriesView.callFunc("setCatalog", { items: m.catalog })
+    if isSearch and m.catalog <> invalid then m.searchView.callFunc("setCatalog", { items: m.catalog })
 end sub
 
 function libraryDescription() as String
@@ -153,6 +157,7 @@ sub onCatalogResult()
     if m.selectedIndex = 1 then m.liveTVView.callFunc("setCatalog", { items: m.catalog, categories: m.categories })
     if m.selectedIndex = 2 then m.moviesView.callFunc("setCatalog", { items: m.catalog })
     if m.selectedIndex = 3 then m.seriesView.callFunc("setCatalog", { items: m.catalog })
+    if m.selectedIndex = 4 then m.searchView.callFunc("setCatalog", { items: m.catalog })
 end sub
 
 sub savePlaylistMetadata(payload as Object)

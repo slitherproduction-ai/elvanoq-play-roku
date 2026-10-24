@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="SearchView" extends="Group">
+  <script type="text/brightscript" uri="pkg:/components/SearchView.brs" />
+  <children>
+    <Rectangle translation="300,0" width="1620" height="1080" color="0x06111FFF" />
+    <Label id="title" translation="390,100" text="Busca" width="600" height="62" />
+    <Rectangle translation="390,190" width="980" height="64" color="0x102944FF" />
+    <Label id="queryLabel" translation="422,208" text="Buscar filmes, séries, canais e episódios…" width="880" height="34" />
+    <Rectangle id="filterAll" translation="390,292" width="105" height="42" color="0x1965D6FF" />
+    <Label id="allLabel" translation="415,302" text="Todos" width="80" height="24" />
+    <Label id="moviesLabel" translation="525,302" text="Filmes" width="90" height="24" />
+    <Label id="seriesLabel" translation="625,302" text="Séries" width="90" height="24" />
+    <Label id="channelsLabel" translation="725,302" text="Canais" width="90" height="24" />
+    <Label id="resultsTitle" translation="390,382" text="Resultados" width="600" height="40" />
+    <PosterGrid id="resultsGrid" translation="390,440" itemSize="210,294" itemSpacing="22,26" numColumns="6" numRows="2" drawFocusFeedback="true" />
+    <Label id="emptyState" translation="390,465" width="900" height="42" />
+  </children>
+</component>

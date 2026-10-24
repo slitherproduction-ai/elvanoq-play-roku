@@ -23,5 +23,6 @@
     <LiveTVView id="liveTVView" visible="false" />
     <BrowseView id="moviesView" kind="movies" visible="false" />
     <BrowseView id="seriesView" kind="series" visible="false" />
+    <SearchView id="searchView" visible="false" />
   </children>
 </component>
