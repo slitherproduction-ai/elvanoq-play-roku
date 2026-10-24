@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="LiveTVView" extends="Group">
+  <script type="text/brightscript" uri="pkg:/components/LiveTVView.brs" />
+  <children>
+    <Rectangle translation="300,0" width="1620" height="1080" color="0x06111FFF" />
+    <Label id="title" translation="350,72" text="TV ao Vivo" width="500" height="54" />
+    <Label id="subtitle" translation="350,126" text="Categorias e canais da sua lista" width="600" height="30" />
+    <Rectangle translation="350,190" width="225" height="720" color="0x0C2036FF" />
+    <Label id="categoriesTitle" translation="378,216" text="CATEGORIAS" width="170" height="30" />
+    <Label id="category01" translation="378,265" width="175" height="30" />
+    <Label id="category02" translation="378,305" width="175" height="30" />
+    <Label id="category03" translation="378,345" width="175" height="30" />
+    <Label id="category04" translation="378,385" width="175" height="30" />
+    <Label id="category05" translation="378,425" width="175" height="30" />
+    <Label id="category06" translation="378,465" width="175" height="30" />
+    <Rectangle translation="595,190" width="390" height="720" color="0x091827FF" />
+    <Label id="channelsTitle" translation="625,216" text="CANAIS" width="240" height="30" />
+    <Rectangle id="channelFocus" translation="615,258" width="350" height="48" color="0x1965D6FF" />
+    <Label id="channel01" translation="635,270" width="310" height="30" />
+    <Label id="channel02" translation="635,325" width="310" height="30" />
+    <Label id="channel03" translation="635,380" width="310" height="30" />
+    <Label id="channel04" translation="635,435" width="310" height="30" />
+    <Label id="channel05" translation="635,490" width="310" height="30" />
+    <Label id="channel06" translation="635,545" width="310" height="30" />
+    <Label id="channel07" translation="635,600" width="310" height="30" />
+    <Label id="channel08" translation="635,655" width="310" height="30" />
+    <Rectangle translation="1010,190" width="820" height="460" color="0x000000FF" />
+    <Video id="preview" translation="1010,190" width="820" height="460" enableUI="false" />
+    <Label id="previewTitle" translation="1040,420" text="Selecione um canal para iniciar a prévia" width="700" height="44" />
+    <Label id="previewHint" translation="1040,470" text="OK ou → para reproduzir" width="600" height="30" />
+    <Rectangle translation="1010,675" width="820" height="235" color="0x0C2036FF" />
+    <Label id="epgTitle" translation="1040,704" text="GUIA DE PROGRAMAÇÃO" width="500" height="30" />
+    <Label id="epgNow" translation="1040,750" text="Programação disponível após sincronizar XMLTV." width="700" height="36" />
+    <Rectangle id="epgProgress" translation="1040,800" width="0" height="6" color="0x3CB5FFFF" />
+    <Label id="epgNext" translation="1040,830" text="Próximo: —" width="700" height="32" />
+    <Label id="emptyState" translation="625,740" width="320" height="60" wrap="true" visible="false" />
+  </children>
+</component>

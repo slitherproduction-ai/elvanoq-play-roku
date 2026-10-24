@@ -6,6 +6,7 @@ sub init()
     m.sectionDescription = m.top.findNode("sectionDescription")
     m.sectionHint = m.top.findNode("sectionHint")
     m.homeView = m.top.findNode("homeView")
+    m.liveTVView = m.top.findNode("liveTVView")
     m.navItems = [
         m.top.findNode("navHome"),
         m.top.findNode("navLive"),
@@ -32,6 +33,20 @@ end sub
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
+    if m.selectedIndex = 1 then
+        if key = "down" then
+            m.liveTVView.callFunc("moveChannel", 1)
+            return true
+        end if
+        if key = "up" then
+            m.liveTVView.callFunc("moveChannel", -1)
+            return true
+        end if
+        if key = "OK" or key = "right" then
+            m.liveTVView.callFunc("playSelected")
+            return true
+        end if
+    end if
     if key = "down" and m.selectedIndex < m.navItems.count() - 1 then
         m.selectedIndex = m.selectedIndex + 1
         showSection()
@@ -47,11 +62,14 @@ end function
 
 sub showSection()
     isHome = m.selectedIndex = 0
+    isLive = m.selectedIndex = 1
     m.homeView.visible = isHome
-    m.sectionEyebrow.visible = not isHome
-    m.sectionTitle.visible = not isHome
-    m.sectionDescription.visible = not isHome
-    m.sectionHint.visible = not isHome
+    m.liveTVView.visible = isLive
+    if not isLive then m.liveTVView.callFunc("stopPreview")
+    m.sectionEyebrow.visible = not isHome and not isLive
+    m.sectionTitle.visible = not isHome and not isLive
+    m.sectionDescription.visible = not isHome and not isLive
+    m.sectionHint.visible = not isHome and not isLive
     for index = 0 to m.navItems.count() - 1
         if index = m.selectedIndex then
             m.navItems[index].color = "0xFFFFFFFF"
@@ -75,6 +93,7 @@ sub showSection()
     m.sectionDescription.text = section.description
     m.sectionHint.text = section.hint
     if isHome and m.catalog <> invalid then m.homeView.callFunc("setCatalog", { items: m.catalog, categories: m.categories })
+    if isLive and m.catalog <> invalid then m.liveTVView.callFunc("setCatalog", { items: m.catalog, categories: m.categories })
 end sub
 
 function libraryDescription() as String
@@ -123,6 +142,7 @@ sub onCatalogResult()
     m.catalog = result.channels
     m.categories = result.categories
     if m.selectedIndex = 0 then m.homeView.callFunc("setCatalog", { items: m.catalog, categories: m.categories })
+    if m.selectedIndex = 1 then m.liveTVView.callFunc("setCatalog", { items: m.catalog, categories: m.categories })
 end sub
 
 sub savePlaylistMetadata(payload as Object)
