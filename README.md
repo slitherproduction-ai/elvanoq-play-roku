@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.3
+0.1.4
 
 ## Fluxo de ativação
 
@@ -33,7 +33,7 @@ Filmes e séries da lista abrem uma tela de detalhes com as ações Assistir, Mi
 
 Quando a licença está ativa, a tela consulta `roku-metadata` no Portal para enriquecer título, sinopse, pôster e avaliação. O Portal valida o aparelho e usa o segredo TMDB exclusivamente no servidor; o canal nunca recebe, armazena ou registra esse token.
 
-O componente PlayerView usa o player nativo Roku e oferece saída pelo botão Voltar e OSD reaberto por OK. Informações enriquecidas (sinopse, elenco, trailer e recomendações) permanecem condicionadas à integração TMDB; o app não inventa metadados quando ela não está configurada. A reprodução real será validada com uma lista autorizada em aparelho físico.
+O componente PlayerView usa o player nativo Roku e oferece saída pelo botão Voltar, avanço/retorno de 10 segundos em VOD, pausa, progresso persistido a cada 15 segundos e histórico local. O OSD apresenta as opções de áudio e legenda somente quando o stream informa faixas compatíveis; a seleção usa os identificadores nativos retornados pelo Video node. Informações enriquecidas (sinopse, elenco, trailer e recomendações) permanecem condicionadas à integração TMDB; o app não inventa metadados quando ela não está configurada. A reprodução real será validada com uma lista autorizada em aparelho físico.
 
 O identificador técnico nunca é exibido completo, registrado em logs ou tratado como endereço físico.
 

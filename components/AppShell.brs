@@ -126,6 +126,7 @@ sub onPlayRequested()
     if item = invalid then return
     if item.stream_url = invalid or item.stream_url = "" then return
     m.playerView.contentTitle = item.title
+    m.playerView.contentId = item.id
     m.playerView.contentCategory = item.category
     m.playerView.streamUrl = item.stream_url
     m.playerView.visible = true

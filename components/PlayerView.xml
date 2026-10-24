@@ -2,17 +2,25 @@
 <component name="PlayerView" extends="Group">
   <interface>
     <field id="streamUrl" type="string" />
+    <field id="contentId" type="string" />
     <field id="contentTitle" type="string" />
     <field id="contentCategory" type="string" />
     <field id="closeRequested" type="boolean" alwaysNotify="true" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/PlayerView.brs" />
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
+  <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <children>
     <Rectangle width="1920" height="1080" color="0x000000FF" />
     <Video id="video" width="1920" height="1080" enableUI="false" />
-    <Rectangle id="osdBackground" translation="0,0" width="1920" height="180" color="0x06111FE6" />
+    <Rectangle id="osdBackground" translation="0,0" width="1920" height="1080" color="0x06111F99" />
     <Label id="title" translation="70,58" width="1500" height="52" />
-    <Label id="hint" translation="70,118" text="OK: controles  •  Voltar: sair" width="900" height="36" />
+    <Label id="hint" translation="70,118" text="OK: controles  •  Voltar: sair" width="1500" height="36" />
+    <Label id="trackStatus" translation="70,158" width="1700" height="32" />
+    <Rectangle id="timelineTrack" translation="70,865" width="1780" height="10" color="0x33475FFF" />
+    <Rectangle id="timelineProgress" translation="70,865" width="0" height="10" color="0x2E91EFFF" />
+    <Label id="timeLabel" translation="70,895" width="700" height="32" />
+    <Rectangle id="controlFocus" translation="70,945" width="230" height="70" color="0x2E91EFFF" />
+    <Label id="controls" translation="95,964" width="1700" height="42" />
   </children>
 </component>
