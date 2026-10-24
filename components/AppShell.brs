@@ -5,6 +5,7 @@ sub init()
     m.sectionTitle = m.top.findNode("sectionTitle")
     m.sectionDescription = m.top.findNode("sectionDescription")
     m.sectionHint = m.top.findNode("sectionHint")
+    m.homeView = m.top.findNode("homeView")
     m.navItems = [
         m.top.findNode("navHome"),
         m.top.findNode("navLive"),
@@ -45,6 +46,12 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
 end function
 
 sub showSection()
+    isHome = m.selectedIndex = 0
+    m.homeView.visible = isHome
+    m.sectionEyebrow.visible = not isHome
+    m.sectionTitle.visible = not isHome
+    m.sectionDescription.visible = not isHome
+    m.sectionHint.visible = not isHome
     for index = 0 to m.navItems.count() - 1
         if index = m.selectedIndex then
             m.navItems[index].color = "0xFFFFFFFF"
@@ -67,6 +74,7 @@ sub showSection()
     m.sectionTitle.text = section.title
     m.sectionDescription.text = section.description
     m.sectionHint.text = section.hint
+    if isHome and m.catalog <> invalid then m.homeView.callFunc("setCatalog", { items: m.catalog, categories: m.categories })
 end sub
 
 function libraryDescription() as String
@@ -114,10 +122,7 @@ sub onCatalogResult()
     if result = invalid or result.ok <> true then return
     m.catalog = result.channels
     m.categories = result.categories
-    if m.selectedIndex = 0 then
-        m.sectionDescription.text = str(m.catalog.count()) + " conteúdos disponíveis em " + str(m.categories.count()) + " categorias."
-        m.sectionHint.text = "Use as setas para navegar pelas áreas do ELVANOQ Play."
-    end if
+    if m.selectedIndex = 0 then m.homeView.callFunc("setCatalog", { items: m.catalog, categories: m.categories })
 end sub
 
 sub savePlaylistMetadata(payload as Object)

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="HomeView" extends="Group">
+  <script type="text/brightscript" uri="pkg:/components/HomeView.brs" />
+  <children>
+    <Rectangle translation="300,0" width="1620" height="560" color="0x0B1C31FF" />
+    <Rectangle translation="300,445" width="1620" height="115" color="0x06111FFF" />
+    <Poster id="heroImage" translation="1240,72" width="560" height="315" loadDisplayMode="scaleToFill" />
+    <Label id="eyebrow" translation="390,110" text="DESTAQUE ELVANOQ" width="500" height="32" />
+    <Label id="heroTitle" translation="390,158" text="Sua TV, do seu jeito" width="780" height="72" />
+    <Label id="heroMeta" translation="390,245" width="780" height="34" />
+    <Label id="heroDescription" translation="390,298" width="740" height="76" wrap="true" />
+    <Rectangle id="watchButton" translation="390,404" width="190" height="56" color="0xFFFFFFFF" />
+    <Label id="watchLabel" translation="420,420" text="▶  Assistir" width="150" height="32" />
+    <Rectangle id="detailsButton" translation="596,404" width="200" height="56" color="0x1D3656FF" />
+    <Label id="detailsLabel" translation="622,420" text="+  Minha Lista" width="164" height="32" />
+    <Label id="continueTitle" translation="390,600" text="Continuar assistindo" width="900" height="44" />
+    <Label id="continueHint" translation="390,644" text="Retome de onde parou" width="600" height="28" />
+    <PosterGrid id="continueGrid" translation="390,692" itemSize="235,132" itemSpacing="20,0" numColumns="5" numRows="1" drawFocusFeedback="true" />
+    <Label id="catalogTitle" translation="390,860" text="Canais e categorias" width="900" height="42" />
+    <PosterGrid id="catalogGrid" translation="390,910" itemSize="182,102" itemSpacing="16,0" numColumns="7" numRows="1" drawFocusFeedback="true" />
+    <Label id="emptyState" translation="390,720" width="1000" height="52" visible="false" />
+  </children>
+</component>

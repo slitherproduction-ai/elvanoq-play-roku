@@ -19,5 +19,6 @@
     <Label id="sectionTitle" translation="390,235" text="Início" width="900" height="74" />
     <Label id="sectionDescription" translation="390,332" width="980" height="86" wrap="true" />
     <Label id="sectionHint" translation="390,890" width="1100" height="40" />
+    <HomeView id="homeView" visible="false" />
   </children>
 </component>
