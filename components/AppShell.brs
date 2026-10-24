@@ -91,10 +91,10 @@ sub onBrowseItemSelected()
     m.detailView.item = selected
     m.detailView.metadata = invalid
     m.detailView.visible = true
-    loadMetadata(selected)
+    loadMetadata(selected, "search", 0, 0)
 end sub
 
-sub loadMetadata(item as Object)
+sub loadMetadata(item as Object, mode as String, tmdbId as Integer, seasonNumber as Integer)
     if m.top.rokuClientId = "" or m.top.deviceCode = "" or m.top.deviceKey = "" then return
     mediaType = "movie"
     if m.selectedIndex = 3 then mediaType = "tv"
@@ -102,8 +102,11 @@ sub loadMetadata(item as Object)
     service.rokuClientId = m.top.rokuClientId
     service.deviceCode = m.top.deviceCode
     service.deviceKey = m.top.deviceKey
-    service.title = item.title
+    if item <> invalid and item.title <> invalid then service.title = item.title
     service.mediaType = mediaType
+    service.mode = mode
+    service.tmdbId = tmdbId
+    service.seasonNumber = seasonNumber
     service.observeField("result", "onMetadataResult")
     m.metadataService = service
     service.control = "RUN"
@@ -113,6 +116,13 @@ sub onMetadataResult()
     result = m.metadataService.result
     if result = invalid or result.ok <> true then return
     m.detailView.metadata = result
+    if result.mode = "search" and result.item <> invalid and result.item.id <> invalid then
+        item = { title: m.detailView.item.title }
+        loadMetadata(item, "details", result.item.id, 0)
+    else if result.mode = "details" and result.media_type = "tv" and result.item <> invalid and result.item.seasons <> invalid and result.item.seasons.count() > 0 then
+        item = { title: m.detailView.item.title }
+        loadMetadata(item, "season", result.item.id, result.item.seasons[0].number)
+    end if
 end sub
 
 sub onDetailClosed()

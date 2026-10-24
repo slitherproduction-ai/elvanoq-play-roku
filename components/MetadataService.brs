@@ -4,7 +4,7 @@ end sub
 
 sub run()
     result = { ok: false, found: false, message: "Metadados indisponíveis." }
-    if m.top.rokuClientId = "" or m.top.deviceCode = "" or m.top.deviceKey = "" or m.top.title = "" then
+    if m.top.rokuClientId = "" or m.top.deviceCode = "" or m.top.deviceKey = "" then
         m.top.result = result
         return
     end if
@@ -13,9 +13,19 @@ sub run()
         rokuClientId: m.top.rokuClientId
         deviceCode: m.top.deviceCode
         device_key: m.top.deviceKey
-        query: m.top.title
         media_type: m.top.mediaType
+        mode: m.top.mode
     }
+    if m.top.mode = "search" then
+        if m.top.title = "" then
+            m.top.result = result
+            return
+        end if
+        request.query = m.top.title
+    else
+        request.tmdb_id = m.top.tmdbId
+        if m.top.mode = "season" then request.season_number = m.top.seasonNumber
+    end if
     transfer = CreateObject("roUrlTransfer")
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
     transfer.SetConnectTimeout(8)
@@ -35,5 +45,6 @@ sub run()
         return
     end if
     payload.ok = true
+    payload.mode = m.top.mode
     m.top.result = payload
 end sub

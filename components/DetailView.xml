@@ -24,6 +24,8 @@
     <Label id="laterLabel" translation="654,516" text="Assistir mais tarde" width="180" height="32" />
     <Label id="actionStatus" translation="150,590" width="850" height="40" />
     <Label id="similarTitle" translation="150,710" text="Mais como este" width="600" height="42" />
-    <Label id="similarHint" translation="150,760" text="Recomendações serão enriquecidas com TMDB quando configurado." width="820" height="32" />
+    <Label id="similarHint" translation="150,760" text="Recomendações serão enriquecidas com TMDB quando configurado." width="820" height="32" wrap="true" />
+    <Label id="seriesLabel" translation="150,650" width="900" height="42" visible="false" />
+    <Label id="episodeLabel" translation="150,805" width="900" height="100" wrap="true" visible="false" />
   </children>
 </component>

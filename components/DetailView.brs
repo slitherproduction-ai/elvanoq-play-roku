@@ -5,6 +5,8 @@ sub init()
     m.overview = m.top.findNode("overview")
     m.watchFocus = m.top.findNode("watchFocus")
     m.actionStatus = m.top.findNode("actionStatus")
+    m.seriesLabel = m.top.findNode("seriesLabel")
+    m.episodeLabel = m.top.findNode("episodeLabel")
     m.selectedAction = 0
     m.top.observeField("item", "onItemChanged")
     m.top.observeField("metadata", "onMetadataChanged")
@@ -21,13 +23,22 @@ sub init()
     m.top.findNode("laterLabel").font = "font:SmallSystemFont"
     m.actionStatus.font = "font:SmallSystemFont"
     m.actionStatus.color = "0x8FA9C4FF"
+    m.seriesLabel.font = "font:SmallSystemFont"
+    m.seriesLabel.color = "0xB9CBE0FF"
+    m.episodeLabel.font = "font:SmallSystemFont"
+    m.episodeLabel.color = "0xB9CBE0FF"
     m.top.findNode("similarTitle").font = "font:MediumBoldSystemFont"
     m.top.findNode("similarHint").font = "font:SmallSystemFont"
     updateActionFocus()
 end sub
 
 sub onMetadataChanged()
-    if m.top.metadata = invalid or m.top.metadata.found <> true or m.top.metadata.item = invalid then return
+    if m.top.metadata = invalid or m.top.metadata.found <> true then return
+    if m.top.metadata.mode = "season" then
+        renderEpisodes(m.top.metadata)
+        return
+    end if
+    if m.top.metadata.item = invalid then return
     details = m.top.metadata.item
     if details.title <> invalid and details.title <> "" then m.title.text = details.title
     if details.overview <> invalid and details.overview <> "" then m.overview.text = details.overview
@@ -35,6 +46,50 @@ sub onMetadataChanged()
         m.meta.text = details.release_date + "  •  Avaliação " + str(details.vote_average)
     end if
     if details.poster_path <> invalid and details.poster_path <> "" then m.poster.uri = "https://image.tmdb.org/t/p/w780" + details.poster_path
+    if details.seasons <> invalid and details.seasons.count() > 0 then
+        m.seriesLabel.visible = true
+        m.seriesLabel.text = seasonSummary(details.seasons)
+    end if
+    if details.trailer <> invalid then m.actionStatus.text = "Trailer oficial disponível."
+    if details.recommendations <> invalid and details.recommendations.count() > 0 then m.top.findNode("similarHint").text = recommendationSummary(details.recommendations)
+end sub
+
+function seasonSummary(seasons as Object) as String
+    summary = "Temporadas: "
+    lastIndex = seasons.count() - 1
+    if lastIndex > 5 then lastIndex = 5
+    for index = 0 to lastIndex
+        season = seasons[index]
+        if index > 0 then summary = summary + "  •  "
+        summary = summary + season.name + " (" + trim(str(season.episode_count)) + ")"
+    end for
+    return summary
+end function
+
+function recommendationSummary(items as Object) as String
+    summary = "Recomendações: "
+    lastIndex = items.count() - 1
+    if lastIndex > 3 then lastIndex = 3
+    for index = 0 to lastIndex
+        if index > 0 then summary = summary + "  •  "
+        summary = summary + items[index].title
+    end for
+    return summary
+end function
+
+sub renderEpisodes(payload as Object)
+    episodes = payload.episodes
+    if episodes = invalid or episodes.count() = 0 then return
+    line = "Episódios: "
+    lastIndex = episodes.count() - 1
+    if lastIndex > 3 then lastIndex = 3
+    for index = 0 to lastIndex
+        if index > 0 then line = line + "  •  "
+        episode = episodes[index]
+        line = line + trim(str(episode.number)) + ". " + episode.name
+    end for
+    m.episodeLabel.visible = true
+    m.episodeLabel.text = line
 end sub
 
 sub onItemChanged()

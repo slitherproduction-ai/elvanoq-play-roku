@@ -6,6 +6,9 @@
     <field id="deviceKey" type="string" />
     <field id="title" type="string" />
     <field id="mediaType" type="string" value="movie" />
+    <field id="mode" type="string" value="search" />
+    <field id="tmdbId" type="integer" value="0" />
+    <field id="seasonNumber" type="integer" value="0" />
     <field id="result" type="assocarray" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/MetadataService.brs" />
