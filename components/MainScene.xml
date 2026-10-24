@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="MainScene" extends="Scene">
+  <script type="text/brightscript" uri="pkg:/components/MainScene.brs" />
+  <children>
+    <Rectangle id="background" width="1920" height="1080" color="0x06111FFF" />
+    <Label id="brand" translation="110,106" text="ELVANOQ PLAY" width="1000" height="58" />
+    <Label id="headline" translation="110,240" text="Ative sua TV" width="1000" height="70" />
+    <Label id="description" translation="110,330" text="Use o código abaixo no Portal ELVANOQ para vincular este Roku à sua conta." width="1450" height="50" wrap="true" />
+    <Label id="deviceCode" translation="110,455" width="1600" height="90" />
+    <Label id="portal" translation="110,610" text="Portal: elvanoqplay.app" width="800" height="40" />
+    <Label id="status" translation="110,850" text="Aguardando ativação" width="1200" height="45" />
+  </children>
+</component>
