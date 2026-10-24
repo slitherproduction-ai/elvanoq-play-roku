@@ -5,9 +5,11 @@
     <Rectangle id="background" width="1920" height="1080" color="0x06111FFF" />
     <Label id="brand" translation="110,106" text="ELVANOQ PLAY" width="1000" height="58" />
     <Label id="headline" translation="110,240" text="Ative sua TV" width="1000" height="70" />
-    <Label id="description" translation="110,330" text="Use o código abaixo no Portal ELVANOQ para vincular este Roku à sua conta." width="1450" height="50" wrap="true" />
+    <Label id="description" translation="110,330" text="Use o código abaixo em elvanoqplay.app para vincular este Roku à sua conta." width="1450" height="70" wrap="true" />
     <Label id="deviceCode" translation="110,455" width="1600" height="90" />
     <Label id="portal" translation="110,610" text="Portal: elvanoqplay.app" width="800" height="40" />
-    <Label id="status" translation="110,850" text="Aguardando ativação" width="1200" height="45" />
+    <Label id="status" translation="110,850" text="Preparando ativação…" width="1500" height="45" wrap="true" />
+    <Label id="homeStatus" translation="110,360" width="1500" height="60" visible="false" />
+    <Timer id="licenseTimer" repeat="true" duration="60" />
   </children>
 </component>

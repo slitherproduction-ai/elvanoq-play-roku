@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="PortalService" extends="Task">
+  <interface>
+    <field id="action" type="string" />
+    <field id="rokuClientId" type="string" />
+    <field id="deviceCode" type="string" />
+    <field id="result" type="assocarray" alwaysNotify="true" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/components/PortalService.brs" />
+</component>
