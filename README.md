@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.16
+0.1.17
 
 ## Fluxo de ativação
 
@@ -35,7 +35,7 @@ Quando a licença está ativa, a tela consulta `roku-metadata` no Portal para en
 
 Para séries, o mesmo fluxo solicita temporadas e episódios reais. No controle remoto, ↑/↓ troca a temporada selecionada na própria tela de detalhes. Trailer e recomendações só aparecem quando retornados pelo TMDB; não há catálogo ou episódios inventados no canal. A reprodução de episódios depende de a lista autorizada fornecer a URL desse episódio.
 
-Em Busca, OK abre o teclado nativo do Roku e filtra somente o catálogo autorizado. Depois da consulta, ←/→/↑/↓ percorrem os resultados e OK abre os detalhes; o botão * reabre o teclado para uma nova consulta. Minha Lista alterna com ←/→ entre assistir mais tarde, favoritos, continuar assistindo e histórico locais; ↑/↓ escolhem um item e OK abre os detalhes somente após resolver o item no catálogo autorizado em memória. Itens com progresso salvo retomam no player a partir da posição registrada. Em TV ao Vivo, ← alterna para as categorias, ↑/↓ seleciona a categoria ou o canal em foco, → inicia a prévia, OK abre o canal no player e * adiciona/remove o canal de Favoritos. A prévia é parada ao trocar de categoria, sair da área ou abrir o player.
+Em Busca, OK abre o teclado nativo do Roku e filtra somente o catálogo autorizado. Depois da consulta, ←/→/↑/↓ percorrem os resultados e OK abre os detalhes; o botão * alterna entre Todos, Filmes, Séries e Canais, e Voltar limpa a consulta para iniciar outra. Minha Lista alterna com ←/→ entre assistir mais tarde, favoritos, continuar assistindo e histórico locais; ↑/↓ escolhem um item e OK abre os detalhes somente após resolver o item no catálogo autorizado em memória. Itens com progresso salvo retomam no player a partir da posição registrada. Em TV ao Vivo, ← alterna para as categorias, ↑/↓ seleciona a categoria ou o canal em foco, → inicia a prévia, OK abre o canal no player e * adiciona/remove o canal de Favoritos. A prévia é parada ao trocar de categoria, sair da área ou abrir o player.
 
 Na Home, o destaque prioriza um conteúdo em andamento e, na ausência dele, um favorito resolvido pelo catálogo atual. O primeiro trilho mostra continuar assistindo, favoritos ou uma seleção da lista, sem ler URL ou credenciais do estado local.
 

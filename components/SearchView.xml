@@ -10,6 +10,7 @@
     <Rectangle translation="390,190" width="980" height="64" color="0x102944FF" />
     <Label id="queryLabel" translation="422,208" text="Buscar filmes, séries, canais e episódios…" width="880" height="34" />
     <Rectangle id="filterAll" translation="390,292" width="105" height="42" color="0x1965D6FF" />
+    <Rectangle id="filterFocus" translation="386,288" width="113" height="50" color="0x2E91EFAA" />
     <Label id="allLabel" translation="415,302" text="Todos" width="80" height="24" />
     <Label id="moviesLabel" translation="525,302" text="Filmes" width="90" height="24" />
     <Label id="seriesLabel" translation="625,302" text="Séries" width="90" height="24" />
