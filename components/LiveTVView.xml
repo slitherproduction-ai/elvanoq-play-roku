@@ -22,14 +22,22 @@
     <Rectangle translation="595,190" width="390" height="720" color="0x091827FF" />
     <Label id="channelsTitle" translation="625,216" text="CANAIS" width="240" height="30" />
     <Rectangle id="channelFocus" translation="615,258" width="350" height="48" color="0x1965D6FF" />
-    <Label id="channel01" translation="635,270" width="310" height="30" />
-    <Label id="channel02" translation="635,325" width="310" height="30" />
-    <Label id="channel03" translation="635,380" width="310" height="30" />
-    <Label id="channel04" translation="635,435" width="310" height="30" />
-    <Label id="channel05" translation="635,490" width="310" height="30" />
-    <Label id="channel06" translation="635,545" width="310" height="30" />
-    <Label id="channel07" translation="635,600" width="310" height="30" />
-    <Label id="channel08" translation="635,655" width="310" height="30" />
+    <Poster id="channelLogo01" translation="630,264" width="34" height="34" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo02" translation="630,319" width="34" height="34" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo03" translation="630,374" width="34" height="34" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo04" translation="630,429" width="34" height="34" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo05" translation="630,484" width="34" height="34" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo06" translation="630,539" width="34" height="34" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo07" translation="630,594" width="34" height="34" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo08" translation="630,649" width="34" height="34" loadDisplayMode="scaleToFit" />
+    <Label id="channel01" translation="680,270" width="260" height="30" />
+    <Label id="channel02" translation="680,325" width="260" height="30" />
+    <Label id="channel03" translation="680,380" width="260" height="30" />
+    <Label id="channel04" translation="680,435" width="260" height="30" />
+    <Label id="channel05" translation="680,490" width="260" height="30" />
+    <Label id="channel06" translation="680,545" width="260" height="30" />
+    <Label id="channel07" translation="680,600" width="260" height="30" />
+    <Label id="channel08" translation="680,655" width="260" height="30" />
     <Rectangle translation="1010,190" width="820" height="460" color="0x000000FF" />
     <Video id="preview" translation="1010,190" width="820" height="460" enableUI="false" />
     <Label id="previewTitle" translation="1040,420" text="Selecione um canal para iniciar a prévia" width="700" height="44" />

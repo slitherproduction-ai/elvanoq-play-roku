@@ -16,11 +16,13 @@ sub init()
     m.localState = loadLocalState()
     m.categoryLabels = []
     m.channelLabels = []
+    m.channelLogos = []
     for index = 1 to 6
         m.categoryLabels.push(m.top.findNode("category0" + trim(str(index))))
     end for
     for index = 1 to 8
         m.channelLabels.push(m.top.findNode("channel0" + trim(str(index))))
+        m.channelLogos.push(m.top.findNode("channelLogo0" + trim(str(index))))
     end for
     for each label in m.categoryLabels
         label.font = "font:SmallSystemFont"
@@ -85,6 +87,10 @@ sub renderGuide()
         for each label in m.channelLabels
             label.text = ""
         end for
+        for each logo in m.channelLogos
+            logo.uri = ""
+            logo.visible = false
+        end for
         return
     end if
     m.emptyState.visible = false
@@ -94,8 +100,17 @@ sub renderGuide()
             prefix = ""
             if isFavorite(channel.id) then prefix = "★ "
             m.channelLabels[index].text = prefix + channel.title
+            if channel.logo <> invalid and channel.logo <> "" then
+                m.channelLogos[index].uri = channel.logo
+                m.channelLogos[index].visible = true
+            else
+                m.channelLogos[index].uri = ""
+                m.channelLogos[index].visible = false
+            end if
         else
             m.channelLabels[index].text = ""
+            m.channelLogos[index].uri = ""
+            m.channelLogos[index].visible = false
         end if
     end for
     updateSelection()
