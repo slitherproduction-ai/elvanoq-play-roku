@@ -42,6 +42,7 @@ sub run()
     result.state = state
     result.ok = true
     result.message = portalMessage(response, state)
+    result.payload = response
     m.top.result = result
 end sub
 

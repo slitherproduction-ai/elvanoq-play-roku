@@ -15,6 +15,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 5. Enquanto estiver pendente, o status é consultado a cada 60 segundos, sem bloquear a tela.
 6. O cliente abre elvanoqplay.app e vincula a TV com o Código Roku mostrado.
 7. Quando a licença fica ativa, o app prepara a transição para a Home.
+8. Após a ativação, o app solicita roku-playlist-sync para receber a configuração da lista. As credenciais retornadas não são mostradas nem registradas em logs.
 
 O identificador técnico nunca é exibido completo, registrado em logs ou tratado como endereço físico.
 

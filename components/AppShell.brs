@@ -67,3 +67,14 @@ sub showSection()
     m.sectionDescription.text = section.description
     m.sectionHint.text = section.hint
 end sub
+
+sub applyPlaylist(payload as Object)
+    if payload = invalid or type(payload) <> "roAssociativeArray" then return
+    if payload.display_name <> invalid and payload.display_name <> "" then
+        m.playlistName = payload.display_name
+        if m.selectedIndex = 0 then
+            m.sectionDescription.text = "Lista conectada: " + m.playlistName + ". Seus destaques aparecerão aqui conforme o catálogo for carregado."
+            m.sectionHint.text = "A sincronização foi concluída com segurança."
+        end if
+    end if
+end sub

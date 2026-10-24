@@ -56,11 +56,16 @@ sub onPortalResult()
         requestPortal("roku-license-status")
         return
     end if
+    if result.action = "roku-playlist-sync" then
+        if result.ok = true and m.appShell <> invalid then m.appShell.callFunc("applyPlaylist", result.payload)
+        return
+    end if
     if result.ok <> true then
         showActivationState(result.state, result.message)
         return
     end if
     showActivationState(result.state, result.message)
+    if result.action = "roku-license-status" and result.state = "active" then requestPortal("roku-playlist-sync")
 end sub
 
 sub showActivationState(state as String, message as String)
