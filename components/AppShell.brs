@@ -71,6 +71,7 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
             m.parentalView.callFunc("clearDigit")
             return true
         end if
+        if m.parentalView.callFunc("handleKey", { key: key, press: press }) then return true
     end if
     if m.selectedIndex = 1 then
         if key = "down" then
@@ -328,6 +329,7 @@ sub showSection()
     if isSeries and m.catalog <> invalid then m.seriesView.callFunc("setCatalog", { items: m.catalog })
     if isSearch and m.catalog <> invalid then m.searchView.callFunc("setCatalog", { items: m.catalog })
     if m.selectedIndex = 5 then m.libraryView.callFunc("refresh")
+    if isSettings and m.categories <> invalid then m.parentalView.categories = m.categories
 end sub
 
 function libraryDescription() as String
