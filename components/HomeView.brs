@@ -40,14 +40,55 @@ sub setCatalog(payload as Object)
         return
     end if
     m.emptyState.visible = false
+    state = loadLocalState()
+    continueItems = resolveLocalItems(state.continue_watching, items)
+    favoriteItems = resolveLocalItems(state.favorites, items)
     hero = items[0]
+    if continueItems.count() > 0 then
+        hero = continueItems[0]
+        m.eyebrow.text = "CONTINUE ASSISTINDO"
+    else if favoriteItems.count() > 0 then
+        hero = favoriteItems[0]
+        m.eyebrow.text = "SEUS FAVORITOS"
+    else
+        m.eyebrow.text = "DESTAQUE ELVANOQ"
+    end if
     m.heroTitle.text = hero.title
-    m.heroMeta.text = hero.category + "  •  Ao vivo  •  HD"
-    m.heroDescription.text = "Conteúdo disponível na sua lista autorizada. Navegue pelas categorias e continue de onde parou."
+    m.heroMeta.text = hero.category + "  •  Disponível na sua lista"
+    m.heroDescription.text = "Conteúdo disponível na sua lista autorizada. Retome, favorite e navegue de forma segura no ELVANOQ Play."
     if hero.logo <> invalid then m.heroImage.uri = hero.logo
-    m.continueGrid.content = buildContent(items, 5)
+    if continueItems.count() > 0 then
+        m.continueTitle.text = "Continuar assistindo"
+        m.continueHint.text = "Retome de onde parou"
+        m.continueGrid.content = buildContent(continueItems, 5)
+    else if favoriteItems.count() > 0 then
+        m.continueTitle.text = "Seus favoritos"
+        m.continueHint.text = "Canais e títulos salvos neste Roku"
+        m.continueGrid.content = buildContent(favoriteItems, 5)
+    else
+        m.continueTitle.text = "Para você"
+        m.continueHint.text = "Conteúdos da sua lista autorizada"
+        m.continueGrid.content = buildContent(items, 5)
+    end if
+    m.catalogTitle.text = "Canais em destaque"
     m.catalogGrid.content = buildContent(items, 7)
 end sub
+
+function resolveLocalItems(savedItems as Object, catalogItems as Object) as Object
+    resolved = []
+    if savedItems = invalid or catalogItems = invalid then return resolved
+    for each saved in savedItems
+        if saved.id <> invalid then
+            for each item in catalogItems
+                if item.id = saved.id then
+                    resolved.push(item)
+                    exit for
+                end if
+            end for
+        end if
+    end for
+    return resolved
+end function
 
 function buildContent(items as Object, maximum as Integer) as Object
     content = CreateObject("roSGNode", "ContentNode")

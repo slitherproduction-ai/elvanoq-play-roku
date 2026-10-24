@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="HomeView" extends="Group">
   <script type="text/brightscript" uri="pkg:/components/HomeView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <children>
     <Rectangle translation="300,0" width="1620" height="560" color="0x0B1C31FF" />
     <Rectangle translation="300,445" width="1620" height="115" color="0x06111FFF" />
@@ -16,7 +17,7 @@
     <Label id="continueTitle" translation="390,600" text="Continuar assistindo" width="900" height="44" />
     <Label id="continueHint" translation="390,644" text="Retome de onde parou" width="600" height="28" />
     <PosterGrid id="continueGrid" translation="390,692" itemSize="235,132" itemSpacing="20,0" numColumns="5" numRows="1" drawFocusFeedback="true" />
-    <Label id="catalogTitle" translation="390,860" text="Canais e categorias" width="900" height="42" />
+    <Label id="catalogTitle" translation="390,860" text="Canais em destaque" width="900" height="42" />
     <PosterGrid id="catalogGrid" translation="390,910" itemSize="182,102" itemSpacing="16,0" numColumns="7" numRows="1" drawFocusFeedback="true" />
     <Label id="emptyState" translation="390,720" width="1000" height="52" visible="false" />
   </children>
