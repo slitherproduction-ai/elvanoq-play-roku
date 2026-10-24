@@ -18,14 +18,24 @@
     <Rectangle width="1920" height="1080" color="0x000000FF" />
     <Video id="video" width="1920" height="1080" enableUI="false" />
     <Timer id="osdTimer" duration="5" repeat="false" />
-    <Rectangle id="osdBackground" translation="0,0" width="1920" height="1080" color="0x06111F99" />
-    <Label id="title" translation="70,58" width="1500" height="52" />
-    <Label id="hint" translation="70,118" text="OK: controles  •  Voltar: sair" width="1500" height="36" />
-    <Label id="trackStatus" translation="70,158" width="1700" height="32" />
-    <Rectangle id="timelineTrack" translation="70,865" width="1780" height="10" color="0x33475FFF" />
-    <Rectangle id="timelineProgress" translation="70,865" width="0" height="10" color="0x2E91EFFF" />
-    <Label id="timeLabel" translation="70,895" width="700" height="32" />
-    <Rectangle id="controlFocus" translation="70,945" width="230" height="70" color="0x2E91EFFF" />
-    <Label id="controls" translation="95,964" width="1700" height="42" />
+    <Rectangle id="osdBackground" translation="0,0" width="1920" height="1080" color="0x030912B8" />
+    <Rectangle id="topShade" translation="0,0" width="1920" height="250" color="0x06111FEF" />
+    <Label id="backLabel" translation="70,60" text="‹" width="48" height="54" />
+    <Label id="title" translation="132,55" width="1320" height="52" />
+    <Label id="contentBadge" translation="1500,62" text="ELVANOQ PLAY" width="290" height="34" horizAlign="right" />
+    <Label id="hint" translation="132,118" text="OK: controles  •  Voltar: sair" width="1500" height="36" />
+    <Label id="trackStatus" translation="132,158" width="1600" height="32" />
+    <Rectangle id="bottomShade" translation="0,760" width="1920" height="320" color="0x06111FEF" />
+    <Label id="nowPlayingLabel" translation="70,792" text="REPRODUZINDO AGORA" width="600" height="28" />
+    <Label id="timeLabel" translation="70,834" width="700" height="32" />
+    <Rectangle id="timelineTrack" translation="70,884" width="1780" height="10" color="0x38506BFF" />
+    <Rectangle id="timelineProgress" translation="70,884" width="0" height="10" color="0x39B7FFFF" />
+    <Rectangle id="controlFocus" translation="70,934" width="270" height="88" color="0x2E91EFFF" />
+    <Label id="controlBack" translation="92,956" text="↶  10s" width="220" height="38" horizAlign="center" />
+    <Label id="controlPlay" translation="372,956" text="❚❚  Pausar" width="220" height="38" horizAlign="center" />
+    <Label id="controlForward" translation="652,956" text="10s  ↷" width="220" height="38" horizAlign="center" />
+    <Label id="controlAudio" translation="932,956" text="Áudio" width="220" height="38" horizAlign="center" />
+    <Label id="controlSubtitles" translation="1212,956" text="Legendas" width="220" height="38" horizAlign="center" />
+    <Label id="controls" translation="1500,956" width="300" height="38" horizAlign="right" />
   </children>
 </component>

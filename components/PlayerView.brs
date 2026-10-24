@@ -9,14 +9,29 @@ sub init()
     m.controls = m.top.findNode("controls")
     m.osdBackground = m.top.findNode("osdBackground")
     m.osdTimer = m.top.findNode("osdTimer")
+    m.topShade = m.top.findNode("topShade")
+    m.bottomShade = m.top.findNode("bottomShade")
+    m.backLabel = m.top.findNode("backLabel")
+    m.contentBadge = m.top.findNode("contentBadge")
+    m.nowPlayingLabel = m.top.findNode("nowPlayingLabel")
+    m.controlLabels = [m.top.findNode("controlBack"), m.top.findNode("controlPlay"), m.top.findNode("controlForward"), m.top.findNode("controlAudio"), m.top.findNode("controlSubtitles")]
     m.title.font = "font:MediumBoldSystemFont"
     m.hint.font = "font:SmallSystemFont"
     m.trackStatus.font = "font:SmallSystemFont"
     m.trackStatus.color = "0xB9CBE0FF"
     m.timeLabel.font = "font:SmallSystemFont"
-    m.controls.font = "font:MediumBoldSystemFont"
-    m.controls.color = "0xFFFFFFFF"
-    m.controls.text = "Voltar 10s     Pausar / Retomar     Avançar 10s     Áudio     Legendas"
+    m.controls.font = "font:SmallSystemFont"
+    m.controls.color = "0x8FA9C4FF"
+    m.controls.text = "←/→ selecionar"
+    m.backLabel.font = "font:LargeBoldSystemFont"
+    m.contentBadge.font = "font:SmallSystemFont"
+    m.contentBadge.color = "0x73B7FFFF"
+    m.nowPlayingLabel.font = "font:SmallSystemFont"
+    m.nowPlayingLabel.color = "0x73B7FFFF"
+    for each label in m.controlLabels
+        label.font = "font:MediumBoldSystemFont"
+        label.color = "0xD7E3F0FF"
+    end for
     m.liveQueue = []
     m.video.notificationInterval = 1
     m.video.observeField("state", "onVideoState")
@@ -53,6 +68,7 @@ end sub
 
 sub onVideoState()
     if m.video.state = "playing" then
+        m.controlLabels[1].text = "❚❚  Pausar"
         if m.shouldRestorePosition then
             m.video.seek = m.top.resumePosition
             m.shouldRestorePosition = false
@@ -65,6 +81,7 @@ sub onVideoState()
         m.hint.text = "Reprodução concluída."
         showOsd()
     end if
+    if m.video.state = "paused" then m.controlLabels[1].text = "▶  Retomar"
     if m.video.state = "error" then
         m.hint.text = "Não foi possível reproduzir este conteúdo. Tente novamente."
         showOsd()
@@ -153,6 +170,14 @@ sub showOsd()
     m.timeLabel.visible = true
     m.controlFocus.visible = true
     m.controls.visible = true
+    m.topShade.visible = true
+    m.bottomShade.visible = true
+    m.backLabel.visible = true
+    m.contentBadge.visible = true
+    m.nowPlayingLabel.visible = true
+    for each label in m.controlLabels
+        label.visible = true
+    end for
     if m.video.state = "playing" then m.osdTimer.control = "start"
 end sub
 
@@ -170,11 +195,26 @@ sub hideOsd()
     m.timeLabel.visible = false
     m.controlFocus.visible = false
     m.controls.visible = false
+    m.topShade.visible = false
+    m.bottomShade.visible = false
+    m.backLabel.visible = false
+    m.contentBadge.visible = false
+    m.nowPlayingLabel.visible = false
+    for each label in m.controlLabels
+        label.visible = false
+    end for
 end sub
 
 sub updateControlFocus()
-    positions = [70, 330, 590, 850, 1110]
-    m.controlFocus.translation = [positions[m.selectedControl], 945]
+    positions = [70, 350, 630, 910, 1190]
+    m.controlFocus.translation = [positions[m.selectedControl], 934]
+    for index = 0 to m.controlLabels.count() - 1
+        if index = m.selectedControl then
+            m.controlLabels[index].color = "0xFFFFFFFF"
+        else
+            m.controlLabels[index].color = "0xD7E3F0FF"
+        end if
+    end for
 end sub
 
 sub runSelectedControl()
