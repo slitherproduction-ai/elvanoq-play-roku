@@ -69,8 +69,8 @@ sub showActivationState(state as String, message as String)
         m.deviceCode.visible = false
         m.portal.visible = false
         m.status.visible = false
-        m.homeStatus.visible = true
-        m.homeStatus.text = "Licença ativa. Preparando sua Home…"
+        m.homeStatus.visible = false
+        openAppShell()
         return
     end if
     m.homeStatus.visible = false
@@ -90,6 +90,13 @@ sub showActivationState(state as String, message as String)
     else
         m.status.text = "Aguardando ativação. Vincule este Roku em elvanoqplay.app."
     end if
+end sub
+
+sub openAppShell()
+    if m.appShell <> invalid then return
+    m.appShell = CreateObject("roSGNode", "AppShell")
+    m.top.appendChild(m.appShell)
+    m.appShell.setFocus(true)
 end sub
 
 function formatDeviceCode(clientId as String) as String

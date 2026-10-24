@@ -28,6 +28,8 @@ jobs:
           test -f source/main.brs
           test -f components/MainScene.xml
           test -f components/MainScene.brs
+          test -f components/AppShell.xml
+          test -f components/AppShell.brs
           test -f components/PortalService.xml
           test -f components/PortalService.brs
           test -f images/elvanoq-wordmark.png
@@ -36,7 +38,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import xml.etree.ElementTree as ET
-          for path in ('components/MainScene.xml', 'components/PortalService.xml'):
+          for path in ('components/MainScene.xml', 'components/AppShell.xml', 'components/PortalService.xml'):
               ET.parse(path)
               print(f'valid XML: {path}')
           PY

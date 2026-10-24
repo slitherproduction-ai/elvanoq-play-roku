@@ -16,11 +16,11 @@ O aplicativo Roku replica os domínios funcionais do ELVANOQ Play Android usando
 1. MainScene obtém o identificador persistente fornecido pelo Roku.
 2. PortalService registra o aparelho e consulta a licença.
 3. A licença pendente exibe a ativação em elvanoqplay.app.
-4. A licença ativa abre o AppShell, que será a raiz das áreas Home, TV ao Vivo, Filmes, Séries e Busca.
+4. A licença ativa abre o AppShell, raiz das áreas Home, TV ao Vivo, Filmes, Séries, Busca, Minha Lista e Ajustes.
 
 ## Equivalência de produto
 
-A implementação não reutiliza código React Native. Ela preserva a organização por domínio e os fluxos de produto, adaptados aos componentes e ao controle remoto do Roku.
+A implementação não reutiliza código React Native. Ela preserva a organização por domínio e os fluxos de produto, adaptados aos componentes e ao controle remoto do Roku. O AppShell já mantém menu lateral, foco por D-pad e as áreas do produto separadas; os conteúdos dinâmicos entram pela sincronização de listas.
 
 ## Empacotamento
 
