@@ -6,6 +6,7 @@
   <script type="text/brightscript" uri="pkg:/components/HomeView.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <children>
+    <Timer id="heroTimer" duration="8" repeat="true" />
     <Rectangle translation="300,0" width="1620" height="560" color="0x0B1C31FF" />
     <Rectangle translation="300,445" width="1620" height="115" color="0x06111FFF" />
     <Poster id="heroImage" translation="1240,72" width="560" height="315" loadDisplayMode="scaleToFill" />

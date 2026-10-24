@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.24
+0.1.25
 
 ## Fluxo de ativação
 
@@ -52,6 +52,8 @@ A tela de detalhes apresenta a hierarquia adaptada do Android/Prime para Roku: m
 Em Busca, OK abre o teclado nativo do Roku e filtra somente o catálogo autorizado. Depois da consulta, ←/→/↑/↓ percorrem os resultados e OK abre os detalhes; o botão * alterna entre Todos, Filmes, Séries e Canais, e Voltar limpa a consulta para iniciar outra. Minha Lista alterna com ←/→ entre assistir mais tarde, favoritos, continuar assistindo e histórico locais; ↑/↓ escolhem um item e OK abre os detalhes somente após resolver o item no catálogo autorizado em memória. Itens com progresso salvo retomam no player a partir da posição registrada. Em TV ao Vivo, ← alterna para as categorias, ↑/↓ seleciona a categoria ou o canal em foco, → inicia a prévia, OK abre o canal no player e * adiciona/remove o canal de Favoritos. A prévia é parada ao trocar de categoria, sair da área ou abrir o player.
 
 Na Home, o destaque prioriza um conteúdo em andamento e, na ausência dele, um favorito resolvido pelo catálogo atual. O primeiro trilho mostra continuar assistindo, favoritos ou uma seleção da lista, sem ler URL ou credenciais do estado local.
+
+A Home alterna automaticamente entre até três destaques reais: continuar assistindo, favorito e catálogo. A rotação só acontece enquanto a Home está ativa e não busca conteúdo fora da lista autorizada.
 
 No destaque da Home, ←/→ alterna entre Assistir e Minha Lista; OK executa a ação selecionada. Adicionar/remover usa somente a coleção local protegida e a reprodução ainda recebe a URL exclusivamente do catálogo em memória.
 

@@ -305,6 +305,7 @@ sub showSection()
     isSearch = m.selectedIndex = 4
     isSettings = m.selectedIndex = 6
     m.homeView.visible = isHome
+    m.homeView.callFunc("setActive", isHome)
     m.liveTVView.visible = isLive
     m.moviesView.visible = isMovies
     m.seriesView.visible = isSeries

@@ -7,6 +7,7 @@ sub init()
     m.watchLabel = m.top.findNode("watchLabel")
     m.detailsLabel = m.top.findNode("detailsLabel")
     m.actionFocus = m.top.findNode("actionFocus")
+    m.heroTimer = m.top.findNode("heroTimer")
     m.continueTitle = m.top.findNode("continueTitle")
     m.continueHint = m.top.findNode("continueHint")
     m.catalogTitle = m.top.findNode("catalogTitle")
@@ -31,6 +32,10 @@ sub init()
     m.emptyState.font = "font:MediumSystemFont"
     m.emptyState.color = "0xB9CBE0FF"
     m.selectedAction = 0
+    m.heroCandidates = []
+    m.heroIndex = 0
+    m.isActive = true
+    m.heroTimer.observeField("fire", "onHeroTimerFired")
     updateActionFocus()
 end sub
 
@@ -38,6 +43,8 @@ sub setCatalog(payload as Object)
     if payload = invalid or type(payload) <> "roAssociativeArray" then return
     items = payload.items
     if items = invalid or items.count() = 0 then
+        m.heroTimer.control = "stop"
+        m.heroCandidates = []
         m.emptyState.visible = true
         m.emptyState.text = "Sua lista será exibida aqui assim que a sincronização for concluída."
         return
@@ -46,21 +53,10 @@ sub setCatalog(payload as Object)
     state = loadLocalState()
     continueItems = resolveLocalItems(state.continue_watching, items)
     favoriteItems = resolveLocalItems(state.favorites, items)
-    hero = items[0]
-    if continueItems.count() > 0 then
-        hero = continueItems[0]
-        m.eyebrow.text = "CONTINUE ASSISTINDO"
-    else if favoriteItems.count() > 0 then
-        hero = favoriteItems[0]
-        m.eyebrow.text = "SEUS FAVORITOS"
-    else
-        m.eyebrow.text = "DESTAQUE ELVANOQ"
-    end if
-    m.heroTitle.text = hero.title
-    m.hero = hero
-    m.heroMeta.text = hero.category + "  •  Disponível na sua lista"
-    m.heroDescription.text = "Conteúdo disponível na sua lista autorizada. Retome, favorite e navegue de forma segura no ELVANOQ Play."
-    if hero.logo <> invalid then m.heroImage.uri = hero.logo
+    m.heroTimer.control = "stop"
+    m.heroCandidates = uniqueHeroCandidates(continueItems, favoriteItems, items)
+    m.heroIndex = 0
+    if m.heroCandidates.count() > 0 then renderHero(m.heroCandidates[0])
     if continueItems.count() > 0 then
         m.continueTitle.text = "Continuar assistindo"
         m.continueHint.text = "Retome de onde parou"
@@ -76,7 +72,52 @@ sub setCatalog(payload as Object)
     end if
     m.catalogTitle.text = "Canais em destaque"
     m.catalogGrid.content = buildContent(items, 7)
+    if m.isActive and m.heroCandidates.count() > 1 then m.heroTimer.control = "start"
+end sub
+
+function uniqueHeroCandidates(continueItems as Object, favoriteItems as Object, catalogItems as Object) as Object
+    candidates = []
+    appendHeroCandidate(candidates, continueItems, "CONTINUE ASSISTINDO")
+    appendHeroCandidate(candidates, favoriteItems, "SEUS FAVORITOS")
+    appendHeroCandidate(candidates, catalogItems, "DESTAQUE ELVANOQ")
+    return candidates
+end function
+
+sub appendHeroCandidate(target as Object, source as Object, eyebrow as String)
+    if source = invalid or source.count() = 0 then return
+    candidate = source[0]
+    for each existing in target
+        if existing.item.id = candidate.id then return
+    end for
+    target.push({ item: candidate, eyebrow: eyebrow })
+end sub
+
+sub renderHero(candidate as Object)
+    if candidate = invalid or candidate.item = invalid then return
+    hero = candidate.item
+    m.hero = hero
+    m.eyebrow.text = candidate.eyebrow
+    m.heroTitle.text = hero.title
+    m.heroMeta.text = hero.category + "  •  Disponível na sua lista"
+    m.heroDescription.text = "Conteúdo disponível na sua lista autorizada. Retome, favorite e navegue de forma segura no ELVANOQ Play."
+    if hero.logo <> invalid and hero.logo <> "" then m.heroImage.uri = hero.logo
     updateActionCopy()
+end sub
+
+sub onHeroTimerFired()
+    if not m.isActive or m.heroCandidates.count() < 2 then return
+    m.heroIndex = m.heroIndex + 1
+    if m.heroIndex >= m.heroCandidates.count() then m.heroIndex = 0
+    renderHero(m.heroCandidates[m.heroIndex])
+end sub
+
+sub setActive(active as Boolean)
+    m.isActive = active
+    if active and m.heroCandidates.count() > 1 then
+        m.heroTimer.control = "start"
+    else
+        m.heroTimer.control = "stop"
+    end if
 end sub
 
 function handleKey(event as Object) as Boolean
