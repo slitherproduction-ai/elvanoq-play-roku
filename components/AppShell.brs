@@ -10,6 +10,7 @@ sub init()
     m.moviesView = m.top.findNode("moviesView")
     m.seriesView = m.top.findNode("seriesView")
     m.searchView = m.top.findNode("searchView")
+    m.parentalView = m.top.findNode("parentalView")
     m.navItems = [
         m.top.findNode("navHome"),
         m.top.findNode("navLive"),
@@ -36,6 +37,16 @@ end sub
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
+    if m.selectedIndex = 6 then
+        if key >= "0" and key <= "9" then
+            m.parentalView.callFunc("enterDigit", key)
+            return true
+        end if
+        if key = "back" then
+            m.parentalView.callFunc("clearDigit")
+            return true
+        end if
+    end if
     if m.selectedIndex = 1 then
         if key = "down" then
             m.liveTVView.callFunc("moveChannel", 1)
@@ -69,16 +80,18 @@ sub showSection()
     isMovies = m.selectedIndex = 2
     isSeries = m.selectedIndex = 3
     isSearch = m.selectedIndex = 4
+    isSettings = m.selectedIndex = 6
     m.homeView.visible = isHome
     m.liveTVView.visible = isLive
     m.moviesView.visible = isMovies
     m.seriesView.visible = isSeries
     m.searchView.visible = isSearch
+    m.parentalView.visible = isSettings
     if not isLive then m.liveTVView.callFunc("stopPreview")
-    m.sectionEyebrow.visible = not isHome and not isLive and not isMovies and not isSeries and not isSearch
-    m.sectionTitle.visible = not isHome and not isLive and not isMovies and not isSeries and not isSearch
-    m.sectionDescription.visible = not isHome and not isLive and not isMovies and not isSeries and not isSearch
-    m.sectionHint.visible = not isHome and not isLive and not isMovies and not isSeries and not isSearch
+    m.sectionEyebrow.visible = not isHome and not isLive and not isMovies and not isSeries and not isSearch and not isSettings
+    m.sectionTitle.visible = not isHome and not isLive and not isMovies and not isSeries and not isSearch and not isSettings
+    m.sectionDescription.visible = not isHome and not isLive and not isMovies and not isSeries and not isSearch and not isSettings
+    m.sectionHint.visible = not isHome and not isLive and not isMovies and not isSeries and not isSearch and not isSettings
     for index = 0 to m.navItems.count() - 1
         if index = m.selectedIndex then
             m.navItems[index].color = "0xFFFFFFFF"

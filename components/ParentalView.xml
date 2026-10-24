@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="ParentalView" extends="Group">
+  <script type="text/brightscript" uri="pkg:/components/ParentalView.brs" />
+  <children>
+    <Rectangle translation="300,0" width="1620" height="1080" color="0x06111FFF" />
+    <Label id="title" translation="390,150" text="Controle Parental" width="800" height="62" />
+    <Label id="description" translation="390,228" text="Digite o PIN para acessar categorias e restrições." width="900" height="40" />
+    <Label id="dots" translation="390,330" text="○  ○  ○  ○" width="420" height="62" />
+    <Label id="status" translation="390,408" text="PIN inicial: 0000" width="800" height="34" />
+    <Rectangle translation="390,495" width="105" height="58" color="0x1D3656FF" />
+    <Label translation="432,510" text="1" width="30" height="32" />
+    <Rectangle translation="510,495" width="105" height="58" color="0x1D3656FF" />
+    <Label translation="552,510" text="2" width="30" height="32" />
+    <Rectangle translation="630,495" width="105" height="58" color="0x1D3656FF" />
+    <Label translation="672,510" text="3" width="30" height="32" />
+    <Rectangle translation="390,565" width="105" height="58" color="0x1D3656FF" />
+    <Label translation="432,580" text="4" width="30" height="32" />
+    <Rectangle translation="510,565" width="105" height="58" color="0x1D3656FF" />
+    <Label translation="552,580" text="5" width="30" height="32" />
+    <Rectangle translation="630,565" width="105" height="58" color="0x1D3656FF" />
+    <Label translation="672,580" text="6" width="30" height="32" />
+    <Rectangle translation="390,635" width="105" height="58" color="0x1D3656FF" />
+    <Label translation="432,650" text="7" width="30" height="32" />
+    <Rectangle translation="510,635" width="105" height="58" color="0x1D3656FF" />
+    <Label translation="552,650" text="8" width="30" height="32" />
+    <Rectangle translation="630,635" width="105" height="58" color="0x1D3656FF" />
+    <Label translation="672,650" text="9" width="30" height="32" />
+    <Rectangle translation="510,705" width="105" height="58" color="0x1D3656FF" />
+    <Label translation="552,720" text="0" width="30" height="32" />
+    <Label id="lockedCategories" translation="900,510" text="Categorias bloqueáveis\nCanais  •  Filmes  •  Séries" width="620" height="100" wrap="true" />
+  </children>
+</component>
