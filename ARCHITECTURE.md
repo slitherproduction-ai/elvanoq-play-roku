@@ -7,6 +7,7 @@ O aplicativo Roku replica os domínios funcionais do ELVANOQ Play Android usando
 - source: inicialização do canal e ciclo de vida da tela.
 - components: cenas e componentes visuais SceneGraph.
 - services: acesso HTTP ao Portal, sincronização de listas e consultas de catálogo.
+- components/CatalogService: carrega listas autorizadas apenas em memória e normaliza canais/categorias M3U; não persiste URLs ou credenciais.
 - models: modelos normalizados de licença, listas, canais, filmes, séries e EPG.
 - features: Home, TV ao Vivo, Filmes, Séries, Busca, Favoritos, Controle Parental e Player.
 - source/LocalState: estado local sem duplicação para favoritos, assistir mais tarde, continuar assistindo, histórico e preferências parentais; não persiste credenciais nem URLs.

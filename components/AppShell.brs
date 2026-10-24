@@ -98,6 +98,26 @@ sub applyPlaylist(payload as Object)
             m.sectionHint.text = "A sincronização foi concluída com segurança."
         end if
     end if
+    if payload.playlist <> invalid and type(payload.playlist) = "roAssociativeArray" then loadCatalog(payload.playlist)
+end sub
+
+sub loadCatalog(playlist as Object)
+    service = CreateObject("roSGNode", "CatalogService")
+    service.playlist = playlist
+    service.observeField("result", "onCatalogResult")
+    m.catalogService = service
+    service.control = "RUN"
+end sub
+
+sub onCatalogResult()
+    result = m.catalogService.result
+    if result = invalid or result.ok <> true then return
+    m.catalog = result.channels
+    m.categories = result.categories
+    if m.selectedIndex = 0 then
+        m.sectionDescription.text = str(m.catalog.count()) + " conteúdos disponíveis em " + str(m.categories.count()) + " categorias."
+        m.sectionHint.text = "Use as setas para navegar pelas áreas do ELVANOQ Play."
+    end if
 end sub
 
 sub savePlaylistMetadata(payload as Object)
