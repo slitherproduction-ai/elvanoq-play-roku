@@ -25,6 +25,8 @@ Favoritos, assistir mais tarde, continuar assistindo, histórico e preferências
 
 Bloqueios parentais são separados por lista ativa e verificados antes de iniciar preview ou reprodução. Uma sessão validada por PIN libera apenas o uso atual do aplicativo.
 
+O PlayerView também aplica essa verificação centralmente: acessos futuros por Home, busca, favoritos, histórico, deep link ou troca rápida não podem iniciar conteúdo protegido sem PIN válido.
+
 ## Player Roku
 
 O componente PlayerView usa o player nativo Roku e está preparado para receber uma URL de stream autorizada pelo fluxo de listas. Ele oferece saída pelo botão Voltar e OSD reaberto por OK. A reprodução real será validada com uma lista autorizada em aparelho físico.

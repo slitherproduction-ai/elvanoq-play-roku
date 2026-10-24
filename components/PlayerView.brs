@@ -16,6 +16,12 @@ end sub
 
 sub onStreamChanged()
     if m.top.streamUrl = "" then return
+    if isParentallyBlocked(m.top.contentCategory) then
+        m.video.control = "stop"
+        m.hint.text = "Conteúdo protegido. Valide o PIN em Ajustes para assistir."
+        showOsd()
+        return
+    end if
     content = CreateObject("roSGNode", "ContentNode")
     content.url = m.top.streamUrl
     content.title = m.top.contentTitle
