@@ -1,0 +1,67 @@
+name: Roku channel validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      create_sideload_package:
+        description: Create a ZIP artifact for Roku Developer Mode
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate SceneGraph channel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate required channel files
+        run: |
+          test -f manifest
+          test -f source/main.brs
+          test -f components/MainScene.xml
+          test -f components/MainScene.brs
+          test -f components/PortalService.xml
+          test -f components/PortalService.brs
+          test -f images/elvanoq-wordmark.png
+          test -f images/icon_elvanoq.png
+      - name: Validate XML components
+        run: |
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          for path in ('components/MainScene.xml', 'components/PortalService.xml'):
+              ET.parse(path)
+              print(f'valid XML: {path}')
+          PY
+      - name: Validate activation contract
+        run: |
+          grep -q 'GetChannelClientId()' components/MainScene.brs
+          grep -q 'roku-device-register' components/MainScene.brs
+          grep -q 'roku-license-status' components/MainScene.brs
+          grep -q 'ROKU-' components/MainScene.brs
+          ! grep -RniE 'mac[ _-]?address|\bmac\b' components source
+
+  package:
+    name: Package sideload channel
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' && inputs.create_sideload_package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create channel archive
+        run: |
+          mkdir -p out
+          zip -r out/elvanoq-play-roku-${{ github.sha }}.zip manifest source components images -x '*.DS_Store'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: elvanoq-play-roku-sideload-${{ github.sha }}
+          path: out/*.zip
+          if-no-files-found: error
+          retention-days: 14
