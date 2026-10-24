@@ -53,7 +53,7 @@ function sanitizeLocalItems(items as Object) as Object
     safeItems = []
     if items = invalid then return safeItems
     for each item in items
-        if item <> invalid and item.id <> invalid and item.id <> "" then safeItems.push(sanitizeLocalItem(item))
+        if item <> invalid and item.id <> invalid and item.id <> "" and instr(1, item.id, "://") = 0 then safeItems.push(sanitizeLocalItem(item))
     end for
     return safeItems
 end function

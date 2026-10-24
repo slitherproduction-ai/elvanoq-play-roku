@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.21
+0.1.22
 
 ## Fluxo de ativação
 
@@ -21,7 +21,9 @@ O app persiste apenas metadados não sensíveis da lista para identificar a sinc
 
 ## Estado local
 
-Favoritos, assistir mais tarde, continuar assistindo, histórico e preferências parentais têm uma base local por dispositivo. As coleções usam identificador de item para evitar duplicações e não armazenam credenciais, URLs ou identificadores técnicos. Ao carregar e gravar o estado, a camada local remove campos não permitidos; a reprodução é sempre resolvida novamente a partir do catálogo autorizado em memória.
+Favoritos, assistir mais tarde, continuar assistindo, histórico e preferências parentais têm uma base local por dispositivo. As coleções usam identificador de item para evitar duplicações e não armazenam credenciais, URLs ou identificadores técnicos. Canais usam um identificador local baseado no `tvg-id` ou em metadados públicos do M3U, nunca na URL de stream. Ao carregar e gravar o estado, a camada local remove campos não permitidos; a reprodução é sempre resolvida novamente a partir do catálogo autorizado em memória.
+
+Registros locais legados cujo identificador corresponda a uma URL são descartados automaticamente na próxima carga para remover esse dado. O usuário pode favoritar novamente o canal a partir do catálogo sincronizado.
 
 Bloqueios parentais são separados por lista ativa e verificados antes de iniciar preview ou reprodução. Uma sessão validada por PIN libera apenas o uso atual do aplicativo.
 

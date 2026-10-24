@@ -75,7 +75,7 @@ function parseM3u(body as String) as Object
         else if pending <> invalid and line <> "" and left(line, 1) <> "#" then
             if items.count() < 1500 then
                 if pending.group = "" then pending.group = "Sem categoria"
-                item = { id: line, title: pending.title, category: pending.group, logo: pending.logo, stream_url: line, type: "live" }
+                item = { id: channelLocalId(pending, items.count()), title: pending.title, category: pending.group, logo: pending.logo, tvg_id: pending.tvg_id, tvg_name: pending.tvg_name, stream_url: line, type: "live" }
                 items.push(item)
                 categories[pending.group] = true
             end if
@@ -87,6 +87,13 @@ function parseM3u(body as String) as Object
         names.push(name)
     end for
     return { items: items, categories: names }
+end function
+
+function channelLocalId(pending as Object, position as Integer) as String
+    if pending.tvg_id <> invalid and pending.tvg_id <> "" then return "live:" + pending.tvg_id
+    identity = pending.group + ":" + pending.title
+    if identity <> ":" then return "live:" + identity
+    return "live:channel:" + trim(str(position))
 end function
 
 function extinfAttribute(line as String, attribute as String) as String
