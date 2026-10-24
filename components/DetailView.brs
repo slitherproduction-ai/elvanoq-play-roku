@@ -6,8 +6,10 @@ sub init()
     m.watchFocus = m.top.findNode("watchFocus")
     m.actionStatus = m.top.findNode("actionStatus")
     m.seriesLabel = m.top.findNode("seriesLabel")
+    m.seasonHint = m.top.findNode("seasonHint")
     m.episodeLabel = m.top.findNode("episodeLabel")
     m.selectedAction = 0
+    m.selectedSeasonIndex = 0
     m.top.observeField("item", "onItemChanged")
     m.top.observeField("metadata", "onMetadataChanged")
     m.top.findNode("eyebrow").font = "font:SmallSystemFont"
@@ -25,6 +27,8 @@ sub init()
     m.actionStatus.color = "0x8FA9C4FF"
     m.seriesLabel.font = "font:SmallSystemFont"
     m.seriesLabel.color = "0xB9CBE0FF"
+    m.seasonHint.font = "font:SmallSystemFont"
+    m.seasonHint.color = "0x73B7FFFF"
     m.episodeLabel.font = "font:SmallSystemFont"
     m.episodeLabel.color = "0xB9CBE0FF"
     m.top.findNode("similarTitle").font = "font:MediumBoldSystemFont"
@@ -47,8 +51,11 @@ sub onMetadataChanged()
     end if
     if details.poster_path <> invalid and details.poster_path <> "" then m.poster.uri = "https://image.tmdb.org/t/p/w780" + details.poster_path
     if details.seasons <> invalid and details.seasons.count() > 0 then
+        m.seasons = details.seasons
+        m.selectedSeasonIndex = 0
         m.seriesLabel.visible = true
-        m.seriesLabel.text = seasonSummary(details.seasons)
+        m.seasonHint.visible = true
+        updateSeasonSelection()
     end if
     if details.trailer <> invalid then m.actionStatus.text = "Trailer oficial disponível."
     if details.recommendations <> invalid and details.recommendations.count() > 0 then m.top.findNode("similarHint").text = recommendationSummary(details.recommendations)
@@ -65,6 +72,13 @@ function seasonSummary(seasons as Object) as String
     end for
     return summary
 end function
+
+sub updateSeasonSelection()
+    if m.seasons = invalid or m.seasons.count() = 0 then return
+    season = m.seasons[m.selectedSeasonIndex]
+    m.seriesLabel.text = "Temporada selecionada: " + season.name + " (" + trim(str(season.episode_count)) + " episódios)"
+    m.seasonHint.text = "↑/↓: trocar temporada  •  episódios da fonte autorizada"
+end sub
 
 function recommendationSummary(items as Object) as String
     summary = "Recomendações: "
@@ -116,6 +130,18 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     if key = "left" and m.selectedAction > 0 then
         m.selectedAction = m.selectedAction - 1
         updateActionFocus()
+        return true
+    end if
+    if key = "down" and m.seasons <> invalid and m.selectedSeasonIndex < m.seasons.count() - 1 then
+        m.selectedSeasonIndex = m.selectedSeasonIndex + 1
+        updateSeasonSelection()
+        m.top.seasonRequested = m.seasons[m.selectedSeasonIndex].number
+        return true
+    end if
+    if key = "up" and m.seasons <> invalid and m.selectedSeasonIndex > 0 then
+        m.selectedSeasonIndex = m.selectedSeasonIndex - 1
+        updateSeasonSelection()
+        m.top.seasonRequested = m.seasons[m.selectedSeasonIndex].number
         return true
     end if
     if key = "OK" then

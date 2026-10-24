@@ -17,6 +17,7 @@ sub init()
     m.seriesView.observeField("selectedItem", "onBrowseItemSelected")
     m.detailView.observeField("closeRequested", "onDetailClosed")
     m.detailView.observeField("playRequested", "onPlayRequested")
+    m.detailView.observeField("seasonRequested", "onSeasonRequested")
     m.playerView.observeField("closeRequested", "onPlayerClosed")
     m.navItems = [
         m.top.findNode("navHome"),
@@ -120,9 +121,18 @@ sub onMetadataResult()
         item = { title: m.detailView.item.title }
         loadMetadata(item, "details", result.item.id, 0)
     else if result.mode = "details" and result.media_type = "tv" and result.item <> invalid and result.item.seasons <> invalid and result.item.seasons.count() > 0 then
+        m.detailTmdbId = result.item.id
         item = { title: m.detailView.item.title }
         loadMetadata(item, "season", result.item.id, result.item.seasons[0].number)
     end if
+end sub
+
+sub onSeasonRequested()
+    seasonNumber = m.detailView.seasonRequested
+    if seasonNumber < 0 then return
+    if m.detailTmdbId = invalid or m.detailTmdbId <= 0 then return
+    item = { title: m.detailView.item.title }
+    loadMetadata(item, "season", m.detailTmdbId, seasonNumber)
 end sub
 
 sub onDetailClosed()
