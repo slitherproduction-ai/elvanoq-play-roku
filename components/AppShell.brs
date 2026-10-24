@@ -11,6 +11,13 @@ sub init()
     m.seriesView = m.top.findNode("seriesView")
     m.searchView = m.top.findNode("searchView")
     m.parentalView = m.top.findNode("parentalView")
+    m.detailView = m.top.findNode("detailView")
+    m.playerView = m.top.findNode("playerView")
+    m.moviesView.observeField("selectedItem", "onBrowseItemSelected")
+    m.seriesView.observeField("selectedItem", "onBrowseItemSelected")
+    m.detailView.observeField("closeRequested", "onDetailClosed")
+    m.detailView.observeField("playRequested", "onPlayRequested")
+    m.playerView.observeField("closeRequested", "onPlayerClosed")
     m.navItems = [
         m.top.findNode("navHome"),
         m.top.findNode("navLive"),
@@ -37,6 +44,8 @@ end sub
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
+    if m.playerView.visible then return m.playerView.callFunc("handleKey", { key: key, press: press })
+    if m.detailView.visible then return m.detailView.callFunc("handleKey", { key: key, press: press })
     if m.selectedIndex = 6 then
         if key >= "0" and key <= "9" then
             m.parentalView.callFunc("enterDigit", key)
@@ -73,6 +82,37 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     end if
     return key = "OK"
 end function
+
+sub onBrowseItemSelected()
+    selected = invalid
+    if m.selectedIndex = 2 then selected = m.moviesView.selectedItem
+    if m.selectedIndex = 3 then selected = m.seriesView.selectedItem
+    if selected = invalid then return
+    m.detailView.item = selected
+    m.detailView.visible = true
+end sub
+
+sub onDetailClosed()
+    if m.detailView.closeRequested <> true then return
+    m.detailView.visible = false
+    m.detailView.closeRequested = false
+end sub
+
+sub onPlayRequested()
+    item = m.detailView.playRequested
+    if item = invalid then return
+    if item.stream_url = invalid or item.stream_url = "" then return
+    m.playerView.contentTitle = item.title
+    m.playerView.contentCategory = item.category
+    m.playerView.streamUrl = item.stream_url
+    m.playerView.visible = true
+end sub
+
+sub onPlayerClosed()
+    if m.playerView.closeRequested <> true then return
+    m.playerView.visible = false
+    m.playerView.closeRequested = false
+end sub
 
 sub showSection()
     isHome = m.selectedIndex = 0

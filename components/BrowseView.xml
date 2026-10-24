@@ -2,6 +2,7 @@
 <component name="BrowseView" extends="Group">
   <interface>
     <field id="kind" type="string" value="movies" />
+    <field id="selectedItem" type="assocarray" alwaysNotify="true" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/BrowseView.brs" />
   <children>

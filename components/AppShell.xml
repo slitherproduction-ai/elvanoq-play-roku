@@ -25,5 +25,7 @@
     <BrowseView id="seriesView" kind="series" visible="false" />
     <SearchView id="searchView" visible="false" />
     <ParentalView id="parentalView" visible="false" />
+    <DetailView id="detailView" visible="false" />
+    <PlayerView id="playerView" visible="false" />
   </children>
 </component>

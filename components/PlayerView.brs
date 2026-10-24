@@ -54,6 +54,10 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     return false
 end function
 
+function handleKey(event as Object) as Boolean
+    return onKeyEvent(event.key, event.press)
+end function
+
 sub showOsd()
     m.osdBackground.visible = true
     m.title.visible = true

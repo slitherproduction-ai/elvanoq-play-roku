@@ -4,6 +4,7 @@ sub init()
     m.countLabel = m.top.findNode("countLabel")
     m.grid = m.top.findNode("grid")
     m.emptyState = m.top.findNode("emptyState")
+    m.grid.observeField("itemSelected", "onItemSelected")
     m.top.findNode("eyebrow").font = "font:SmallSystemFont"
     m.top.findNode("eyebrow").color = "0x73B7FFFF"
     m.title.font = "font:LargeBoldSystemFont"
@@ -39,6 +40,7 @@ sub setCatalog(payload as Object)
         if (m.top.kind = "series" and isSeries) or (m.top.kind = "movies" and isMovie and not isSeries) then selected.push(item)
     end for
     m.countLabel.text = trim(str(selected.count())) + " títulos disponíveis"
+    m.selectedItems = selected
     if selected.count() = 0 then
         m.grid.content = CreateObject("roSGNode", "ContentNode")
         m.emptyState.visible = true
@@ -57,4 +59,11 @@ sub setCatalog(payload as Object)
         content.appendChild(child)
     end for
     m.grid.content = content
+end sub
+
+sub onItemSelected()
+    index = m.grid.itemSelected
+    if m.selectedItems = invalid then return
+    if index < 0 or index >= m.selectedItems.count() then return
+    m.top.selectedItem = m.selectedItems[index]
 end sub

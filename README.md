@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.1
+0.1.2
 
 ## Fluxo de ativação
 
@@ -29,7 +29,9 @@ O PlayerView também aplica essa verificação centralmente: acessos futuros por
 
 ## Player Roku
 
-O componente PlayerView usa o player nativo Roku e está preparado para receber uma URL de stream autorizada pelo fluxo de listas. Ele oferece saída pelo botão Voltar e OSD reaberto por OK. A reprodução real será validada com uma lista autorizada em aparelho físico.
+Filmes e séries da lista abrem uma tela de detalhes com as ações Assistir, Minha Lista e Assistir mais tarde. As duas últimas são persistidas localmente, sem URL nem credenciais. A ação Assistir aplica a política parental e encaminha apenas a URL de stream disponível em memória ao PlayerView.
+
+O componente PlayerView usa o player nativo Roku e oferece saída pelo botão Voltar e OSD reaberto por OK. Informações enriquecidas (sinopse, elenco, trailer e recomendações) permanecem condicionadas à integração TMDB; o app não inventa metadados quando ela não está configurada. A reprodução real será validada com uma lista autorizada em aparelho físico.
 
 O identificador técnico nunca é exibido completo, registrado em logs ou tratado como endereço físico.
 
@@ -44,5 +46,7 @@ Ativo, pendente, expirado, bloqueado, offline e erro de API.
 3. Confirme o registro/atualização no Portal.
 4. Vincule o código e aguarde a próxima consulta de licença.
 5. Valide os cenários pendente, ativo, expirado, bloqueado, sem rede e resposta inválida.
+6. Com uma lista autorizada que contenha categorias de filmes ou séries, abra um item, inclua-o em Minha Lista e em Assistir mais tarde e confirme a persistência após reiniciar o canal.
+7. Só em Roku físico, valide abertura do PlayerView, retorno pelo botão Voltar e conteúdo protegido com uma categoria bloqueada.
 
 Este repositório não inclui pacote de sideload e não publica na Roku Channel Store.

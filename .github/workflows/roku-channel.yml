@@ -48,13 +48,15 @@ jobs:
           test -f components/SearchView.brs
           test -f components/ParentalView.xml
           test -f components/ParentalView.brs
+          test -f components/DetailView.xml
+          test -f components/DetailView.brs
           test -f images/elvanoq-wordmark.png
           test -f images/icon_elvanoq.png
       - name: Validate XML components
         run: |
           python3 - <<'PY'
           import xml.etree.ElementTree as ET
-          for path in ('components/MainScene.xml', 'components/AppShell.xml', 'components/HomeView.xml', 'components/LiveTVView.xml', 'components/BrowseView.xml', 'components/SearchView.xml', 'components/ParentalView.xml', 'components/PlayerView.xml', 'components/PortalService.xml', 'components/CatalogService.xml'):
+          for path in ('components/MainScene.xml', 'components/AppShell.xml', 'components/HomeView.xml', 'components/LiveTVView.xml', 'components/BrowseView.xml', 'components/SearchView.xml', 'components/ParentalView.xml', 'components/DetailView.xml', 'components/PlayerView.xml', 'components/PortalService.xml', 'components/CatalogService.xml'):
               ET.parse(path)
               print(f'valid XML: {path}')
           PY
