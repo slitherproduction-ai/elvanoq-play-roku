@@ -7,6 +7,7 @@ sub init()
     m.actionStatus = m.top.findNode("actionStatus")
     m.selectedAction = 0
     m.top.observeField("item", "onItemChanged")
+    m.top.observeField("metadata", "onMetadataChanged")
     m.top.findNode("eyebrow").font = "font:SmallSystemFont"
     m.top.findNode("eyebrow").color = "0x73B7FFFF"
     m.title.font = "font:LargeBoldSystemFont"
@@ -23,6 +24,17 @@ sub init()
     m.top.findNode("similarTitle").font = "font:MediumBoldSystemFont"
     m.top.findNode("similarHint").font = "font:SmallSystemFont"
     updateActionFocus()
+end sub
+
+sub onMetadataChanged()
+    if m.top.metadata = invalid or m.top.metadata.found <> true or m.top.metadata.item = invalid then return
+    details = m.top.metadata.item
+    if details.title <> invalid and details.title <> "" then m.title.text = details.title
+    if details.overview <> invalid and details.overview <> "" then m.overview.text = details.overview
+    if details.release_date <> invalid and details.vote_average <> invalid then
+        m.meta.text = details.release_date + "  •  Avaliação " + str(details.vote_average)
+    end if
+    if details.poster_path <> invalid and details.poster_path <> "" then m.poster.uri = "https://image.tmdb.org/t/p/w780" + details.poster_path
 end sub
 
 sub onItemChanged()

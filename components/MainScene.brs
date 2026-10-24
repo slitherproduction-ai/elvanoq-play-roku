@@ -102,6 +102,9 @@ end sub
 sub openAppShell()
     if m.appShell <> invalid then return
     m.appShell = CreateObject("roSGNode", "AppShell")
+    m.appShell.rokuClientId = m.clientId
+    m.appShell.deviceCode = m.deviceCodeValue
+    m.appShell.deviceKey = m.deviceKey
     m.top.appendChild(m.appShell)
     m.appShell.setFocus(true)
 end sub

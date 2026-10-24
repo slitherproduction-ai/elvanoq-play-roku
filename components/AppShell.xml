@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="AppShell" extends="Group">
+  <interface>
+    <field id="rokuClientId" type="string" />
+    <field id="deviceCode" type="string" />
+    <field id="deviceKey" type="string" />
+  </interface>
   <script type="text/brightscript" uri="pkg:/components/AppShell.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <children>

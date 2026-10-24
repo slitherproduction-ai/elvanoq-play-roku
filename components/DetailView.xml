@@ -2,6 +2,7 @@
 <component name="DetailView" extends="Group">
   <interface>
     <field id="item" type="assocarray" />
+    <field id="metadata" type="assocarray" />
     <field id="closeRequested" type="boolean" alwaysNotify="true" />
     <field id="playRequested" type="assocarray" alwaysNotify="true" />
   </interface>

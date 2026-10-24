@@ -89,7 +89,30 @@ sub onBrowseItemSelected()
     if m.selectedIndex = 3 then selected = m.seriesView.selectedItem
     if selected = invalid then return
     m.detailView.item = selected
+    m.detailView.metadata = invalid
     m.detailView.visible = true
+    loadMetadata(selected)
+end sub
+
+sub loadMetadata(item as Object)
+    if m.top.rokuClientId = "" or m.top.deviceCode = "" or m.top.deviceKey = "" then return
+    mediaType = "movie"
+    if m.selectedIndex = 3 then mediaType = "tv"
+    service = CreateObject("roSGNode", "MetadataService")
+    service.rokuClientId = m.top.rokuClientId
+    service.deviceCode = m.top.deviceCode
+    service.deviceKey = m.top.deviceKey
+    service.title = item.title
+    service.mediaType = mediaType
+    service.observeField("result", "onMetadataResult")
+    m.metadataService = service
+    service.control = "RUN"
+end sub
+
+sub onMetadataResult()
+    result = m.metadataService.result
+    if result = invalid or result.ok <> true then return
+    m.detailView.metadata = result
 end sub
 
 sub onDetailClosed()
