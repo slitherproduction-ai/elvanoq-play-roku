@@ -14,6 +14,9 @@ sub init()
     m.backLabel = m.top.findNode("backLabel")
     m.contentBadge = m.top.findNode("contentBadge")
     m.nowPlayingLabel = m.top.findNode("nowPlayingLabel")
+    m.trackPanel = m.top.findNode("trackPanel")
+    m.trackPanelTitle = m.top.findNode("trackPanelTitle")
+    m.trackPanelValue = m.top.findNode("trackPanelValue")
     m.controlLabels = [m.top.findNode("controlBack"), m.top.findNode("controlPlay"), m.top.findNode("controlForward"), m.top.findNode("controlAudio"), m.top.findNode("controlSubtitles")]
     m.title.font = "font:MediumBoldSystemFont"
     m.hint.font = "font:SmallSystemFont"
@@ -28,6 +31,10 @@ sub init()
     m.contentBadge.color = "0x73B7FFFF"
     m.nowPlayingLabel.font = "font:SmallSystemFont"
     m.nowPlayingLabel.color = "0x73B7FFFF"
+    m.trackPanelTitle.font = "font:SmallSystemFont"
+    m.trackPanelTitle.color = "0x73B7FFFF"
+    m.trackPanelValue.font = "font:SmallSystemFont"
+    m.trackPanelValue.color = "0xD7E3F0FF"
     for each label in m.controlLabels
         label.font = "font:MediumBoldSystemFont"
         label.color = "0xD7E3F0FF"
@@ -175,6 +182,9 @@ sub showOsd()
     m.backLabel.visible = true
     m.contentBadge.visible = true
     m.nowPlayingLabel.visible = true
+    m.trackPanel.visible = true
+    m.trackPanelTitle.visible = true
+    m.trackPanelValue.visible = true
     for each label in m.controlLabels
         label.visible = true
     end for
@@ -200,6 +210,9 @@ sub hideOsd()
     m.backLabel.visible = false
     m.contentBadge.visible = false
     m.nowPlayingLabel.visible = false
+    m.trackPanel.visible = false
+    m.trackPanelTitle.visible = false
+    m.trackPanelValue.visible = false
     for each label in m.controlLabels
         label.visible = false
     end for
@@ -215,6 +228,7 @@ sub updateControlFocus()
             m.controlLabels[index].color = "0xD7E3F0FF"
         end if
     end for
+    refreshTrackStatus()
 end sub
 
 sub runSelectedControl()
@@ -287,6 +301,20 @@ sub refreshTrackStatus()
     if m.video.audioTrack <> invalid and m.video.audioTrack <> "" then audioText = "Áudio: " + m.video.audioTrack
     if m.video.subtitleTrack <> invalid and m.video.subtitleTrack <> "" then subtitlesText = "Legendas: " + m.video.subtitleTrack
     m.trackStatus.text = audioText + "  •  " + subtitlesText
+    updateTrackPanel(audioText, subtitlesText)
+end sub
+
+sub updateTrackPanel(audioText as String, subtitlesText as String)
+    if m.selectedControl = 3 then
+        m.trackPanelTitle.text = "ÁUDIO"
+        m.trackPanelValue.text = audioText
+    else if m.selectedControl = 4 then
+        m.trackPanelTitle.text = "LEGENDAS"
+        m.trackPanelValue.text = subtitlesText
+    else
+        m.trackPanelTitle.text = "ÁUDIO E LEGENDAS"
+        m.trackPanelValue.text = audioText + "  •  " + subtitlesText
+    end if
 end sub
 
 sub updateTimeline()

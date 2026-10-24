@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.15
+0.1.16
 
 ## Fluxo de ativação
 
@@ -41,7 +41,7 @@ Na Home, o destaque prioriza um conteúdo em andamento e, na ausência dele, um 
 
 No destaque da Home, ←/→ alterna entre Assistir e Minha Lista; OK executa a ação selecionada. Adicionar/remover usa somente a coleção local protegida e a reprodução ainda recebe a URL exclusivamente do catálogo em memória.
 
-O componente PlayerView usa uma linguagem visual em camadas adaptada da experiência Android: TopBar discreta, identificação do conteúdo, OSD inferior, timeline, foco individual de controles e estados de áudio/legenda. Ele oferece saída pelo botão Voltar, avanço/retorno de 10 segundos em VOD, pausa, progresso persistido a cada 15 segundos e histórico local. O OSD permanece visível durante a interação e se oculta após cinco segundos de reprodução; OK, setas ou * o exibem novamente. Em TV ao Vivo, ↑/↓ faz troca rápida apenas entre os canais da categoria atual, mantidos somente em memória; cada canal é verificado novamente pela política parental antes de iniciar. O OSD apresenta as opções de áudio e legenda somente quando o stream informa faixas compatíveis; a seleção usa os identificadores nativos retornados pelo Video node. Informações enriquecidas permanecem condicionadas à integração TMDB; o app não inventa metadados quando ela não está configurada. A reprodução real será validada com uma lista autorizada em aparelho físico.
+O componente PlayerView usa uma linguagem visual em camadas adaptada da experiência Android: TopBar discreta, identificação do conteúdo, OSD inferior, timeline, foco individual de controles e painel contextual de áudio/legendas. Ele oferece saída pelo botão Voltar, avanço/retorno de 10 segundos em VOD, pausa, progresso persistido a cada 15 segundos e histórico local. O OSD permanece visível durante a interação e se oculta após cinco segundos de reprodução; OK, setas ou * o exibem novamente. Em TV ao Vivo, ↑/↓ faz troca rápida apenas entre os canais da categoria atual, mantidos somente em memória; cada canal é verificado novamente pela política parental antes de iniciar. O painel apresenta apenas as faixas efetivamente informadas pelo stream e a seleção usa os identificadores nativos retornados pelo Video node. Informações enriquecidas permanecem condicionadas à integração TMDB; o app não inventa metadados quando ela não está configurada. A reprodução real será validada com uma lista autorizada em aparelho físico.
 
 O identificador técnico nunca é exibido completo, registrado em logs ou tratado como endereço físico.
 
