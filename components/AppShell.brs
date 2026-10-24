@@ -23,6 +23,7 @@ sub init()
     m.detailView.observeField("playRequested", "onPlayRequested")
     m.detailView.observeField("seasonRequested", "onSeasonRequested")
     m.playerView.observeField("closeRequested", "onPlayerClosed")
+    m.playerView.observeField("channelRequested", "onPlayerChannelRequested")
     m.navItems = [
         m.top.findNode("navHome"),
         m.top.findNode("navLive"),
@@ -141,6 +142,8 @@ end sub
 
 sub playCatalogItem(item as Object, resumePosition as Integer)
     if item = invalid or item.stream_url = invalid or item.stream_url = "" then return
+    m.playerView.liveQueue = []
+    m.playerView.liveIndex = 0
     m.playerView.contentTitle = item.title
     m.playerView.contentId = item.id
     m.playerView.contentCategory = item.category
@@ -168,9 +171,29 @@ function resolveCatalogItem(savedItem as Object) as Object
 end function
 
 sub onLivePlayRequested()
-    item = m.liveTVView.playRequested
+    request = m.liveTVView.playRequested
+    if request = invalid or request.item = invalid then return
+    item = request.item
     if item = invalid or item.stream_url = invalid or item.stream_url = "" then return
-    playCatalogItem(item, 0)
+    playLiveItem(item, request.channels, request.index)
+end sub
+
+sub playLiveItem(item as Object, channels as Object, index as Integer)
+    if item = invalid or item.stream_url = invalid or item.stream_url = "" then return
+    m.playerView.liveQueue = channels
+    m.playerView.liveIndex = index
+    m.playerView.contentTitle = item.title
+    m.playerView.contentId = item.id
+    m.playerView.contentCategory = item.category
+    m.playerView.resumePosition = 0
+    m.playerView.streamUrl = item.stream_url
+    m.playerView.visible = true
+end sub
+
+sub onPlayerChannelRequested()
+    request = m.playerView.channelRequested
+    if request = invalid or request.item = invalid then return
+    playLiveItem(request.item, m.playerView.liveQueue, request.index)
 end sub
 
 sub onSearchKeyboardSelected()

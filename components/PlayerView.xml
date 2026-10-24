@@ -6,6 +6,9 @@
     <field id="contentTitle" type="string" />
     <field id="contentCategory" type="string" />
     <field id="resumePosition" type="integer" value="0" />
+    <field id="liveQueue" type="array" />
+    <field id="liveIndex" type="integer" value="0" />
+    <field id="channelRequested" type="assocarray" alwaysNotify="true" />
     <field id="closeRequested" type="boolean" alwaysNotify="true" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/PlayerView.brs" />

@@ -16,6 +16,7 @@ sub init()
     m.controls.font = "font:MediumBoldSystemFont"
     m.controls.color = "0xFFFFFFFF"
     m.controls.text = "Voltar 10s     Pausar / Retomar     Avançar 10s     Áudio     Legendas"
+    m.liveQueue = []
     m.video.notificationInterval = 1
     m.video.observeField("state", "onVideoState")
     m.video.observeField("position", "onPositionChanged")
@@ -45,6 +46,7 @@ sub onStreamChanged()
     content.title = m.top.contentTitle
     m.video.content = content
     m.video.control = "play"
+    if isLivePlayback() then m.hint.text = "↑/↓: trocar canal  •  OK: controles  •  Voltar: sair"
 end sub
 
 sub onVideoState()
@@ -92,6 +94,14 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
         showOsd()
         return true
     end if
+    if key = "up" and isLivePlayback() then
+        switchLiveChannel(-1)
+        return true
+    end if
+    if key = "down" and isLivePlayback() then
+        switchLiveChannel(1)
+        return true
+    end if
     if key = "up" or key = "down" or key = "options" then
         showOsd()
         refreshTrackStatus()
@@ -111,6 +121,26 @@ end function
 function handleKey(event as Object) as Boolean
     return onKeyEvent(event.key, event.press)
 end function
+
+function isLivePlayback() as Boolean
+    if m.top.liveQueue = invalid then return false
+    return m.top.liveQueue.count() > 0
+end function
+
+sub switchLiveChannel(delta as Integer)
+    if not isLivePlayback() then return
+    nextIndex = m.top.liveIndex + delta
+    if nextIndex < 0 then nextIndex = 0
+    if nextIndex > m.top.liveQueue.count() - 1 then nextIndex = m.top.liveQueue.count() - 1
+    if nextIndex = m.top.liveIndex then
+        m.hint.text = "Não há outro canal nesta direção."
+        showOsd()
+        return
+    end if
+    nextChannel = m.top.liveQueue[nextIndex]
+    if nextChannel = invalid then return
+    m.top.channelRequested = { item: nextChannel, index: nextIndex }
+end sub
 
 sub showOsd()
     m.osdBackground.visible = true
@@ -243,7 +273,7 @@ sub persistProgress(completed as Boolean)
     item = { id: m.top.contentId, title: m.top.contentTitle, category: m.top.contentCategory, progress_seconds: int(m.video.position), duration_seconds: 0, completed: completed, updated_at: CreateObject("roDateTime").ToISOString() }
     if m.video.duration <> invalid then item.duration_seconds = int(m.video.duration)
     state = loadLocalState()
-    state.continue_watching = upsertLocalItem(state.continue_watching, item)
+    if not isLivePlayback() then state.continue_watching = upsertLocalItem(state.continue_watching, item)
     state.history = upsertLocalItem(state.history, item)
     saveLocalState(state)
     m.lastPersistedSecond = int(m.video.position)

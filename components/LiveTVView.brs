@@ -192,7 +192,7 @@ sub openSelected()
         return
     end if
     stopPreview()
-    m.top.playRequested = selected
+    m.top.playRequested = { item: selected, channels: m.visibleChannels, index: m.selectedIndex }
 end sub
 
 sub toggleFavorite()

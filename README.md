@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.10
+0.1.11
 
 ## Fluxo de ativação
 
@@ -37,7 +37,7 @@ Para séries, o mesmo fluxo solicita temporadas e episódios reais. No controle 
 
 Em Busca, OK abre o teclado nativo do Roku e filtra somente o catálogo autorizado. Depois da consulta, ←/→/↑/↓ percorrem os resultados e OK abre os detalhes; o botão * reabre o teclado para uma nova consulta. Minha Lista alterna com ←/→ entre assistir mais tarde, favoritos, continuar assistindo e histórico locais; ↑/↓ escolhem um item e OK abre os detalhes somente após resolver o item no catálogo autorizado em memória. Itens com progresso salvo retomam no player a partir da posição registrada. Em TV ao Vivo, ← alterna para as categorias, ↑/↓ seleciona a categoria ou o canal em foco, → inicia a prévia, OK abre o canal no player e * adiciona/remove o canal de Favoritos. A prévia é parada ao trocar de categoria, sair da área ou abrir o player.
 
-O componente PlayerView usa o player nativo Roku e oferece saída pelo botão Voltar, avanço/retorno de 10 segundos em VOD, pausa, progresso persistido a cada 15 segundos e histórico local. O OSD apresenta as opções de áudio e legenda somente quando o stream informa faixas compatíveis; a seleção usa os identificadores nativos retornados pelo Video node. Informações enriquecidas (sinopse, elenco, trailer e recomendações) permanecem condicionadas à integração TMDB; o app não inventa metadados quando ela não está configurada. A reprodução real será validada com uma lista autorizada em aparelho físico.
+O componente PlayerView usa o player nativo Roku e oferece saída pelo botão Voltar, avanço/retorno de 10 segundos em VOD, pausa, progresso persistido a cada 15 segundos e histórico local. Em TV ao Vivo, ↑/↓ faz troca rápida apenas entre os canais da categoria atual, mantidos somente em memória; cada canal é verificado novamente pela política parental antes de iniciar. O OSD apresenta as opções de áudio e legenda somente quando o stream informa faixas compatíveis; a seleção usa os identificadores nativos retornados pelo Video node. Informações enriquecidas (sinopse, elenco, trailer e recomendações) permanecem condicionadas à integração TMDB; o app não inventa metadados quando ela não está configurada. A reprodução real será validada com uma lista autorizada em aparelho físico.
 
 O identificador técnico nunca é exibido completo, registrado em logs ou tratado como endereço físico.
 
