@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="LibraryView" extends="Group">
+  <interface>
+    <field id="itemRequested" type="assocarray" alwaysNotify="true" />
+  </interface>
   <script type="text/brightscript" uri="pkg:/components/LibraryView.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <children>
@@ -7,7 +10,8 @@
     <Label id="title" translation="390,100" text="Minha Lista" width="700" height="62" />
     <Label id="tabs" translation="390,200" width="1100" height="38" />
     <Rectangle id="tabFocus" translation="390,246" width="220" height="6" color="0x2E91EFFF" />
+    <Rectangle id="itemFocus" translation="370,302" width="1200" height="40" color="0x174D87FF" visible="false" />
     <Label id="items" translation="390,310" width="1180" height="580" wrap="true" />
-    <Label id="hint" translation="390,930" text="←/→: trocar coleção" width="900" height="36" />
+    <Label id="hint" translation="390,930" text="←/→: trocar coleção  •  ↑/↓: selecionar  •  OK: abrir" width="1000" height="36" />
   </children>
 </component>

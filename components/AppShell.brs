@@ -17,6 +17,8 @@ sub init()
     m.moviesView.observeField("selectedItem", "onBrowseItemSelected")
     m.seriesView.observeField("selectedItem", "onBrowseItemSelected")
     m.liveTVView.observeField("playRequested", "onLivePlayRequested")
+    m.searchView.observeField("selectedItem", "onSearchItemSelected")
+    m.libraryView.observeField("itemRequested", "onLibraryItemRequested")
     m.detailView.observeField("closeRequested", "onDetailClosed")
     m.detailView.observeField("playRequested", "onPlayRequested")
     m.detailView.observeField("seasonRequested", "onSeasonRequested")
@@ -50,6 +52,13 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     if m.playerView.visible then return m.playerView.callFunc("handleKey", { key: key, press: press })
     if m.detailView.visible then return m.detailView.callFunc("handleKey", { key: key, press: press })
     if m.selectedIndex = 5 then return m.libraryView.callFunc("handleKey", { key: key, press: press })
+    if m.selectedIndex = 4 then
+        if m.searchView.callFunc("handleKey", { key: key, press: press }) then return true
+        if key = "OK" or key = "options" then
+            openSearchKeyboard()
+            return true
+        end if
+    end if
     if m.selectedIndex = 6 then
         if key >= "0" and key <= "9" then
             m.parentalView.callFunc("enterDigit", key)
@@ -92,10 +101,6 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
             return true
         end if
     end if
-    if m.selectedIndex = 4 and key = "OK" then
-        openSearchKeyboard()
-        return true
-    end if
     if key = "down" and m.selectedIndex < m.navItems.count() - 1 then
         m.selectedIndex = m.selectedIndex + 1
         showSection()
@@ -118,6 +123,35 @@ sub openSearchKeyboard()
     m.searchKeyboard = dialog
     m.top.getScene().dialog = dialog
 end sub
+
+sub onSearchItemSelected()
+    openCatalogItem(m.searchView.selectedItem)
+end sub
+
+sub onLibraryItemRequested()
+    requested = m.libraryView.itemRequested
+    resolved = resolveCatalogItem(requested)
+    if resolved = invalid then return
+    openCatalogItem(resolved)
+end sub
+
+sub openCatalogItem(item as Object)
+    if item = invalid then return
+    m.detailView.item = item
+    m.detailView.metadata = invalid
+    m.detailView.visible = true
+    loadMetadata(item, "search", 0, 0)
+end sub
+
+function resolveCatalogItem(savedItem as Object) as Object
+    if savedItem = invalid then return invalid
+    if m.catalog <> invalid then
+        for each item in m.catalog
+            if savedItem.id <> invalid and item.id = savedItem.id then return item
+        end for
+    end if
+    return invalid
+end function
 
 sub onLivePlayRequested()
     item = m.liveTVView.playRequested
@@ -149,7 +183,10 @@ end sub
 sub loadMetadata(item as Object, mode as String, tmdbId as Integer, seasonNumber as Integer)
     if m.top.rokuClientId = "" or m.top.deviceCode = "" or m.top.deviceKey = "" then return
     mediaType = "movie"
-    if m.selectedIndex = 3 then mediaType = "tv"
+    if item <> invalid and item.category <> invalid then
+        category = lcase(item.category)
+        if instr(1, category, "série") > 0 or instr(1, category, "serie") > 0 or instr(1, category, "series") > 0 then mediaType = "tv"
+    end if
     service = CreateObject("roSGNode", "MetadataService")
     service.rokuClientId = m.top.rokuClientId
     service.deviceCode = m.top.deviceCode

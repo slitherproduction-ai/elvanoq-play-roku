@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="SearchView" extends="Group">
+  <interface>
+    <field id="selectedItem" type="assocarray" alwaysNotify="true" />
+  </interface>
   <script type="text/brightscript" uri="pkg:/components/SearchView.brs" />
   <children>
     <Rectangle translation="300,0" width="1620" height="1080" color="0x06111FFF" />
