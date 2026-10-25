@@ -87,6 +87,9 @@ sub onVideoState()
         persistProgress(true)
         m.hint.text = "Reprodução concluída."
         showOsd()
+    else if m.video.state = "buffering" then
+        m.hint.text = "Carregando stream…"
+        showOsd()
     end if
     if m.video.state = "paused" then m.controlLabels[1].text = "▶  Retomar"
     if m.video.state = "error" then
@@ -239,6 +242,9 @@ sub runSelectedControl()
             m.video.control = "pause"
         else if m.video.state = "paused" then
             m.video.control = "resume"
+        else if m.video.state = "error" then
+            m.video.control = "retry"
+            m.hint.text = "Tentando reconectar ao stream…"
         end if
     else if m.selectedControl = 2 then
         seekBy(10)

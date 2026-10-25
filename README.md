@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.43
+0.1.44
 
 ## Fluxo de ativação
 
@@ -88,6 +88,8 @@ Os dois carrosséis da Home mantêm uma janela leve: cinco itens no primeiro tri
 A Busca reúne até 300 correspondências da lista autorizada e exibe doze por vez. Ao avançar com as setas além da janela atual, a grade carrega os resultados seguintes, preservando filtro e foco.
 
 Quando o XMLTV informar horários, o guia ordena até seis entradas por canal e mostra a hora ao lado do programa atual e do seguinte. XMLTVs sem horário continuam exibindo apenas o título disponível.
+
+O player informa quando o stream está em buffering. Após falha de reprodução, selecione o controle central e pressione OK para solicitar uma nova tentativa ao nó de vídeo Roku, sem regravar ou revelar a URL do stream.
 
 No destaque da Home, ←/→ alterna entre Assistir e Minha Lista; OK executa a ação selecionada. Adicionar/remover usa somente a coleção local protegida e a reprodução ainda recebe a URL exclusivamente do catálogo em memória.
 
