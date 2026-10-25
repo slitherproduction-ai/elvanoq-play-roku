@@ -1,5 +1,6 @@
 sub init()
     clearParentalSession()
+    m.playlistSynced = false
     m.brand = m.top.findNode("brand")
     m.headline = m.top.findNode("headline")
     m.description = m.top.findNode("description")
@@ -64,7 +65,10 @@ sub onPortalResult()
         return
     end if
     if result.action = "roku-playlist-sync" then
-        if result.ok = true and m.appShell <> invalid then m.appShell.callFunc("applyPlaylist", result.payload)
+        if result.ok = true and m.appShell <> invalid then
+            m.playlistSynced = true
+            m.appShell.callFunc("applyPlaylist", result.payload)
+        end if
         return
     end if
     if result.ok <> true then
@@ -72,12 +76,12 @@ sub onPortalResult()
         return
     end if
     showActivationState(result.state, result.message)
-    if result.action = "roku-license-status" and result.state = "active" then requestPortal("roku-playlist-sync")
+    if result.action = "roku-license-status" and result.state = "active" and m.playlistSynced <> true then requestPortal("roku-playlist-sync")
 end sub
 
 sub showActivationState(state as String, message as String)
     if state = "active" then
-        m.licenseTimer.control = "stop"
+        m.licenseTimer.control = "start"
         m.headline.visible = false
         m.description.visible = false
         m.deviceCode.visible = false
@@ -87,6 +91,7 @@ sub showActivationState(state as String, message as String)
         openAppShell()
         return
     end if
+    if (state = "expired" or state = "blocked") and m.appShell <> invalid then m.appShell.visible = false
     m.homeStatus.visible = false
     m.headline.visible = true
     m.description.visible = true
@@ -107,7 +112,11 @@ sub showActivationState(state as String, message as String)
 end sub
 
 sub openAppShell()
-    if m.appShell <> invalid then return
+    if m.appShell <> invalid then
+        m.appShell.visible = true
+        m.appShell.setFocus(true)
+        return
+    end if
     m.appShell = CreateObject("roSGNode", "AppShell")
     m.appShell.rokuClientId = m.clientId
     m.appShell.deviceCode = m.deviceCodeValue
