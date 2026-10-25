@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.30
+0.1.31
 
 ## Fluxo de ativação
 
@@ -62,6 +62,8 @@ Em Busca, o filtro `*` alterna entre Todos, Filmes, Séries e Canais usando a cl
 Filmes e Séries exibem até doze pôsteres por vez. Use `*` para avançar a página; depois da última, a navegação retorna à primeira. Isso evita preencher a grade de uma só vez em dispositivos Roku com menos memória.
 
 Dentro da grade de Filmes e Séries, ←/→/↑/↓ movem o foco entre os pôsteres e OK abre o título selecionado. As setas não trocam de seção enquanto a grade estiver ativa; Voltar retorna à Home conforme o padrão do canal.
+
+Na Home, ↓ entra nos carrosséis e ↑ retorna ao destaque. Em cada carrossel, ←/→ move o foco e OK abre o item: canais ao vivo iniciam a reprodução e filmes/séries abrem os detalhes. A navegação é mantida somente sobre os itens da lista autorizada.
 
 No destaque da Home, ←/→ alterna entre Assistir e Minha Lista; OK executa a ação selecionada. Adicionar/remover usa somente a coleção local protegida e a reprodução ainda recebe a URL exclusivamente do catálogo em memória.
 

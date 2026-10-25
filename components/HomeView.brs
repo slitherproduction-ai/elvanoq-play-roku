@@ -32,6 +32,9 @@ sub init()
     m.emptyState.font = "font:MediumSystemFont"
     m.emptyState.color = "0xB9CBE0FF"
     m.selectedAction = 0
+    m.focusArea = 0
+    m.continueIndex = 0
+    m.catalogIndex = 0
     m.heroCandidates = []
     m.heroIndex = 0
     m.isActive = true
@@ -70,6 +73,12 @@ sub setCatalog(payload as Object)
         m.continueHint.text = "Conteúdos da sua lista autorizada"
         m.continueGrid.content = buildContent(items, 5)
     end if
+    m.continueItems = continueItems
+    if m.continueItems.count() = 0 then m.continueItems = favoriteItems
+    if m.continueItems.count() = 0 then m.continueItems = items
+    m.catalogItems = items
+    m.continueIndex = 0
+    m.catalogIndex = 0
     m.catalogTitle.text = "Canais em destaque"
     m.catalogGrid.content = buildContent(items, 7)
     if m.isActive and m.heroCandidates.count() > 1 then m.heroTimer.control = "start"
@@ -170,6 +179,10 @@ end sub
 
 sub setActive(active as Boolean)
     m.isActive = active
+    if active then
+        m.focusArea = 0
+        updateFocusArea()
+    end if
     if active and m.heroCandidates.count() > 1 then
         m.heroTimer.control = "start"
     else
@@ -179,6 +192,18 @@ end sub
 
 function handleKey(event as Object) as Boolean
     if event.press <> true or m.hero = invalid then return false
+    if event.key = "down" and m.focusArea < 2 then
+        m.focusArea = m.focusArea + 1
+        updateFocusArea()
+        return true
+    end if
+    if event.key = "up" and m.focusArea > 0 then
+        m.focusArea = m.focusArea - 1
+        updateFocusArea()
+        return true
+    end if
+    if m.focusArea = 1 then return handleRailKey(event, m.continueItems, "continue")
+    if m.focusArea = 2 then return handleRailKey(event, m.catalogItems, "catalog")
     if event.key = "right" and m.selectedAction = 0 then
         m.selectedAction = 1
         updateActionFocus()
@@ -199,6 +224,38 @@ function handleKey(event as Object) as Boolean
     end if
     return false
 end function
+
+function handleRailKey(event as Object, items as Object, rail as String) as Boolean
+    if items = invalid or items.count() = 0 then return true
+    index = m.continueIndex
+    if rail = "catalog" then index = m.catalogIndex
+    visibleCount = items.count()
+    if rail = "continue" and visibleCount > 5 then visibleCount = 5
+    if rail = "catalog" and visibleCount > 7 then visibleCount = 7
+    if event.key = "right" and index < visibleCount - 1 then index = index + 1
+    if event.key = "left" and index > 0 then index = index - 1
+    if rail = "continue" then
+        m.continueIndex = index
+        m.continueGrid.jumpToItem = index
+    else
+        m.catalogIndex = index
+        m.catalogGrid.jumpToItem = index
+    end if
+    if event.key = "OK" then m.top.selectedItem = items[index]
+    return true
+end function
+
+sub updateFocusArea()
+    m.actionFocus.visible = m.focusArea = 0
+    if m.focusArea = 0 then return
+    if m.focusArea = 1 then
+        m.continueGrid.jumpToItem = m.continueIndex
+        m.continueGrid.setFocus(true)
+    else
+        m.catalogGrid.jumpToItem = m.catalogIndex
+        m.catalogGrid.setFocus(true)
+    end if
+end sub
 
 sub updateActionFocus()
     if m.selectedAction = 0 then

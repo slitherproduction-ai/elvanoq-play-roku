@@ -2,6 +2,7 @@
 <component name="HomeView" extends="Group">
   <interface>
     <field id="playRequested" type="assocarray" alwaysNotify="true" />
+    <field id="selectedItem" type="assocarray" alwaysNotify="true" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/HomeView.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />

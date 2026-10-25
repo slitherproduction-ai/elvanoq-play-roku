@@ -18,6 +18,7 @@ sub init()
     m.seriesView.observeField("selectedItem", "onBrowseItemSelected")
     m.liveTVView.observeField("playRequested", "onLivePlayRequested")
     m.homeView.observeField("playRequested", "onHomePlayRequested")
+    m.homeView.observeField("selectedItem", "onHomeItemSelected")
     m.searchView.observeField("selectedItem", "onSearchItemSelected")
     m.libraryView.observeField("itemRequested", "onLibraryItemRequested")
     m.detailView.observeField("closeRequested", "onDetailClosed")
@@ -141,6 +142,16 @@ end sub
 
 sub onHomePlayRequested()
     playCatalogItem(m.homeView.playRequested, 0)
+end sub
+
+sub onHomeItemSelected()
+    item = m.homeView.selectedItem
+    if item = invalid then return
+    if item.type = "live" then
+        playLiveItem(item, [item], 0)
+    else
+        openCatalogItem(item)
+    end if
 end sub
 
 sub openSearchKeyboard()
