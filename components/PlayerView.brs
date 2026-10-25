@@ -3,6 +3,7 @@ sub init()
     m.title = m.top.findNode("title")
     m.hint = m.top.findNode("hint")
     m.trackStatus = m.top.findNode("trackStatus")
+    m.liveGuideLabel = m.top.findNode("liveGuideLabel")
     m.timelineProgress = m.top.findNode("timelineProgress")
     m.timeLabel = m.top.findNode("timeLabel")
     m.controlFocus = m.top.findNode("controlFocus")
@@ -26,6 +27,8 @@ sub init()
     m.hint.font = "font:SmallSystemFont"
     m.trackStatus.font = "font:SmallSystemFont"
     m.trackStatus.color = "0xB9CBE0FF"
+    m.liveGuideLabel.font = "font:SmallSystemFont"
+    m.liveGuideLabel.color = "0x73B7FFFF"
     m.timeLabel.font = "font:SmallSystemFont"
     m.controls.font = "font:SmallSystemFont"
     m.controls.color = "0x8FA9C4FF"
@@ -82,8 +85,40 @@ sub onStreamChanged()
     content.title = m.top.contentTitle
     m.video.content = content
     m.video.control = "play"
-    if isLivePlayback() then m.hint.text = "↑/↓: trocar canal  •  *: favorito  •  Voltar: sair"
+    if isLivePlayback() then
+        m.hint.text = "↑/↓: trocar canal  •  *: favorito  •  Voltar: sair"
+        renderLiveGuide()
+    else
+        m.liveGuideLabel.visible = false
+    end if
 end sub
+
+sub renderLiveGuide()
+    if not isLivePlayback() or m.top.liveGuide = invalid then
+        m.liveGuideLabel.visible = false
+        return
+    end if
+    nowText = programmeText(m.top.liveGuide.now)
+    nextText = programmeText(m.top.liveGuide.next)
+    if nowText = "" and nextText = "" then
+        m.liveGuideLabel.visible = false
+        return
+    end if
+    m.liveGuideLabel.text = "GUIA  " + nowText
+    if nextText <> "" then m.liveGuideLabel.text = m.liveGuideLabel.text + "   •   SEGUINTE  " + nextText
+    m.liveGuideLabel.visible = true
+end sub
+
+function programmeText(programme as Dynamic) as String
+    if programme = invalid or type(programme) <> "roAssociativeArray" then return ""
+    title = ""
+    if programme.title <> invalid then title = programme.title
+    if title = "" then return ""
+    if programme.start <> invalid and len(programme.start) >= 12 then
+        return mid(programme.start, 9, 2) + ":" + mid(programme.start, 11, 2) + "  " + title
+    end if
+    return title
+end function
 
 sub onVideoState()
     if m.video.state = "playing" then
@@ -262,6 +297,7 @@ sub showOsd()
     m.title.visible = true
     m.hint.visible = true
     m.trackStatus.visible = true
+    if isLivePlayback() then renderLiveGuide()
     m.timelineProgress.visible = true
     m.timeLabel.visible = true
     m.controlFocus.visible = true
@@ -295,6 +331,7 @@ sub hideOsd()
     m.title.visible = false
     m.hint.visible = false
     m.trackStatus.visible = false
+    m.liveGuideLabel.visible = false
     m.timelineProgress.visible = false
     m.timeLabel.visible = false
     m.controlFocus.visible = false

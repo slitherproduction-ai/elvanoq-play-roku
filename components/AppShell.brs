@@ -1,5 +1,6 @@
 sub init()
     m.localState = loadLocalState()
+    m.epg = {}
     m.focusRail = m.top.findNode("focusRail")
     m.sectionEyebrow = m.top.findNode("sectionEyebrow")
     m.sectionTitle = m.top.findNode("sectionTitle")
@@ -232,6 +233,7 @@ sub playLiveItem(item as Object, channels as Object, index as Integer)
     clearEpisodeQueue()
     m.playerView.liveQueue = channels
     m.playerView.liveIndex = index
+    m.playerView.liveGuide = liveGuideFor(item)
     m.playerView.contentTitle = item.title
     m.playerView.contentId = item.id
     m.playerView.contentCategory = item.category
@@ -551,8 +553,20 @@ end sub
 sub onEpgResult()
     result = m.epgService.result
     if result = invalid or result.ok <> true then return
+    m.epg = result.entries
     m.liveTVView.callFunc("setEpg", result.entries)
 end sub
+
+function liveGuideFor(item as Object) as Object
+    guide = {}
+    if item = invalid or item.tvg_id = invalid or item.tvg_id = "" then return guide
+    if m.epg = invalid or m.epg[item.tvg_id] = invalid then return guide
+    programmes = m.epg[item.tvg_id]
+    if programmes = invalid or programmes.count() = 0 then return guide
+    guide.now = programmes[0]
+    if programmes.count() > 1 then guide.next = programmes[1]
+    return guide
+end function
 
 sub savePlaylistMetadata(payload as Object)
     metadata = { synced_at: CreateObject("roDateTime").ToISOString() }

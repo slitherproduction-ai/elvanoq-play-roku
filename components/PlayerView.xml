@@ -12,6 +12,7 @@
     <field id="nextEpisodeRequested" type="assocarray" alwaysNotify="true" />
     <field id="liveQueue" type="array" />
     <field id="liveIndex" type="integer" value="0" />
+    <field id="liveGuide" type="assocarray" />
     <field id="channelRequested" type="assocarray" alwaysNotify="true" />
     <field id="favoriteRequested" type="assocarray" alwaysNotify="true" />
     <field id="closeRequested" type="boolean" alwaysNotify="true" />
@@ -31,6 +32,7 @@
     <Label id="contentBadge" translation="1500,62" text="ELVANOQ PLAY" width="290" height="34" horizAlign="right" />
     <Label id="hint" translation="132,118" text="OK: controles  •  Voltar: sair" width="1500" height="36" />
     <Label id="trackStatus" translation="132,158" width="1600" height="32" />
+    <Label id="liveGuideLabel" translation="132,198" width="1580" height="32" visible="false" />
     <Rectangle id="nextEpisodePanel" translation="620,430" width="680" height="176" color="0x06111FEF" visible="false" />
     <Label id="nextEpisodeTitle" translation="660,462" text="PRÓXIMO EPISÓDIO" width="600" height="30" visible="false" />
     <Label id="nextEpisodeHint" translation="660,510" width="600" height="60" wrap="true" visible="false" />
