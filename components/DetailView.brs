@@ -192,9 +192,18 @@ function episodeRequestAt(index as Integer) as Object
     episodeNumber = index + 1
     if episode.number <> invalid then episodeNumber = int(episode.number)
     request = { url: streamUrl, title: m.top.item.title + " • " + episodeDisplayName(episode), id: m.top.item.id + ":episode:" + trim(str(episodeNumber)), parentId: m.top.item.id, category: m.top.item.category }
-    following = episodeRequestAt(index + 1)
-    if following <> invalid then request.next = following
     return request
+end function
+
+function authorizedEpisodeQueue(startIndex as Integer) as Object
+    queue = []
+    if m.episodes = invalid then return queue
+    for index = startIndex to m.episodes.count() - 1
+        request = episodeRequestAt(index)
+        if request = invalid then exit for
+        queue.push(request)
+    end for
+    return queue
 end function
 
 sub onItemChanged()
@@ -268,11 +277,13 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
             return true
         end if
         if key = "OK" then
-            request = episodeRequestAt(m.selectedEpisodeIndex)
-            if request = invalid then
+            queue = authorizedEpisodeQueue(m.selectedEpisodeIndex)
+            if queue.count() = 0 then
                 m.actionStatus.text = "Este episódio ainda não possui reprodução autorizada na sua lista."
                 return true
             end if
+            request = queue[0]
+            request.queue = queue
             m.top.episodeRequested = request
             return true
         end if

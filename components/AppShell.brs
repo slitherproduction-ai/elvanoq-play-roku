@@ -339,6 +339,12 @@ sub onEpisodeRequested()
     if episode = invalid or episode.url = invalid or episode.url = "" then return
     if episode.parentId = invalid or episode.category = invalid then return
     if isParentallyBlockedItem(episode.category, episode.parentId) then return
+    if episode.queue <> invalid and type(episode.queue) = "roArray" then
+        m.episodeQueue = episode.queue
+    else
+        m.episodeQueue = [episode]
+    end if
+    m.episodeQueueIndex = 0
     m.playerView.liveQueue = []
     m.playerView.liveIndex = 0
     m.playerView.contentTitle = episode.title
@@ -346,8 +352,8 @@ sub onEpisodeRequested()
     m.playerView.contentCategory = episode.category
     m.playerView.resumePosition = resumePositionFor(episode)
     m.playerView.persistEnabled = true
-    if episode.next <> invalid then
-        m.playerView.nextEpisode = episode.next
+    if m.episodeQueue.count() > 1 then
+        m.playerView.nextEpisode = m.episodeQueue[1]
     else
         m.playerView.nextEpisode = invalid
     end if
@@ -356,10 +362,14 @@ sub onEpisodeRequested()
 end sub
 
 sub onNextEpisodeRequested()
-    episode = m.playerView.nextEpisodeRequested
+    if m.episodeQueue = invalid or m.episodeQueueIndex = invalid then return
+    nextIndex = m.episodeQueueIndex + 1
+    if nextIndex >= m.episodeQueue.count() then return
+    episode = m.episodeQueue[nextIndex]
     if episode = invalid or episode.url = invalid or episode.url = "" then return
     if episode.parentId = invalid or episode.category = invalid then return
     if isParentallyBlockedItem(episode.category, episode.parentId) then return
+    m.episodeQueueIndex = nextIndex
     m.playerView.liveQueue = []
     m.playerView.liveIndex = 0
     m.playerView.contentTitle = episode.title
@@ -367,8 +377,8 @@ sub onNextEpisodeRequested()
     m.playerView.contentCategory = episode.category
     m.playerView.resumePosition = resumePositionFor(episode)
     m.playerView.persistEnabled = true
-    if episode.next <> invalid then
-        m.playerView.nextEpisode = episode.next
+    if m.episodeQueueIndex < m.episodeQueue.count() - 1 then
+        m.playerView.nextEpisode = m.episodeQueue[m.episodeQueueIndex + 1]
     else
         m.playerView.nextEpisode = invalid
     end if
