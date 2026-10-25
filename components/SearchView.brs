@@ -2,6 +2,7 @@ sub init()
     m.queryLabel = m.top.findNode("queryLabel")
     m.resultsGrid = m.top.findNode("resultsGrid")
     m.emptyState = m.top.findNode("emptyState")
+    m.resultsTitle = m.top.findNode("resultsTitle")
     m.filterFocus = m.top.findNode("filterFocus")
     m.items = []
     m.matches = []
@@ -17,7 +18,7 @@ sub init()
     m.top.findNode("moviesLabel").font = "font:SmallSystemFont"
     m.top.findNode("seriesLabel").font = "font:SmallSystemFont"
     m.top.findNode("channelsLabel").font = "font:SmallSystemFont"
-    m.top.findNode("resultsTitle").font = "font:MediumBoldSystemFont"
+    m.resultsTitle.font = "font:MediumBoldSystemFont"
     m.emptyState.font = "font:MediumSystemFont"
     m.emptyState.color = "0x8FA9C4FF"
     m.emptyState.text = "Use o teclado do Roku para pesquisar no catálogo da sua lista."
@@ -42,7 +43,9 @@ sub renderQuery()
     if query = "" then
         m.queryLabel.text = "Buscar filmes, séries, canais e episódios…"
         m.resultsGrid.content = CreateObject("roSGNode", "ContentNode")
+        m.resultsTitle.text = "Resultados"
         m.emptyState.visible = true
+        m.emptyState.text = "Use o teclado do Roku para pesquisar no catálogo da sua lista."
         return
     end if
     m.queryLabel.text = query
@@ -62,7 +65,8 @@ sub renderQuery()
     end for
     m.resultsGrid.content = content
     m.emptyState.visible = matches = 0
-    if matches = 0 then m.emptyState.text = "Nenhum resultado encontrado na lista atual."
+    m.resultsTitle.text = "Resultados — " + trim(str(matches)) + " encontrados"
+    if matches = 0 then m.emptyState.text = "Nenhum " + filterName() + " encontrado na lista atual."
     if matches > 0 then m.resultsGrid.setFocus(true)
 end sub
 
@@ -122,13 +126,26 @@ end sub
 
 function matchesFilter(item as Object) as Boolean
     if m.selectedFilter = 0 then return true
+    itemType = catalogItemType(item)
+    if m.selectedFilter = 1 then return itemType = "movies"
+    if m.selectedFilter = 2 then return itemType = "series"
+    return itemType = "live"
+end function
+
+function catalogItemType(item as Object) as String
+    if item.type <> invalid and item.type <> "" then return item.type
     category = ""
     if item.category <> invalid then category = lcase(item.category)
     isSeries = instr(1, category, "série") > 0 or instr(1, category, "serie") > 0 or instr(1, category, "series") > 0
     isMovie = instr(1, category, "filme") > 0 or instr(1, category, "movie") > 0 or instr(1, category, "vod") > 0
-    if m.selectedFilter = 1 then return isMovie and not isSeries
-    if m.selectedFilter = 2 then return isSeries
-    return not isMovie and not isSeries
+    if isSeries then return "series"
+    if isMovie then return "movies"
+    return "live"
+end function
+
+function filterName() as String
+    names = ["resultado", "filme", "série", "canal"]
+    return names[m.selectedFilter]
 end function
 
 sub updateFilterFocus()
