@@ -4,14 +4,17 @@ sub init()
     m.countLabel = m.top.findNode("countLabel")
     m.grid = m.top.findNode("grid")
     m.emptyState = m.top.findNode("emptyState")
+    m.filterLabel = m.top.findNode("filterLabel")
+    m.page = 0
+    m.pageSize = 12
     m.grid.observeField("itemSelected", "onItemSelected")
     m.top.findNode("eyebrow").font = "font:SmallSystemFont"
     m.top.findNode("eyebrow").color = "0x73B7FFFF"
     m.title.font = "font:LargeBoldSystemFont"
     m.description.font = "font:MediumSystemFont"
     m.description.color = "0xB9CBE0FF"
-    m.top.findNode("filterLabel").font = "font:SmallSystemFont"
-    m.top.findNode("filterLabel").color = "0xFFFFFFFF"
+    m.filterLabel.font = "font:SmallSystemFont"
+    m.filterLabel.color = "0xFFFFFFFF"
     m.countLabel.font = "font:SmallSystemFont"
     m.countLabel.color = "0x8FA9C4FF"
     m.emptyState.font = "font:MediumSystemFont"
@@ -43,6 +46,7 @@ sub setCatalog(payload as Object)
     end for
     m.countLabel.text = trim(str(selected.count())) + " títulos disponíveis"
     m.selectedItems = selected
+    m.page = 0
     if selected.count() = 0 then
         m.grid.content = CreateObject("roSGNode", "ContentNode")
         m.emptyState.visible = true
@@ -50,22 +54,43 @@ sub setCatalog(payload as Object)
         return
     end if
     m.emptyState.visible = false
+    renderPage()
+end sub
+
+sub renderPage()
+    if m.selectedItems = invalid or m.selectedItems.count() = 0 then return
     content = CreateObject("roSGNode", "ContentNode")
-    lastIndex = selected.count() - 1
-    if lastIndex > 11 then lastIndex = 11
-    for index = 0 to lastIndex
-        item = selected[index]
+    firstIndex = m.page * m.pageSize
+    lastIndex = firstIndex + m.pageSize - 1
+    if lastIndex > m.selectedItems.count() - 1 then lastIndex = m.selectedItems.count() - 1
+    for index = firstIndex to lastIndex
+        item = m.selectedItems[index]
         child = CreateObject("roSGNode", "ContentNode")
         child.title = item.title
         if item.logo <> invalid then child.hdPosterUrl = item.logo
         content.appendChild(child)
     end for
     m.grid.content = content
+    totalPages = int((m.selectedItems.count() + m.pageSize - 1) / m.pageSize)
+    m.filterLabel.text = "Página " + trim(str(m.page + 1)) + " de " + trim(str(totalPages)) + "  •  * avançar"
 end sub
 
 sub onItemSelected()
     index = m.grid.itemSelected
     if m.selectedItems = invalid then return
-    if index < 0 or index >= m.selectedItems.count() then return
-    m.top.selectedItem = m.selectedItems[index]
+    absoluteIndex = (m.page * m.pageSize) + index
+    if absoluteIndex < 0 or absoluteIndex >= m.selectedItems.count() then return
+    m.top.selectedItem = m.selectedItems[absoluteIndex]
 end sub
+
+function handleKey(event as Object) as Boolean
+    if event.press <> true then return false
+    if event.key <> "options" or m.selectedItems = invalid then return false
+    totalPages = int((m.selectedItems.count() + m.pageSize - 1) / m.pageSize)
+    if totalPages < 2 then return true
+    m.page = m.page + 1
+    if m.page >= totalPages then m.page = 0
+    renderPage()
+    m.grid.setFocus(true)
+    return true
+end function

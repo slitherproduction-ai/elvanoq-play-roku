@@ -68,6 +68,12 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
             return true
         end if
     end if
+    if m.selectedIndex = 2 then
+        if m.moviesView.callFunc("handleKey", { key: key, press: press }) then return true
+    end if
+    if m.selectedIndex = 3 then
+        if m.seriesView.callFunc("handleKey", { key: key, press: press }) then return true
+    end if
     if m.selectedIndex = 6 then
         if key >= "0" and key <= "9" then
             m.parentalView.callFunc("enterDigit", key)
