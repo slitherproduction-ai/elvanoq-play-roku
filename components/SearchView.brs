@@ -7,6 +7,7 @@ sub init()
     m.items = []
     m.matches = []
     m.selectedIndex = 0
+    m.resultOffset = 0
     m.selectedFilter = 0
     m.filterLabels = [m.top.findNode("allLabel"), m.top.findNode("moviesLabel"), m.top.findNode("seriesLabel"), m.top.findNode("channelsLabel")]
     m.resultsGrid.observeField("itemSelected", "onItemSelected")
@@ -33,6 +34,7 @@ end sub
 sub setQuery(query as String)
     m.query = query
     m.selectedIndex = 0
+    m.resultOffset = 0
     m.matches = []
     renderQuery()
 end sub
@@ -50,30 +52,41 @@ sub renderQuery()
     end if
     m.queryLabel.text = query
     needle = lcase(query)
-    content = CreateObject("roSGNode", "ContentNode")
     matches = 0
     for each item in m.items
         if matchesFilter(item) and (instr(1, lcase(item.title), needle) > 0 or instr(1, lcase(item.category), needle) > 0) then
-            child = CreateObject("roSGNode", "ContentNode")
-            child.title = item.title
-            if item.logo <> invalid then child.hdPosterUrl = item.logo
-            content.appendChild(child)
             m.matches.push(item)
             matches = matches + 1
-            if matches = 12 then exit for
+            if matches = 300 then exit for
         end if
     end for
-    m.resultsGrid.content = content
     m.emptyState.visible = matches = 0
     m.resultsTitle.text = "Resultados — " + trim(str(matches)) + " encontrados"
     if matches = 0 then m.emptyState.text = "Nenhum " + filterName() + " encontrado na lista atual."
-    if matches > 0 then m.resultsGrid.setFocus(true)
+    if matches > 0 then renderResultsWindow()
+end sub
+
+sub renderResultsWindow()
+    content = CreateObject("roSGNode", "ContentNode")
+    lastIndex = m.resultOffset + 11
+    if lastIndex > m.matches.count() - 1 then lastIndex = m.matches.count() - 1
+    for index = m.resultOffset to lastIndex
+        item = m.matches[index]
+        child = CreateObject("roSGNode", "ContentNode")
+        child.title = item.title
+        if item.logo <> invalid then child.hdPosterUrl = item.logo
+        content.appendChild(child)
+    end for
+    m.resultsGrid.content = content
+    m.resultsGrid.jumpToItem = m.selectedIndex - m.resultOffset
+    m.resultsGrid.setFocus(true)
 end sub
 
 sub onItemSelected()
     index = m.resultsGrid.itemSelected
-    if index < 0 or index >= m.matches.count() then return
-    m.top.selectedItem = m.matches[index]
+    absoluteIndex = m.resultOffset + index
+    if absoluteIndex < 0 or absoluteIndex >= m.matches.count() then return
+    m.top.selectedItem = m.matches[absoluteIndex]
 end sub
 
 function handleKey(event as Object) as Boolean
@@ -81,6 +94,7 @@ function handleKey(event as Object) as Boolean
     if event.key = "back" and m.query <> "" then
         m.query = ""
         m.selectedIndex = 0
+        m.resultOffset = 0
         renderQuery()
         return true
     end if
@@ -88,6 +102,7 @@ function handleKey(event as Object) as Boolean
         m.selectedFilter = m.selectedFilter + 1
         if m.selectedFilter > 3 then m.selectedFilter = 0
         m.selectedIndex = 0
+        m.resultOffset = 0
         updateFilterFocus()
         renderQuery()
         return true
@@ -95,22 +110,22 @@ function handleKey(event as Object) as Boolean
     if m.matches.count() = 0 then return false
     if event.key = "right" and m.selectedIndex < m.matches.count() - 1 then
         m.selectedIndex = m.selectedIndex + 1
-        updateSelection()
+        updateResultViewport()
         return true
     end if
     if event.key = "left" and m.selectedIndex > 0 then
         m.selectedIndex = m.selectedIndex - 1
-        updateSelection()
+        updateResultViewport()
         return true
     end if
     if event.key = "down" and m.selectedIndex + 6 < m.matches.count() then
         m.selectedIndex = m.selectedIndex + 6
-        updateSelection()
+        updateResultViewport()
         return true
     end if
     if event.key = "up" and m.selectedIndex - 6 >= 0 then
         m.selectedIndex = m.selectedIndex - 6
-        updateSelection()
+        updateResultViewport()
         return true
     end if
     if event.key = "OK" then
@@ -121,7 +136,19 @@ function handleKey(event as Object) as Boolean
 end function
 
 sub updateSelection()
-    m.resultsGrid.jumpToItem = m.selectedIndex
+    m.resultsGrid.jumpToItem = m.selectedIndex - m.resultOffset
+end sub
+
+sub updateResultViewport()
+    if m.selectedIndex < m.resultOffset then
+        m.resultOffset = m.selectedIndex
+        renderResultsWindow()
+    else if m.selectedIndex >= m.resultOffset + 12 then
+        m.resultOffset = m.selectedIndex - 11
+        renderResultsWindow()
+    else
+        updateSelection()
+    end if
 end sub
 
 function matchesFilter(item as Object) as Boolean
