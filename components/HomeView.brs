@@ -35,6 +35,8 @@ sub init()
     m.focusArea = 0
     m.continueIndex = 0
     m.catalogIndex = 0
+    m.continueOffset = 0
+    m.catalogOffset = 0
     m.heroCandidates = []
     m.heroIndex = 0
     m.isActive = true
@@ -63,15 +65,12 @@ sub setCatalog(payload as Object)
     if continueItems.count() > 0 then
         m.continueTitle.text = "Continuar assistindo"
         m.continueHint.text = "Retome de onde parou"
-        m.continueGrid.content = buildContent(continueItems, 5)
     else if favoriteItems.count() > 0 then
         m.continueTitle.text = "Seus favoritos"
         m.continueHint.text = "Canais e títulos salvos neste Roku"
-        m.continueGrid.content = buildContent(favoriteItems, 5)
     else
         m.continueTitle.text = "Para você"
         m.continueHint.text = "Conteúdos da sua lista autorizada"
-        m.continueGrid.content = buildContent(items, 5)
     end if
     m.continueItems = continueItems
     if m.continueItems.count() = 0 then m.continueItems = favoriteItems
@@ -79,8 +78,10 @@ sub setCatalog(payload as Object)
     m.catalogItems = items
     m.continueIndex = 0
     m.catalogIndex = 0
+    m.continueOffset = 0
+    m.catalogOffset = 0
     m.catalogTitle.text = "Canais em destaque"
-    m.catalogGrid.content = buildContent(items, 7)
+    renderRails()
     if m.isActive and m.heroCandidates.count() > 1 then m.heroTimer.control = "start"
 end sub
 
@@ -229,17 +230,32 @@ function handleRailKey(event as Object, items as Object, rail as String) as Bool
     if items = invalid or items.count() = 0 then return true
     index = m.continueIndex
     if rail = "catalog" then index = m.catalogIndex
-    visibleCount = items.count()
-    if rail = "continue" and visibleCount > 5 then visibleCount = 5
-    if rail = "catalog" and visibleCount > 7 then visibleCount = 7
-    if event.key = "right" and index < visibleCount - 1 then index = index + 1
+    maximum = 5
+    offset = m.continueOffset
+    if rail = "catalog" then
+        maximum = 7
+        offset = m.catalogOffset
+    end if
+    if event.key = "right" and index < items.count() - 1 then index = index + 1
     if event.key = "left" and index > 0 then index = index - 1
+    if index < offset then offset = index
+    if index >= offset + maximum then offset = index - (maximum - 1)
     if rail = "continue" then
         m.continueIndex = index
-        m.continueGrid.jumpToItem = index
+        m.continueOffset = offset
+        m.continueGrid.jumpToItem = index - offset
     else
         m.catalogIndex = index
-        m.catalogGrid.jumpToItem = index
+        m.catalogOffset = offset
+        m.catalogGrid.jumpToItem = index - offset
+    end if
+    if event.key = "left" or event.key = "right" then
+        renderRails()
+        if rail = "continue" then
+            m.continueGrid.jumpToItem = index - offset
+        else
+            m.catalogGrid.jumpToItem = index - offset
+        end if
     end if
     if event.key = "OK" then m.top.selectedItem = items[index]
     return true
@@ -249,12 +265,17 @@ sub updateFocusArea()
     m.actionFocus.visible = m.focusArea = 0
     if m.focusArea = 0 then return
     if m.focusArea = 1 then
-        m.continueGrid.jumpToItem = m.continueIndex
+        m.continueGrid.jumpToItem = m.continueIndex - m.continueOffset
         m.continueGrid.setFocus(true)
     else
-        m.catalogGrid.jumpToItem = m.catalogIndex
+        m.catalogGrid.jumpToItem = m.catalogIndex - m.catalogOffset
         m.catalogGrid.setFocus(true)
     end if
+end sub
+
+sub renderRails()
+    if m.continueItems <> invalid then m.continueGrid.content = buildContentWindow(m.continueItems, 5, m.continueOffset)
+    if m.catalogItems <> invalid then m.catalogGrid.content = buildContentWindow(m.catalogItems, 7, m.catalogOffset)
 end sub
 
 sub updateActionFocus()
@@ -321,11 +342,12 @@ function resolveLocalItems(savedItems as Object, catalogItems as Object) as Obje
     return resolved
 end function
 
-function buildContent(items as Object, maximum as Integer) as Object
+function buildContentWindow(items as Object, maximum as Integer, offset as Integer) as Object
     content = CreateObject("roSGNode", "ContentNode")
-    lastIndex = items.count() - 1
-    if lastIndex > maximum - 1 then lastIndex = maximum - 1
-    for index = 0 to lastIndex
+    if items = invalid or items.count() = 0 then return content
+    lastIndex = offset + maximum - 1
+    if lastIndex > items.count() - 1 then lastIndex = items.count() - 1
+    for index = offset to lastIndex
         item = items[index]
         child = CreateObject("roSGNode", "ContentNode")
         child.title = item.title

@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.40
+0.1.41
 
 ## Fluxo de ativação
 
@@ -82,6 +82,8 @@ TV ao Vivo exibe seis categorias por vez e percorre as demais de forma increment
 Minha Lista, Favoritos, Continuar e Histórico exibem doze itens por vez. Ao navegar além da janela atual com ↑/↓, a lista percorre os itens incrementalmente e preserva o item selecionado para abrir com OK.
 
 Depois da ativação, o canal continua consultando `roku-license-status` em intervalo leve de 60 segundos sem interromper a navegação. A sincronização da lista acontece uma vez por ativação; se o Portal informar expiração ou bloqueio, o acesso ao app é removido até que a licença volte a ficar ativa.
+
+Os dois carrosséis da Home mantêm uma janela leve: cinco itens no primeiro trilho e sete no segundo. Ao navegar com ←/→ além da janela, os itens seguintes da lista autorizada são exibidos sem montar todos os pôsteres de uma vez.
 
 No destaque da Home, ←/→ alterna entre Assistir e Minha Lista; OK executa a ação selecionada. Adicionar/remover usa somente a coleção local protegida e a reprodução ainda recebe a URL exclusivamente do catálogo em memória.
 
