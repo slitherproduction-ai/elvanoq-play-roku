@@ -81,7 +81,7 @@ sub onStreamChanged()
     content.title = m.top.contentTitle
     m.video.content = content
     m.video.control = "play"
-    if isLivePlayback() then m.hint.text = "↑/↓: trocar canal  •  OK: controles  •  Voltar: sair"
+    if isLivePlayback() then m.hint.text = "↑/↓: trocar canal  •  *: favorito  •  Voltar: sair"
 end sub
 
 sub onVideoState()
@@ -180,6 +180,12 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
         m.video.seek = m.top.skipIntroEnd
         m.skipIntroAvailable = false
         m.hint.text = "Abertura pulada."
+        showOsd()
+        return true
+    end if
+    if key = "options" and isLivePlayback() then
+        m.top.favoriteRequested = { id: m.top.contentId, title: m.top.contentTitle, category: m.top.contentCategory }
+        m.hint.text = "Favorito atualizado."
         showOsd()
         return true
     end if

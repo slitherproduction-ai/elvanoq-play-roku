@@ -28,6 +28,7 @@ sub init()
     m.detailView.observeField("seasonRequested", "onSeasonRequested")
     m.playerView.observeField("closeRequested", "onPlayerClosed")
     m.playerView.observeField("channelRequested", "onPlayerChannelRequested")
+    m.playerView.observeField("favoriteRequested", "onPlayerFavoriteRequested")
     m.playerView.observeField("nextEpisodeRequested", "onNextEpisodeRequested")
     m.navItems = [
         m.top.findNode("navHome"),
@@ -246,6 +247,20 @@ sub onPlayerChannelRequested()
     request = m.playerView.channelRequested
     if request = invalid or request.item = invalid then return
     playLiveItem(request.item, m.playerView.liveQueue, request.index)
+end sub
+
+sub onPlayerFavoriteRequested()
+    request = m.playerView.favoriteRequested
+    if request = invalid or request.id = invalid then return
+    item = resolveCatalogItem(request)
+    if item = invalid then return
+    for each favorite in m.localState.favorites
+        if favorite.id = item.id then
+            removeFavorite(item.id)
+            return
+        end if
+    end for
+    saveFavorite(item)
 end sub
 
 sub onSearchKeyboardSelected()
