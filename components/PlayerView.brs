@@ -68,6 +68,7 @@ sub onStreamChanged()
     if m.top.streamUrl = "" then return
     cancelNextEpisode(false)
     m.skipIntroAvailable = m.top.skipIntroEnd > 0
+    m.subtitlesDisabled = false
     m.lastPersistedSecond = -15
     m.shouldRestorePosition = m.top.resumePosition > 0
     if isParentallyBlockedItem(m.top.contentCategory, m.top.contentId) then
@@ -379,10 +380,20 @@ sub cycleSubtitleTrack()
         m.hint.text = "Não há legendas neste stream."
         return
     end if
-    nextIndex = trackIndex(tracks, m.video.subtitleTrack, "TrackName") + 1
+    selectedIndex = trackIndex(tracks, m.video.subtitleTrack, "TrackName")
+    if m.subtitlesDisabled <> true and selectedIndex >= tracks.count() - 1 then
+        m.video.globalCaptionMode = "Off"
+        m.video.subtitleTrack = ""
+        m.subtitlesDisabled = true
+        m.hint.text = "Legendas desativadas."
+        refreshTrackStatus()
+        return
+    end if
+    nextIndex = selectedIndex + 1
     if nextIndex >= tracks.count() then nextIndex = 0
     m.video.subtitleTrack = tracks[nextIndex].TrackName
     m.video.globalCaptionMode = "On"
+    m.subtitlesDisabled = false
     m.hint.text = "Legenda atualizada."
     refreshTrackStatus()
 end sub
@@ -398,7 +409,11 @@ sub refreshTrackStatus()
     audioText = "Áudio: automático"
     subtitlesText = "Legendas: automático"
     if m.video.audioTrack <> invalid and m.video.audioTrack <> "" then audioText = "Áudio: " + m.video.audioTrack
-    if m.video.subtitleTrack <> invalid and m.video.subtitleTrack <> "" then subtitlesText = "Legendas: " + m.video.subtitleTrack
+    if m.subtitlesDisabled = true then
+        subtitlesText = "Legendas: desativadas"
+    else if m.video.subtitleTrack <> invalid and m.video.subtitleTrack <> "" then
+        subtitlesText = "Legendas: " + m.video.subtitleTrack
+    end if
     m.trackStatus.text = audioText + "  •  " + subtitlesText
     updateTrackPanel(audioText, subtitlesText)
 end sub

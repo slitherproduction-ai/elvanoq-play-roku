@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.54
+0.1.55
 
 ## Fluxo de ativação
 
@@ -54,6 +54,8 @@ Ao fechar o player ou iniciar conteúdo diferente, a fila transitória de episó
 Quando a fonte autorizada fornecer `intro_end_seconds` ou `introEnd` para um episódio, o player apresenta `*` para pular a abertura até esse instante. Sem marcador, `*` mantém o comportamento normal do player; o canal não estima nem inventa pontos de corte.
 
 Durante TV ao Vivo, `*` alterna o canal atual entre favorito e não favorito diretamente no player. A coleção local guarda somente o identificador e metadados permitidos do canal, nunca a URL ou credenciais do stream.
+
+No painel de legendas do player, o controle percorre as faixas nativas recebidas pelo stream e, após a última, desativa as legendas. A indicação no OSD diferencia claramente faixa automática, selecionada e desativada.
 
 A tela de detalhes apresenta a hierarquia adaptada do Android/Prime para Roku: metadados, gêneros retornados pelo TMDB, ações principais, painel de temporada/episódios e recomendações. O canal só exibe informações que tenham sido retornadas pela fonte autorizada.
 
