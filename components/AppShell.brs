@@ -195,6 +195,7 @@ sub playCatalogItem(item as Object, resumePosition as Integer)
     m.playerView.resumePosition = resumePosition
     m.playerView.persistEnabled = true
     m.playerView.nextEpisode = invalid
+    m.playerView.skipIntroEnd = 0
     m.playerView.streamUrl = item.stream_url
     m.playerView.visible = true
 end sub
@@ -236,6 +237,7 @@ sub playLiveItem(item as Object, channels as Object, index as Integer)
     m.playerView.resumePosition = 0
     m.playerView.persistEnabled = false
     m.playerView.nextEpisode = invalid
+    m.playerView.skipIntroEnd = 0
     m.playerView.streamUrl = item.stream_url
     m.playerView.visible = true
 end sub
@@ -333,6 +335,7 @@ sub onTrailerRequested()
     m.playerView.resumePosition = 0
     m.playerView.persistEnabled = false
     m.playerView.nextEpisode = invalid
+    m.playerView.skipIntroEnd = 0
     m.playerView.streamUrl = trailer.url
     m.playerView.visible = true
 end sub
@@ -355,6 +358,7 @@ sub onEpisodeRequested()
     m.playerView.contentCategory = episode.category
     m.playerView.resumePosition = resumePositionFor(episode)
     m.playerView.persistEnabled = true
+    if episode.introEnd <> invalid then m.playerView.skipIntroEnd = int(episode.introEnd) else m.playerView.skipIntroEnd = 0
     if m.episodeQueue.count() > 1 then
         m.playerView.nextEpisode = m.episodeQueue[1]
     else
@@ -380,6 +384,7 @@ sub onNextEpisodeRequested()
     m.playerView.contentCategory = episode.category
     m.playerView.resumePosition = resumePositionFor(episode)
     m.playerView.persistEnabled = true
+    if episode.introEnd <> invalid then m.playerView.skipIntroEnd = int(episode.introEnd) else m.playerView.skipIntroEnd = 0
     if m.episodeQueueIndex < m.episodeQueue.count() - 1 then
         m.playerView.nextEpisode = m.episodeQueue[m.episodeQueueIndex + 1]
     else

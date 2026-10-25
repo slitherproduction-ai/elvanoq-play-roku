@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.52
+0.1.53
 
 ## Fluxo de ativação
 
@@ -50,6 +50,8 @@ Para séries, o mesmo fluxo solicita temporadas e episódios reais. No controle 
 Quando a fonte autorizada também fornecer episódios consecutivos com URL HTTP ou HTTPS, o player apresenta uma contagem de seis segundos ao finalizar o atual. OK inicia imediatamente e `*` cancela; cada episódio mantém progresso próprio. A fila de episódios fica somente em memória e é plana, evitando estruturas grandes em temporadas extensas. A transição para no primeiro episódio sem stream autorizado.
 
 Ao fechar o player ou iniciar conteúdo diferente, a fila transitória de episódios é removida imediatamente da memória. Nenhuma URL de stream, credencial ou fila é persistida no registro local.
+
+Quando a fonte autorizada fornecer `intro_end_seconds` ou `introEnd` para um episódio, o player apresenta `*` para pular a abertura até esse instante. Sem marcador, `*` mantém o comportamento normal do player; o canal não estima nem inventa pontos de corte.
 
 A tela de detalhes apresenta a hierarquia adaptada do Android/Prime para Roku: metadados, gêneros retornados pelo TMDB, ações principais, painel de temporada/episódios e recomendações. O canal só exibe informações que tenham sido retornadas pela fonte autorizada.
 

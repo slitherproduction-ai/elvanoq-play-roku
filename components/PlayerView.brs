@@ -67,6 +67,7 @@ end sub
 sub onStreamChanged()
     if m.top.streamUrl = "" then return
     cancelNextEpisode(false)
+    m.skipIntroAvailable = m.top.skipIntroEnd > 0
     m.lastPersistedSecond = -15
     m.shouldRestorePosition = m.top.resumePosition > 0
     if isParentallyBlockedItem(m.top.contentCategory, m.top.contentId) then
@@ -122,7 +123,18 @@ end sub
 
 sub onPositionChanged()
     updateTimeline()
+    updateSkipIntroHint()
     if m.video.position <> invalid and m.video.position - m.lastPersistedSecond >= 15 then persistProgress(false)
+end sub
+
+sub updateSkipIntroHint()
+    if m.skipIntroAvailable <> true then return
+    if m.video.position = invalid or m.top.skipIntroEnd <= 0 then return
+    if m.video.position >= m.top.skipIntroEnd then
+        m.skipIntroAvailable = false
+        return
+    end if
+    m.hint.text = "*: pular abertura  •  OK: controles  •  Voltar: sair"
 end sub
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
@@ -162,6 +174,13 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     end if
     if key = "down" and isLivePlayback() then
         switchLiveChannel(1)
+        return true
+    end if
+    if key = "options" and m.skipIntroAvailable = true and m.video.position <> invalid and m.video.position < m.top.skipIntroEnd then
+        m.video.seek = m.top.skipIntroEnd
+        m.skipIntroAvailable = false
+        m.hint.text = "Abertura pulada."
+        showOsd()
         return true
     end if
     if key = "up" or key = "down" or key = "options" then

@@ -184,6 +184,15 @@ function episodeDisplayName(episode as Object) as String
     return "Episódio"
 end function
 
+function episodeSkipIntroEnd(episode as Object) as Integer
+    if episode = invalid then return 0
+    value = 0
+    if episode.intro_end_seconds <> invalid then value = int(episode.intro_end_seconds)
+    if value <= 0 and episode.introEnd <> invalid then value = int(episode.introEnd)
+    if value < 0 then value = 0
+    return value
+end function
+
 function episodeRequestAt(index as Integer) as Object
     if m.episodes = invalid or index < 0 or index >= m.episodes.count() then return invalid
     episode = m.episodes[index]
@@ -191,7 +200,7 @@ function episodeRequestAt(index as Integer) as Object
     if streamUrl = "" then return invalid
     episodeNumber = index + 1
     if episode.number <> invalid then episodeNumber = int(episode.number)
-    request = { url: streamUrl, title: m.top.item.title + " • " + episodeDisplayName(episode), id: m.top.item.id + ":episode:" + trim(str(episodeNumber)), parentId: m.top.item.id, category: m.top.item.category }
+    request = { url: streamUrl, title: m.top.item.title + " • " + episodeDisplayName(episode), id: m.top.item.id + ":episode:" + trim(str(episodeNumber)), parentId: m.top.item.id, category: m.top.item.category, introEnd: episodeSkipIntroEnd(episode) }
     return request
 end function
 
