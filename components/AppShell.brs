@@ -28,6 +28,7 @@ sub init()
     m.detailView.observeField("seasonRequested", "onSeasonRequested")
     m.playerView.observeField("closeRequested", "onPlayerClosed")
     m.playerView.observeField("channelRequested", "onPlayerChannelRequested")
+    m.playerView.observeField("nextEpisodeRequested", "onNextEpisodeRequested")
     m.navItems = [
         m.top.findNode("navHome"),
         m.top.findNode("navLive"),
@@ -192,6 +193,7 @@ sub playCatalogItem(item as Object, resumePosition as Integer)
     m.playerView.contentCategory = item.category
     m.playerView.resumePosition = resumePosition
     m.playerView.persistEnabled = true
+    m.playerView.nextEpisode = invalid
     m.playerView.streamUrl = item.stream_url
     m.playerView.visible = true
 end sub
@@ -231,6 +233,7 @@ sub playLiveItem(item as Object, channels as Object, index as Integer)
     m.playerView.contentCategory = item.category
     m.playerView.resumePosition = 0
     m.playerView.persistEnabled = false
+    m.playerView.nextEpisode = invalid
     m.playerView.streamUrl = item.stream_url
     m.playerView.visible = true
 end sub
@@ -326,6 +329,7 @@ sub onTrailerRequested()
     m.playerView.contentCategory = trailer.category
     m.playerView.resumePosition = 0
     m.playerView.persistEnabled = false
+    m.playerView.nextEpisode = invalid
     m.playerView.streamUrl = trailer.url
     m.playerView.visible = true
 end sub
@@ -342,8 +346,33 @@ sub onEpisodeRequested()
     m.playerView.contentCategory = episode.category
     m.playerView.resumePosition = resumePositionFor(episode)
     m.playerView.persistEnabled = true
+    if episode.next <> invalid then
+        m.playerView.nextEpisode = episode.next
+    else
+        m.playerView.nextEpisode = invalid
+    end if
     m.playerView.streamUrl = episode.url
     m.playerView.visible = true
+end sub
+
+sub onNextEpisodeRequested()
+    episode = m.playerView.nextEpisodeRequested
+    if episode = invalid or episode.url = invalid or episode.url = "" then return
+    if episode.parentId = invalid or episode.category = invalid then return
+    if isParentallyBlockedItem(episode.category, episode.parentId) then return
+    m.playerView.liveQueue = []
+    m.playerView.liveIndex = 0
+    m.playerView.contentTitle = episode.title
+    m.playerView.contentId = episode.id
+    m.playerView.contentCategory = episode.category
+    m.playerView.resumePosition = resumePositionFor(episode)
+    m.playerView.persistEnabled = true
+    if episode.next <> invalid then
+        m.playerView.nextEpisode = episode.next
+    else
+        m.playerView.nextEpisode = invalid
+    end if
+    m.playerView.streamUrl = episode.url
 end sub
 
 function resumePositionFor(item as Object) as Integer

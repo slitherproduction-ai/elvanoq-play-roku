@@ -184,6 +184,19 @@ function episodeDisplayName(episode as Object) as String
     return "Episódio"
 end function
 
+function episodeRequestAt(index as Integer) as Object
+    if m.episodes = invalid or index < 0 or index >= m.episodes.count() then return invalid
+    episode = m.episodes[index]
+    streamUrl = episodeStreamUrl(episode)
+    if streamUrl = "" then return invalid
+    episodeNumber = index + 1
+    if episode.number <> invalid then episodeNumber = int(episode.number)
+    request = { url: streamUrl, title: m.top.item.title + " • " + episodeDisplayName(episode), id: m.top.item.id + ":episode:" + trim(str(episodeNumber)), parentId: m.top.item.id, category: m.top.item.category }
+    following = episodeRequestAt(index + 1)
+    if following <> invalid then request.next = following
+    return request
+end function
+
 sub onItemChanged()
     if m.top.item = invalid then return
     item = m.top.item
@@ -255,15 +268,12 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
             return true
         end if
         if key = "OK" then
-            episode = m.episodes[m.selectedEpisodeIndex]
-            streamUrl = episodeStreamUrl(episode)
-            if streamUrl = "" then
+            request = episodeRequestAt(m.selectedEpisodeIndex)
+            if request = invalid then
                 m.actionStatus.text = "Este episódio ainda não possui reprodução autorizada na sua lista."
                 return true
             end if
-            episodeNumber = m.selectedEpisodeIndex + 1
-            if episode.number <> invalid then episodeNumber = int(episode.number)
-            m.top.episodeRequested = { url: streamUrl, title: m.top.item.title + " • " + episodeDisplayName(episode), id: m.top.item.id + ":episode:" + trim(str(episodeNumber)), parentId: m.top.item.id, category: m.top.item.category }
+            m.top.episodeRequested = request
             return true
         end if
         return key = "left" or key = "right" or key = "up" or key = "down"

@@ -85,6 +85,12 @@ sub onVideoState()
         showOsd()
     else if m.video.state = "finished" then
         persistProgress(true)
+        if m.top.nextEpisode <> invalid and m.top.nextEpisode.url <> invalid and m.top.nextEpisode.url <> "" then
+            m.hint.text = "Iniciando o próximo episódio…"
+            showOsd()
+            m.top.nextEpisodeRequested = m.top.nextEpisode
+            return
+        end if
         m.hint.text = "Reprodução concluída."
         showOsd()
     else if m.video.state = "buffering" then
