@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.49
+0.1.50
 
 ## Fluxo de ativação
 
@@ -47,7 +47,7 @@ Quando a licença está ativa, a tela consulta `roku-metadata` no Portal para en
 
 Para séries, o mesmo fluxo solicita temporadas e episódios reais. No controle remoto, ↑/↓ troca a temporada selecionada na própria tela de detalhes. Após receber episódios, `*` entra no seletor; ←/→ troca o episódio e OK inicia a reprodução somente quando a fonte autorizada fornecer uma URL IPTV HTTP ou HTTPS para ele. Sem URL autorizada, o canal informa a indisponibilidade sem inventar links. A URL fica somente em memória durante a reprodução e nunca é registrada localmente. Trailer e recomendações só aparecem quando retornados pelo Portal; quando houver URL HTTPS compatível para o trailer, o botão Trailer abre o player nativo sem gravar progresso, URL ou credenciais localmente.
 
-Quando a fonte autorizada também fornecer o episódio seguinte com URL HTTP ou HTTPS, o player inicia esse próximo episódio ao finalizar o atual. Cada episódio mantém progresso próprio; a transição não acontece caso a origem não tenha fornecido o próximo stream autorizado.
+Quando a fonte autorizada também fornecer o episódio seguinte com URL HTTP ou HTTPS, o player apresenta uma contagem de seis segundos ao finalizar o atual. OK inicia imediatamente e `*` cancela; cada episódio mantém progresso próprio. A transição não acontece caso a origem não tenha fornecido o próximo stream autorizado.
 
 A tela de detalhes apresenta a hierarquia adaptada do Android/Prime para Roku: metadados, gêneros retornados pelo TMDB, ações principais, painel de temporada/episódios e recomendações. O canal só exibe informações que tenham sido retornadas pela fonte autorizada.
 

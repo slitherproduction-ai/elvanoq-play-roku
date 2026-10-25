@@ -9,6 +9,10 @@ sub init()
     m.controls = m.top.findNode("controls")
     m.osdBackground = m.top.findNode("osdBackground")
     m.osdTimer = m.top.findNode("osdTimer")
+    m.nextEpisodeTimer = m.top.findNode("nextEpisodeTimer")
+    m.nextEpisodePanel = m.top.findNode("nextEpisodePanel")
+    m.nextEpisodeTitle = m.top.findNode("nextEpisodeTitle")
+    m.nextEpisodeHint = m.top.findNode("nextEpisodeHint")
     m.topShade = m.top.findNode("topShade")
     m.bottomShade = m.top.findNode("bottomShade")
     m.backLabel = m.top.findNode("backLabel")
@@ -35,6 +39,10 @@ sub init()
     m.trackPanelTitle.color = "0x73B7FFFF"
     m.trackPanelValue.font = "font:SmallSystemFont"
     m.trackPanelValue.color = "0xD7E3F0FF"
+    m.nextEpisodeTitle.font = "font:MediumBoldSystemFont"
+    m.nextEpisodeTitle.color = "0x73B7FFFF"
+    m.nextEpisodeHint.font = "font:SmallSystemFont"
+    m.nextEpisodeHint.color = "0xD7E3F0FF"
     for each label in m.controlLabels
         label.font = "font:MediumBoldSystemFont"
         label.color = "0xD7E3F0FF"
@@ -44,6 +52,7 @@ sub init()
     m.video.observeField("state", "onVideoState")
     m.video.observeField("position", "onPositionChanged")
     m.osdTimer.observeField("fire", "onOsdTimerFired")
+    m.nextEpisodeTimer.observeField("fire", "onNextEpisodeTimerFired")
     m.top.observeField("streamUrl", "onStreamChanged")
     m.top.observeField("contentTitle", "onTitleChanged")
     m.selectedControl = 1
@@ -57,6 +66,7 @@ end sub
 
 sub onStreamChanged()
     if m.top.streamUrl = "" then return
+    cancelNextEpisode(false)
     m.lastPersistedSecond = -15
     m.shouldRestorePosition = m.top.resumePosition > 0
     if isParentallyBlockedItem(m.top.contentCategory, m.top.contentId) then
@@ -86,9 +96,15 @@ sub onVideoState()
     else if m.video.state = "finished" then
         persistProgress(true)
         if m.top.nextEpisode <> invalid and m.top.nextEpisode.url <> invalid and m.top.nextEpisode.url <> "" then
-            m.hint.text = "Iniciando o próximo episódio…"
+            m.osdTimer.control = "stop"
+            m.awaitingNextEpisode = true
+            m.nextEpisodePanel.visible = true
+            m.nextEpisodeTitle.visible = true
+            m.nextEpisodeHint.visible = true
+            m.nextEpisodeHint.text = "A seguir: " + m.top.nextEpisode.title + chr(10) + "OK iniciar agora  •  * cancelar"
+            m.hint.text = "Próximo episódio em 6 segundos."
             showOsd()
-            m.top.nextEpisodeRequested = m.top.nextEpisode
+            m.nextEpisodeTimer.control = "start"
             return
         end if
         m.hint.text = "Reprodução concluída."
@@ -111,6 +127,17 @@ end sub
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
+    if m.awaitingNextEpisode = true then
+        if key = "OK" then
+            requestNextEpisode()
+            return true
+        end if
+        if key = "options" or key = "back" then
+            cancelNextEpisode(true)
+            return true
+        end if
+        return true
+    end if
     if key = "back" then
         persistProgress(false)
         m.video.control = "stop"
@@ -153,6 +180,33 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     return false
 end function
 
+sub onNextEpisodeTimerFired()
+    requestNextEpisode()
+end sub
+
+sub requestNextEpisode()
+    if m.awaitingNextEpisode <> true then return
+    m.nextEpisodeTimer.control = "stop"
+    m.awaitingNextEpisode = false
+    m.nextEpisodePanel.visible = false
+    m.nextEpisodeTitle.visible = false
+    m.nextEpisodeHint.visible = false
+    if m.top.nextEpisode <> invalid then m.top.nextEpisodeRequested = m.top.nextEpisode
+end sub
+
+sub cancelNextEpisode(showMessage as Boolean)
+    m.nextEpisodeTimer.control = "stop"
+    m.awaitingNextEpisode = false
+    m.nextEpisodePanel.visible = false
+    m.nextEpisodeTitle.visible = false
+    m.nextEpisodeHint.visible = false
+    if showMessage then
+        m.top.nextEpisode = invalid
+        m.hint.text = "Próximo episódio cancelado."
+        showOsd()
+    end if
+end sub
+
 function handleKey(event as Object) as Boolean
     return onKeyEvent(event.key, event.press)
 end function
@@ -194,6 +248,11 @@ sub showOsd()
     m.trackPanel.visible = true
     m.trackPanelTitle.visible = true
     m.trackPanelValue.visible = true
+    if m.awaitingNextEpisode = true then
+        m.nextEpisodePanel.visible = true
+        m.nextEpisodeTitle.visible = true
+        m.nextEpisodeHint.visible = true
+    end if
     for each label in m.controlLabels
         label.visible = true
     end for
@@ -222,6 +281,9 @@ sub hideOsd()
     m.trackPanel.visible = false
     m.trackPanelTitle.visible = false
     m.trackPanelValue.visible = false
+    m.nextEpisodePanel.visible = false
+    m.nextEpisodeTitle.visible = false
+    m.nextEpisodeHint.visible = false
     for each label in m.controlLabels
         label.visible = false
     end for
