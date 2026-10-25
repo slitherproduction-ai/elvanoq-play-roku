@@ -77,11 +77,68 @@ end sub
 
 function uniqueHeroCandidates(continueItems as Object, favoriteItems as Object, catalogItems as Object) as Object
     candidates = []
+    recent = newestItem(catalogItems)
+    weekly = featuredItem(catalogItems)
+    topRated = highestRatedItem(catalogItems)
+
+    appendSingleHeroCandidate(candidates, recent, "RECÉM-ADICIONADO")
+    appendSingleHeroCandidate(candidates, weekly, "DESTAQUE DA SEMANA")
+    appendSingleHeroCandidate(candidates, topRated, "MAIS BEM AVALIADO")
+
+    ' Fallbacks mantêm a Home útil quando a fonte não fornece curadoria.
     appendHeroCandidate(candidates, continueItems, "CONTINUE ASSISTINDO")
     appendHeroCandidate(candidates, favoriteItems, "SEUS FAVORITOS")
     appendHeroCandidate(candidates, catalogItems, "DESTAQUE ELVANOQ")
+    while candidates.count() > 3
+        candidates.pop()
+    end while
     return candidates
 end function
+
+function newestItem(items as Object) as Object
+    best = invalid
+    bestValue = ""
+    for each item in items
+        if item.added_at <> invalid and item.added_at <> "" and item.added_at > bestValue then
+            best = item
+            bestValue = item.added_at
+        end if
+    end for
+    return best
+end function
+
+function featuredItem(items as Object) as Object
+    for each item in items
+        if item.featured <> invalid then
+            value = lcase(item.featured)
+            if value = "true" or value = "1" or value = "yes" then return item
+        end if
+    end for
+    return invalid
+end function
+
+function highestRatedItem(items as Object) as Object
+    best = invalid
+    bestValue = -1
+    for each item in items
+        if item.rating <> invalid and item.rating <> "" then
+            value = val(item.rating)
+            if value > bestValue then
+                best = item
+                bestValue = value
+            end if
+        end if
+    end for
+    return best
+end function
+
+sub appendSingleHeroCandidate(target as Object, candidate as Object, eyebrow as String)
+    if candidate = invalid then return
+    for each existing in target
+        if existing.item.id = candidate.id then return
+    end for
+    target.push({ item: candidate, eyebrow: eyebrow })
+end sub
 
 sub appendHeroCandidate(target as Object, source as Object, eyebrow as String)
     if source = invalid or source.count() = 0 then return

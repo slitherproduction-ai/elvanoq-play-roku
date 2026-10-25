@@ -71,11 +71,14 @@ function parseM3u(body as String) as Object
                 logo: extinfAttribute(line, "tvg-logo")
                 tvg_id: extinfAttribute(line, "tvg-id")
                 tvg_name: extinfAttribute(line, "tvg-name")
+                added_at: firstExtinfAttribute(line, ["added", "date", "release-date"])
+                rating: firstExtinfAttribute(line, ["rating", "tvg-rating", "score"])
+                featured: firstExtinfAttribute(line, ["featured", "weekly-featured", "is-featured"])
             }
         else if pending <> invalid and line <> "" and left(line, 1) <> "#" then
             if items.count() < 1500 then
                 if pending.group = "" then pending.group = "Sem categoria"
-                item = { id: channelLocalId(pending, items.count()), title: pending.title, category: pending.group, logo: pending.logo, tvg_id: pending.tvg_id, tvg_name: pending.tvg_name, stream_url: line, type: "live" }
+                item = { id: channelLocalId(pending, items.count()), title: pending.title, category: pending.group, logo: pending.logo, tvg_id: pending.tvg_id, tvg_name: pending.tvg_name, added_at: pending.added_at, rating: pending.rating, featured: pending.featured, stream_url: line, type: "live" }
                 items.push(item)
                 categories[pending.group] = true
             end if
@@ -104,6 +107,14 @@ function extinfAttribute(line as String, attribute as String) as String
     valueEnd = instr(valueStart, line, "\"")
     if valueEnd = 0 then return ""
     return mid(line, valueStart, valueEnd - valueStart)
+end function
+
+function firstExtinfAttribute(line as String, attributes as Object) as String
+    for each attribute in attributes
+        value = extinfAttribute(line, attribute)
+        if value <> "" then return value
+    end for
+    return ""
 end function
 
 function extinfTitle(line as String) as String
