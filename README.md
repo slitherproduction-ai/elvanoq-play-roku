@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.35
+0.1.36
 
 ## Fluxo de ativação
 
@@ -72,6 +72,8 @@ Em Ajustes, o PIN inicial é `0000`. Depois de desbloquear a sessão, use `*` pa
 Para conteúdo sob demanda, o botão Assistir dos detalhes e o destaque da Home consultam o progresso local associado ao item e retomam da última posição quando ela existir. Conteúdo marcado como concluído começa do início. A posição é sempre resolvida contra o catálogo autorizado em memória.
 
 Quando o stream informa duração, o player marca o título como concluído ao chegar a 95% ou ao terminar. O item é removido de Continuar assistindo e permanece somente no Histórico. Streams ao vivo não entram nessa regra.
+
+O desbloqueio parental vale apenas enquanto o canal permanece aberto. Ao iniciar o ELVANOQ Play novamente, a sessão desbloqueada é removida e o PIN volta a ser exigido para conteúdo ou categorias protegidas.
 
 No destaque da Home, ←/→ alterna entre Assistir e Minha Lista; OK executa a ação selecionada. Adicionar/remover usa somente a coleção local protegida e a reprodução ainda recebe a URL exclusivamente do catálogo em memória.
 

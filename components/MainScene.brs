@@ -1,4 +1,5 @@
 sub init()
+    clearParentalSession()
     m.brand = m.top.findNode("brand")
     m.headline = m.top.findNode("headline")
     m.description = m.top.findNode("description")
@@ -26,6 +27,12 @@ sub init()
     m.status.text = "Conectando ao Portal para ativação…"
     requestPortal("roku-device-register")
     m.licenseTimer.control = "start"
+end sub
+
+sub clearParentalSession()
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    section.Delete("parental_session")
+    section.Flush()
 end sub
 
 sub onLicenseTimer()
