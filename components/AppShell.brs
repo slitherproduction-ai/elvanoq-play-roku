@@ -186,6 +186,7 @@ end sub
 
 sub playCatalogItem(item as Object, resumePosition as Integer)
     if item = invalid or item.stream_url = invalid or item.stream_url = "" then return
+    clearEpisodeQueue()
     m.playerView.liveQueue = []
     m.playerView.liveIndex = 0
     m.playerView.contentTitle = item.title
@@ -226,6 +227,7 @@ end sub
 
 sub playLiveItem(item as Object, channels as Object, index as Integer)
     if item = invalid or item.stream_url = invalid or item.stream_url = "" then return
+    clearEpisodeQueue()
     m.playerView.liveQueue = channels
     m.playerView.liveIndex = index
     m.playerView.contentTitle = item.title
@@ -322,6 +324,7 @@ sub onTrailerRequested()
     if trailer = invalid or trailer.url = invalid or trailer.url = "" then return
     if trailer.id = invalid or trailer.category = invalid then return
     if isParentallyBlockedItem(trailer.category, trailer.id) then return
+    clearEpisodeQueue()
     m.playerView.liveQueue = []
     m.playerView.liveIndex = 0
     m.playerView.contentTitle = trailer.title
@@ -401,8 +404,15 @@ end function
 
 sub onPlayerClosed()
     if m.playerView.closeRequested <> true then return
+    clearEpisodeQueue()
     m.playerView.visible = false
     m.playerView.closeRequested = false
+end sub
+
+sub clearEpisodeQueue()
+    m.episodeQueue = []
+    m.episodeQueueIndex = 0
+    m.playerView.nextEpisode = invalid
 end sub
 
 sub showSection()
