@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.32
+0.1.33
 
 ## Fluxo de ativação
 
@@ -66,6 +66,8 @@ Dentro da grade de Filmes e Séries, ←/→/↑/↓ movem o foco entre os pôst
 Na Home, ↓ entra nos carrosséis e ↑ retorna ao destaque. Em cada carrossel, ←/→ move o foco e OK abre o item: canais ao vivo iniciam a reprodução e filmes/séries abrem os detalhes. A navegação é mantida somente sobre os itens da lista autorizada.
 
 Em TV ao Vivo, a lista lateral mantém uma janela de oito canais. Ao navegar acima ou abaixo dessa janela, a lista avança de forma incremental, sem reconstruir o catálogo completo nem perder a seleção, a prévia ou o guia do canal atual.
+
+Em Ajustes, o PIN inicial é `0000`. Depois de desbloquear a sessão, use `*` para iniciar a troca e digite o novo PIN de quatro dígitos. O PIN não é exibido em texto e os bloqueios continuam separados por lista ativa.
 
 No destaque da Home, ←/→ alterna entre Assistir e Minha Lista; OK executa a ação selecionada. Adicionar/remover usa somente a coleção local protegida e a reprodução ainda recebe a URL exclusivamente do catálogo em memória.
 

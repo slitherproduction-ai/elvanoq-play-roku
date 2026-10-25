@@ -81,7 +81,7 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
             return true
         end if
         if key = "back" then
-            m.parentalView.callFunc("clearDigit")
+            m.parentalView.callFunc("cancelPinEntry")
             returnToHome()
             return true
         end if

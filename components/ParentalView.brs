@@ -2,6 +2,7 @@ sub init()
     m.dots = m.top.findNode("dots")
     m.status = m.top.findNode("status")
     m.pin = ""
+    m.pinMode = "unlock"
     m.categories = []
     m.selectedCategory = 0
     m.top.findNode("title").font = "font:LargeBoldSystemFont"
@@ -27,6 +28,13 @@ end sub
 
 function handleKey(event as Object) as Boolean
     if event.press <> true then return false
+    if event.key = "options" and parentalSessionUnlocked() then
+        m.pinMode = "change"
+        m.pin = ""
+        updateDots()
+        m.status.text = "Digite o novo PIN de quatro dígitos."
+        return true
+    end if
     if not parentalSessionUnlocked() then return false
     if event.key = "down" and m.selectedCategory < m.categories.count() - 1 then
         m.selectedCategory = m.selectedCategory + 1
@@ -57,6 +65,15 @@ sub clearDigit()
     updateDots()
 end sub
 
+sub cancelPinEntry()
+    m.pin = ""
+    if m.pinMode = "change" then
+        m.pinMode = "unlock"
+        m.status.text = "Alteração de PIN cancelada."
+    end if
+    updateDots()
+end sub
+
 sub updateDots()
     text = ""
     for index = 1 to 4
@@ -67,12 +84,23 @@ end sub
 
 sub validatePin()
     section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    if m.pinMode = "change" then
+        section.Write("parental_pin", m.pin)
+        section.Flush()
+        m.pin = ""
+        m.pinMode = "unlock"
+        updateDots()
+        m.status.text = "PIN atualizado com sucesso."
+        return
+    end if
     saved = section.Read("parental_pin")
     if saved = invalid or saved = "" then saved = "0000"
     if m.pin = saved then
         m.status.text = "Controle parental desbloqueado nesta sessão."
         section.Write("parental_session", "unlocked")
         section.Flush()
+        m.pin = ""
+        updateDots()
         renderLocks()
     else
         m.status.text = "PIN incorreto. Tente novamente."
@@ -104,7 +132,7 @@ sub renderLocks()
         if index < lastIndex then output = output + chr(10)
     end for
     m.lockedCategories.text = output
-    m.scopeStatus.text = "↑/↓ selecionar  •  OK bloquear/desbloquear  •  ● bloqueada"
+    m.scopeStatus.text = "↑/↓ selecionar  •  OK bloquear/desbloquear  •  * alterar PIN  •  ● bloqueada"
 end sub
 
 function currentLocks() as Object
