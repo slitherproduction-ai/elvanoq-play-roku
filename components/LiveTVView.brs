@@ -11,6 +11,7 @@ sub init()
     m.visibleChannels = []
     m.categories = ["Todas"]
     m.selectedIndex = 0
+    m.channelOffset = 0
     m.selectedCategoryIndex = 0
     m.focusColumn = "channels"
     m.localState = loadLocalState()
@@ -65,6 +66,7 @@ sub setCatalog(payload as Object)
     end if
     m.selectedCategoryIndex = 0
     m.selectedIndex = 0
+    m.channelOffset = 0
     applyCategory()
 end sub
 
@@ -75,6 +77,7 @@ sub applyCategory()
         if selectedCategory = "Todas" or channel.category = selectedCategory then m.visibleChannels.push(channel)
     end for
     m.selectedIndex = 0
+    m.channelOffset = 0
     renderGuide()
 end sub
 
@@ -105,8 +108,9 @@ sub renderGuide()
     end if
     m.emptyState.visible = false
     for index = 0 to m.channelLabels.count() - 1
-        if index < m.visibleChannels.count() then
-            channel = m.visibleChannels[index]
+        itemIndex = m.channelOffset + index
+        if itemIndex < m.visibleChannels.count() then
+            channel = m.visibleChannels[itemIndex]
             prefix = ""
             if isFavorite(channel.id) then prefix = "★ "
             m.channelLabels[index].text = prefix + channel.title
@@ -136,7 +140,15 @@ sub moveChannel(delta as Integer)
     if nextIndex < 0 then nextIndex = 0
     if nextIndex > m.visibleChannels.count() - 1 then nextIndex = m.visibleChannels.count() - 1
     m.selectedIndex = nextIndex
-    updateSelection()
+    if m.selectedIndex < m.channelOffset then
+        m.channelOffset = m.selectedIndex
+        renderGuide()
+    else if m.selectedIndex >= m.channelOffset + 8 then
+        m.channelOffset = m.selectedIndex - 7
+        renderGuide()
+    else
+        updateSelection()
+    end if
 end sub
 
 sub moveCategory(delta as Integer)
@@ -176,7 +188,8 @@ sub updateFocus()
     m.channelFocus.visible = m.focusColumn = "channels"
     m.categoryFocus.translation = [364, 256 + (m.selectedCategoryIndex * 40)]
     if m.visibleChannels.count() > 0 then
-        visibleIndex = m.selectedIndex
+        visibleIndex = m.selectedIndex - m.channelOffset
+        if visibleIndex < 0 then visibleIndex = 0
         if visibleIndex > 7 then visibleIndex = 7
         m.channelFocus.translation = [615, 258 + (visibleIndex * 55)]
     end if
