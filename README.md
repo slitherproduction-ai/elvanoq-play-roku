@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.44
+0.1.45
 
 ## Fluxo de ativação
 
@@ -55,7 +55,7 @@ Na Home, o destaque prioriza um conteúdo em andamento e, na ausência dele, um 
 
 A Home alterna automaticamente entre até três destaques reais. Quando a lista autorizada fornecer os atributos de curadoria, a ordem é: recém-adicionado (`added`, `date` ou `release-date`), destaque semanal (`featured`, `weekly-featured` ou `is-featured`) e mais bem avaliado (`rating`, `tvg-rating` ou `score`). Sem esses atributos, os destaques usam continuar assistindo, favoritos e catálogo. A rotação só acontece enquanto a Home está ativa e não busca conteúdo fora da lista autorizada.
 
-O catálogo diferencia canais ao vivo, filmes e séries pelo grupo recebido na lista: grupos contendo `filme`, `movie` ou `vod` vão para Filmes; grupos contendo `série`, `serie` ou `series` vão para Séries; os demais permanecem em TV ao Vivo. A classificação não altera a URL do stream nem inventa itens; listas com nomes de grupo diferentes precisarão de ajuste após a validação no Roku físico.
+O catálogo diferencia canais ao vivo, filmes e séries sem alterar a URL do stream. Quando a lista autorizada declara `content-type`, `media-type`, `tvg-type`, `type` ou `category-type`, esse metadado tem prioridade e aceita valores usuais como `live`, `movie`, `vod`, `series` e `tv shows`. Sem esse atributo, o app infere pelo grupo: `filme`, `movie` ou `vod` vão para Filmes; `série`, `serie`, `series` e `tv show` vão para Séries; os demais permanecem em TV ao Vivo. A classificação não inventa itens; convenções diferentes do provedor devem ser validadas com a lista autorizada no Roku físico.
 
 Em Busca, o filtro `*` alterna entre Todos, Filmes, Séries e Canais usando a classificação recebida do catálogo. A grade informa a quantidade retornada e mantém a mensagem específica quando o tipo escolhido não possui itens correspondentes.
 

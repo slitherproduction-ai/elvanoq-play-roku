@@ -74,11 +74,12 @@ function parseM3u(body as String) as Object
                 added_at: firstExtinfAttribute(line, ["added", "date", "release-date"])
                 rating: firstExtinfAttribute(line, ["rating", "tvg-rating", "score"])
                 featured: firstExtinfAttribute(line, ["featured", "weekly-featured", "is-featured"])
+                content_type: firstExtinfAttribute(line, ["content-type", "content_type", "media-type", "media_type", "tvg-type", "tvg_type", "type", "category-type"])
             }
         else if pending <> invalid and line <> "" and left(line, 1) <> "#" then
             if items.count() < 1500 then
                 if pending.group = "" then pending.group = "Sem categoria"
-                contentType = contentTypeForGroup(pending.group)
+                contentType = contentTypeForEntry(pending)
                 item = { id: channelLocalId(pending, items.count()), title: pending.title, category: pending.group, logo: pending.logo, tvg_id: pending.tvg_id, tvg_name: pending.tvg_name, added_at: pending.added_at, rating: pending.rating, featured: pending.featured, stream_url: line, type: contentType }
                 items.push(item)
                 if contentType = "live" then categories[pending.group] = true
@@ -93,11 +94,30 @@ function parseM3u(body as String) as Object
     return { items: items, categories: names }
 end function
 
-function contentTypeForGroup(group as String) as String
-    normalized = lcase(group)
-    if instr(1, normalized, "série") > 0 or instr(1, normalized, "serie") > 0 or instr(1, normalized, "series") > 0 then return "series"
-    if instr(1, normalized, "filme") > 0 or instr(1, normalized, "movie") > 0 or instr(1, normalized, "vod") > 0 then return "movies"
+function contentTypeForEntry(pending as Object) as String
+    explicitType = ""
+    if pending.content_type <> invalid then explicitType = normalizedContentType(pending.content_type)
+    if explicitType <> "" then return explicitType
+
+    inferredType = normalizedContentType(pending.group)
+    if inferredType <> "" then return inferredType
     return "live"
+end function
+
+function normalizedContentType(value as String) as String
+    normalized = lcase(trim(value))
+    if normalized = "" then return ""
+
+    ' Providers use a range of M3U conventions. Explicit attributes are evaluated
+    ' before the display group so a provider can keep a branded group name.
+    if normalized = "series" or normalized = "serie" or normalized = "series tv" or normalized = "tv shows" or normalized = "show" or normalized = "shows" then return "series"
+    if normalized = "movie" or normalized = "movies" or normalized = "film" or normalized = "films" or normalized = "vod" then return "movies"
+    if normalized = "live" or normalized = "live tv" or normalized = "tv" or normalized = "channel" or normalized = "channels" then return "live"
+
+    if instr(1, normalized, "série") > 0 or instr(1, normalized, "serie") > 0 or instr(1, normalized, "tv show") > 0 then return "series"
+    if instr(1, normalized, "filme") > 0 or instr(1, normalized, "movie") > 0 or instr(1, normalized, "film") > 0 or instr(1, normalized, "vod") > 0 then return "movies"
+    if instr(1, normalized, "ao vivo") > 0 or instr(1, normalized, "ao-vivo") > 0 or instr(1, normalized, "live") > 0 then return "live"
+    return ""
 end function
 
 function channelLocalId(pending as Object, position as Integer) as String
