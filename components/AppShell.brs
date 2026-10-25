@@ -24,6 +24,7 @@ sub init()
     m.detailView.observeField("closeRequested", "onDetailClosed")
     m.detailView.observeField("playRequested", "onPlayRequested")
     m.detailView.observeField("trailerRequested", "onTrailerRequested")
+    m.detailView.observeField("episodeRequested", "onEpisodeRequested")
     m.detailView.observeField("seasonRequested", "onSeasonRequested")
     m.playerView.observeField("closeRequested", "onPlayerClosed")
     m.playerView.observeField("channelRequested", "onPlayerChannelRequested")
@@ -326,6 +327,22 @@ sub onTrailerRequested()
     m.playerView.resumePosition = 0
     m.playerView.persistEnabled = false
     m.playerView.streamUrl = trailer.url
+    m.playerView.visible = true
+end sub
+
+sub onEpisodeRequested()
+    episode = m.detailView.episodeRequested
+    if episode = invalid or episode.url = invalid or episode.url = "" then return
+    if episode.parentId = invalid or episode.category = invalid then return
+    if isParentallyBlockedItem(episode.category, episode.parentId) then return
+    m.playerView.liveQueue = []
+    m.playerView.liveIndex = 0
+    m.playerView.contentTitle = episode.title
+    m.playerView.contentId = episode.id
+    m.playerView.contentCategory = episode.category
+    m.playerView.resumePosition = resumePositionFor(episode)
+    m.playerView.persistEnabled = true
+    m.playerView.streamUrl = episode.url
     m.playerView.visible = true
 end sub
 

@@ -13,6 +13,7 @@ sub init()
     m.seriesLabel = m.top.findNode("seriesLabel")
     m.seasonHint = m.top.findNode("seasonHint")
     m.episodeLabel = m.top.findNode("episodeLabel")
+    m.episodeHint = m.top.findNode("episodeHint")
     m.seasonPanel = m.top.findNode("seasonPanel")
     m.selectedAction = 0
     m.selectedSeasonIndex = 0
@@ -39,6 +40,10 @@ sub init()
     m.seasonHint.color = "0x73B7FFFF"
     m.episodeLabel.font = "font:SmallSystemFont"
     m.episodeLabel.color = "0xB9CBE0FF"
+    m.episodeHint.font = "font:SmallSystemFont"
+    m.episodeHint.color = "0x73B7FFFF"
+    m.episodeFocus = false
+    m.selectedEpisodeIndex = 0
     m.top.findNode("similarTitle").font = "font:MediumBoldSystemFont"
     m.top.findNode("similarHint").font = "font:SmallSystemFont"
     updateActionFocus()
@@ -138,17 +143,44 @@ end function
 sub renderEpisodes(payload as Object)
     episodes = payload.episodes
     if episodes = invalid or episodes.count() = 0 then return
-    line = "Episódios: "
-    lastIndex = episodes.count() - 1
-    if lastIndex > 3 then lastIndex = 3
-    for index = 0 to lastIndex
-        if index > 0 then line = line + "  •  "
-        episode = episodes[index]
-        line = line + trim(str(episode.number)) + ". " + episode.name
-    end for
+    m.episodes = episodes
+    m.selectedEpisodeIndex = 0
     m.episodeLabel.visible = true
-    m.episodeLabel.text = line
+    m.episodeHint.visible = true
+    renderEpisodeSelection()
 end sub
+
+sub renderEpisodeSelection()
+    if m.episodes = invalid or m.episodes.count() = 0 then return
+    selected = m.episodes[m.selectedEpisodeIndex]
+    number = ""
+    if selected.number <> invalid then number = trim(str(selected.number)) + ". "
+    name = episodeDisplayName(selected)
+    prefix = "Episódio selecionado: "
+    if m.episodeFocus then prefix = "▶ " + prefix
+    m.episodeLabel.text = prefix + number + name
+    if m.episodeFocus then
+        m.episodeHint.text = "←/→ escolher  •  OK assistir  •  * voltar às ações"
+    else
+        m.episodeHint.text = "*: selecionar episódio para assistir"
+    end if
+end sub
+
+function episodeStreamUrl(episode as Object) as String
+    if episode = invalid then return ""
+    candidate = ""
+    if episode.stream_url <> invalid then candidate = episode.stream_url
+    if candidate = "" and episode.playback_url <> invalid then candidate = episode.playback_url
+    if candidate = "" and episode.url <> invalid then candidate = episode.url
+    candidate = trim(candidate)
+    if left(candidate, 8) = "https://" then return candidate
+    return ""
+end function
+
+function episodeDisplayName(episode as Object) as String
+    if episode <> invalid and episode.name <> invalid and episode.name <> "" then return episode.name
+    return "Episódio"
+end function
 
 sub onItemChanged()
     if m.top.item = invalid then return
@@ -160,6 +192,10 @@ sub onItemChanged()
     if item.logo <> invalid then m.poster.uri = item.logo
     m.actionStatus.text = ""
     m.trailerUrl = ""
+    m.episodes = invalid
+    m.episodeFocus = false
+    m.episodeLabel.visible = false
+    m.episodeHint.visible = false
     m.trailerButton.visible = false
     m.trailerLabel.visible = false
     m.seasonPanel.visible = false
@@ -192,8 +228,43 @@ end function
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
     if key = "back" then
+        if m.episodeFocus then
+            m.episodeFocus = false
+            renderEpisodeSelection()
+            return true
+        end if
         m.top.closeRequested = true
         return true
+    end if
+    if key = "options" and m.episodes <> invalid and m.episodes.count() > 0 then
+        m.episodeFocus = not m.episodeFocus
+        renderEpisodeSelection()
+        return true
+    end if
+    if m.episodeFocus then
+        if key = "left" and m.selectedEpisodeIndex > 0 then
+            m.selectedEpisodeIndex = m.selectedEpisodeIndex - 1
+            renderEpisodeSelection()
+            return true
+        end if
+        if key = "right" and m.selectedEpisodeIndex < m.episodes.count() - 1 then
+            m.selectedEpisodeIndex = m.selectedEpisodeIndex + 1
+            renderEpisodeSelection()
+            return true
+        end if
+        if key = "OK" then
+            episode = m.episodes[m.selectedEpisodeIndex]
+            streamUrl = episodeStreamUrl(episode)
+            if streamUrl = "" then
+                m.actionStatus.text = "Este episódio ainda não possui reprodução autorizada na sua lista."
+                return true
+            end if
+            episodeNumber = m.selectedEpisodeIndex + 1
+            if episode.number <> invalid then episodeNumber = int(episode.number)
+            m.top.episodeRequested = { url: streamUrl, title: m.top.item.title + " • " + episodeDisplayName(episode), id: m.top.item.id + ":episode:" + trim(str(episodeNumber)), parentId: m.top.item.id, category: m.top.item.category }
+            return true
+        end if
+        return key = "left" or key = "right" or key = "up" or key = "down"
     end if
     maxAction = 2
     if m.trailerUrl <> invalid and m.trailerUrl <> "" then maxAction = 3
