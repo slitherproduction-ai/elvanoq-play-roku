@@ -346,10 +346,17 @@ end function
 
 sub persistProgress(completed as Boolean)
     if m.top.contentId = "" or m.video.position = invalid then return
+    if m.video.duration <> invalid and m.video.duration > 0 and m.video.position / m.video.duration >= 0.95 then completed = true
     item = { id: m.top.contentId, title: m.top.contentTitle, category: m.top.contentCategory, progress_seconds: int(m.video.position), duration_seconds: 0, completed: completed, updated_at: CreateObject("roDateTime").ToISOString() }
     if m.video.duration <> invalid then item.duration_seconds = int(m.video.duration)
     state = loadLocalState()
-    if not isLivePlayback() then state.continue_watching = upsertLocalItem(state.continue_watching, item)
+    if not isLivePlayback() then
+        if completed then
+            state.continue_watching = removeLocalItem(state.continue_watching, item.id)
+        else
+            state.continue_watching = upsertLocalItem(state.continue_watching, item)
+        end if
+    end if
     state.history = upsertLocalItem(state.history, item)
     saveLocalState(state)
     m.lastPersistedSecond = int(m.video.position)

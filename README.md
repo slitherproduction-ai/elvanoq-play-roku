@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.34
+0.1.35
 
 ## Fluxo de ativação
 
@@ -70,6 +70,8 @@ Em TV ao Vivo, a lista lateral mantém uma janela de oito canais. Ao navegar aci
 Em Ajustes, o PIN inicial é `0000`. Depois de desbloquear a sessão, use `*` para iniciar a troca e digite o novo PIN de quatro dígitos. O PIN não é exibido em texto e os bloqueios continuam separados por lista ativa.
 
 Para conteúdo sob demanda, o botão Assistir dos detalhes e o destaque da Home consultam o progresso local associado ao item e retomam da última posição quando ela existir. Conteúdo marcado como concluído começa do início. A posição é sempre resolvida contra o catálogo autorizado em memória.
+
+Quando o stream informa duração, o player marca o título como concluído ao chegar a 95% ou ao terminar. O item é removido de Continuar assistindo e permanece somente no Histórico. Streams ao vivo não entram nessa regra.
 
 No destaque da Home, ←/→ alterna entre Assistir e Minha Lista; OK executa a ação selecionada. Adicionar/remover usa somente a coleção local protegida e a reprodução ainda recebe a URL exclusivamente do catálogo em memória.
 
