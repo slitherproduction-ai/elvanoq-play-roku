@@ -53,7 +53,10 @@ end sub
 
 sub setCatalog(payload as Object)
     if payload = invalid or type(payload) <> "roAssociativeArray" then return
-    m.allChannels = payload.items
+    m.allChannels = []
+    for each item in payload.items
+        if item.type = invalid or item.type = "live" then m.allChannels.push(item)
+    end for
     m.categories = ["Todas"]
     if payload.categories <> invalid then
         for each category in payload.categories

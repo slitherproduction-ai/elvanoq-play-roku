@@ -78,9 +78,10 @@ function parseM3u(body as String) as Object
         else if pending <> invalid and line <> "" and left(line, 1) <> "#" then
             if items.count() < 1500 then
                 if pending.group = "" then pending.group = "Sem categoria"
-                item = { id: channelLocalId(pending, items.count()), title: pending.title, category: pending.group, logo: pending.logo, tvg_id: pending.tvg_id, tvg_name: pending.tvg_name, added_at: pending.added_at, rating: pending.rating, featured: pending.featured, stream_url: line, type: "live" }
+                contentType = contentTypeForGroup(pending.group)
+                item = { id: channelLocalId(pending, items.count()), title: pending.title, category: pending.group, logo: pending.logo, tvg_id: pending.tvg_id, tvg_name: pending.tvg_name, added_at: pending.added_at, rating: pending.rating, featured: pending.featured, stream_url: line, type: contentType }
                 items.push(item)
-                categories[pending.group] = true
+                if contentType = "live" then categories[pending.group] = true
             end if
             pending = invalid
         end if
@@ -90,6 +91,13 @@ function parseM3u(body as String) as Object
         names.push(name)
     end for
     return { items: items, categories: names }
+end function
+
+function contentTypeForGroup(group as String) as String
+    normalized = lcase(group)
+    if instr(1, normalized, "série") > 0 or instr(1, normalized, "serie") > 0 or instr(1, normalized, "series") > 0 then return "series"
+    if instr(1, normalized, "filme") > 0 or instr(1, normalized, "movie") > 0 or instr(1, normalized, "vod") > 0 then return "movies"
+    return "live"
 end function
 
 function channelLocalId(pending as Object, position as Integer) as String

@@ -37,6 +37,8 @@ sub setCatalog(payload as Object)
         category = lcase(item.category)
         isSeries = instr(1, category, "série") > 0 or instr(1, category, "serie") > 0 or instr(1, category, "series") > 0
         isMovie = instr(1, category, "filme") > 0 or instr(1, category, "movie") > 0 or instr(1, category, "vod") > 0
+        if item.type = "series" then isSeries = true
+        if item.type = "movies" then isMovie = true
         if (m.top.kind = "series" and isSeries) or (m.top.kind = "movies" and isMovie and not isSeries) then selected.push(item)
     end for
     m.countLabel.text = trim(str(selected.count())) + " títulos disponíveis"
