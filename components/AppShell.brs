@@ -23,6 +23,7 @@ sub init()
     m.libraryView.observeField("itemRequested", "onLibraryItemRequested")
     m.detailView.observeField("closeRequested", "onDetailClosed")
     m.detailView.observeField("playRequested", "onPlayRequested")
+    m.detailView.observeField("trailerRequested", "onTrailerRequested")
     m.detailView.observeField("seasonRequested", "onSeasonRequested")
     m.playerView.observeField("closeRequested", "onPlayerClosed")
     m.playerView.observeField("channelRequested", "onPlayerChannelRequested")
@@ -189,6 +190,7 @@ sub playCatalogItem(item as Object, resumePosition as Integer)
     m.playerView.contentId = item.id
     m.playerView.contentCategory = item.category
     m.playerView.resumePosition = resumePosition
+    m.playerView.persistEnabled = true
     m.playerView.streamUrl = item.stream_url
     m.playerView.visible = true
 end sub
@@ -227,6 +229,7 @@ sub playLiveItem(item as Object, channels as Object, index as Integer)
     m.playerView.contentId = item.id
     m.playerView.contentCategory = item.category
     m.playerView.resumePosition = 0
+    m.playerView.persistEnabled = false
     m.playerView.streamUrl = item.stream_url
     m.playerView.visible = true
 end sub
@@ -308,6 +311,22 @@ sub onPlayRequested()
     if item = invalid then return
     if item.stream_url = invalid or item.stream_url = "" then return
     playCatalogItem(item, resumePositionFor(item))
+end sub
+
+sub onTrailerRequested()
+    trailer = m.detailView.trailerRequested
+    if trailer = invalid or trailer.url = invalid or trailer.url = "" then return
+    if trailer.id = invalid or trailer.category = invalid then return
+    if isParentallyBlockedItem(trailer.category, trailer.id) then return
+    m.playerView.liveQueue = []
+    m.playerView.liveIndex = 0
+    m.playerView.contentTitle = trailer.title
+    m.playerView.contentId = trailer.id
+    m.playerView.contentCategory = trailer.category
+    m.playerView.resumePosition = 0
+    m.playerView.persistEnabled = false
+    m.playerView.streamUrl = trailer.url
+    m.playerView.visible = true
 end sub
 
 function resumePositionFor(item as Object) as Integer

@@ -5,6 +5,7 @@
     <field id="metadata" type="assocarray" />
     <field id="closeRequested" type="boolean" alwaysNotify="true" />
     <field id="playRequested" type="assocarray" alwaysNotify="true" />
+    <field id="trailerRequested" type="assocarray" alwaysNotify="true" />
     <field id="seasonRequested" type="integer" alwaysNotify="true" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/DetailView.brs" />
@@ -26,6 +27,8 @@
     <Label id="listLabel" translation="412,516" text="+ Minha Lista" width="190" height="32" />
     <Rectangle id="laterButton" translation="632,500" width="205" height="58" color="0x1D3656FF" />
     <Label id="laterLabel" translation="654,516" text="Assistir mais tarde" width="180" height="32" />
+    <Rectangle id="trailerButton" translation="850,500" width="150" height="58" color="0x1D3656FF" visible="false" />
+    <Label id="trailerLabel" translation="873,516" text="Trailer" width="112" height="32" visible="false" />
     <Label id="actionStatus" translation="150,590" width="850" height="40" />
     <Label id="similarTitle" translation="150,710" text="Mais como este" width="600" height="42" />
     <Label id="similarHint" translation="150,760" text="Recomendações serão enriquecidas com TMDB quando configurado." width="820" height="32" wrap="true" />

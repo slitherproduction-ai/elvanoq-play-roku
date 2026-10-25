@@ -7,6 +7,8 @@ sub init()
     m.watchFocus = m.top.findNode("watchFocus")
     m.listLabel = m.top.findNode("listLabel")
     m.laterLabel = m.top.findNode("laterLabel")
+    m.trailerButton = m.top.findNode("trailerButton")
+    m.trailerLabel = m.top.findNode("trailerLabel")
     m.actionStatus = m.top.findNode("actionStatus")
     m.seriesLabel = m.top.findNode("seriesLabel")
     m.seasonHint = m.top.findNode("seasonHint")
@@ -65,9 +67,27 @@ sub onMetadataChanged()
         m.seasonPanel.visible = true
         updateSeasonSelection()
     end if
-    if details.trailer <> invalid then m.actionStatus.text = "Trailer oficial disponível."
+    m.trailerUrl = trailerUrlFromDetails(details)
+    m.trailerButton.visible = m.trailerUrl <> ""
+    m.trailerLabel.visible = m.trailerUrl <> ""
+    if m.trailerUrl <> "" then m.actionStatus.text = "Trailer oficial disponível."
     if details.recommendations <> invalid and details.recommendations.count() > 0 then m.top.findNode("similarHint").text = recommendationSummary(details.recommendations)
 end sub
+
+function trailerUrlFromDetails(details as Object) as String
+    candidate = ""
+    if details.trailer_url <> invalid then candidate = details.trailer_url
+    if candidate = "" and details.trailer <> invalid then
+        if type(details.trailer) = "roAssociativeArray" then
+            if details.trailer.url <> invalid then candidate = details.trailer.url
+        else if type(details.trailer) = "roString" then
+            candidate = details.trailer
+        end if
+    end if
+    candidate = trim(candidate)
+    if left(candidate, 8) = "https://" then return candidate
+    return ""
+end function
 
 function genreSummary(genres as Object) as String
     summary = ""
@@ -139,6 +159,9 @@ sub onItemChanged()
     m.overview.text = "Informações complementares, elenco, trailer e recomendações serão exibidos quando os metadados estiverem disponíveis."
     if item.logo <> invalid then m.poster.uri = item.logo
     m.actionStatus.text = ""
+    m.trailerUrl = ""
+    m.trailerButton.visible = false
+    m.trailerLabel.visible = false
     m.seasonPanel.visible = false
     updateCollectionLabels()
 end sub
@@ -172,7 +195,9 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
         m.top.closeRequested = true
         return true
     end if
-    if key = "right" and m.selectedAction < 2 then
+    maxAction = 2
+    if m.trailerUrl <> invalid and m.trailerUrl <> "" then maxAction = 3
+    if key = "right" and m.selectedAction < maxAction then
         m.selectedAction = m.selectedAction + 1
         updateActionFocus()
         return true
@@ -206,8 +231,8 @@ function handleKey(event as Object) as Boolean
 end function
 
 sub updateActionFocus()
-    positions = [150, 386, 632]
-    widths = [220, 230, 205]
+    positions = [150, 386, 632, 850]
+    widths = [220, 230, 205, 150]
     m.watchFocus.translation = [positions[m.selectedAction], 500]
     m.watchFocus.width = widths[m.selectedAction]
     if m.selectedAction = 0 then m.watchFocus.color = "0xFFFFFFFF" else m.watchFocus.color = "0x2E91EFFF"
@@ -233,7 +258,7 @@ sub runAction()
         end if
         saveLocalState(state)
         updateCollectionLabels()
-    else
+    else if m.selectedAction = 2 then
         state = loadLocalState()
         if collectionContains(state.watch_later, item.id) then
             state.watch_later = removeLocalItem(state.watch_later, item.id)
@@ -244,5 +269,7 @@ sub runAction()
         end if
         saveLocalState(state)
         updateCollectionLabels()
+    else if m.trailerUrl <> invalid and m.trailerUrl <> "" then
+        m.top.trailerRequested = { url: m.trailerUrl, title: item.title + " • Trailer", id: item.id, category: item.category }
     end if
 end sub

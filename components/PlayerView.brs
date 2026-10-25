@@ -351,6 +351,7 @@ function twoDigits(value as Integer) as String
 end function
 
 sub persistProgress(completed as Boolean)
+    if m.top.persistEnabled <> true then return
     if m.top.contentId = "" or m.video.position = invalid then return
     if m.video.duration <> invalid and m.video.duration > 0 and m.video.position / m.video.duration >= 0.95 then completed = true
     item = { id: m.top.contentId, title: m.top.contentTitle, category: m.top.contentCategory, progress_seconds: int(m.video.position), duration_seconds: 0, completed: completed, updated_at: CreateObject("roDateTime").ToISOString() }

@@ -6,6 +6,7 @@
     <field id="contentTitle" type="string" />
     <field id="contentCategory" type="string" />
     <field id="resumePosition" type="integer" value="0" />
+    <field id="persistEnabled" type="boolean" value="true" />
     <field id="liveQueue" type="array" />
     <field id="liveIndex" type="integer" value="0" />
     <field id="channelRequested" type="assocarray" alwaysNotify="true" />
