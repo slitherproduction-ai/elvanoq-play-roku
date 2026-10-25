@@ -12,6 +12,10 @@ function parentalSessionUnlocked() as Boolean
     return section.Read("parental_session") = "unlocked"
 end function
 
+function parentalItemScopeKey() as String
+    return parentalScopeKey() + "_items"
+end function
+
 function isParentallyBlocked(category as String) as Boolean
     if parentalSessionUnlocked() then return false
     section = CreateObject("roRegistrySection", "ELVANOQPlay")
@@ -19,6 +23,18 @@ function isParentallyBlocked(category as String) as Boolean
     if locks = invalid or type(locks) <> "roArray" then return false
     for each lockedCategory in locks
         if lcase(lockedCategory) = lcase(category) then return true
+    end for
+    return false
+end function
+
+function isParentallyBlockedItem(category as String, itemId as String) as Boolean
+    if isParentallyBlocked(category) then return true
+    if parentalSessionUnlocked() or itemId = "" then return false
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    locks = ParseJson(section.Read(parentalItemScopeKey()))
+    if locks = invalid or type(locks) <> "roArray" then return false
+    for each lockedItemId in locks
+        if lockedItemId = itemId then return true
     end for
     return false
 end function

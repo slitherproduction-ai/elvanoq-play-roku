@@ -217,7 +217,7 @@ sub runAction()
     if m.top.item = invalid then return
     item = m.top.item
     if m.selectedAction = 0 then
-        if isParentallyBlocked(item.category) then
+        if isParentallyBlockedItem(item.category, item.id) then
             m.actionStatus.text = "Conteúdo protegido. Valide o PIN em Ajustes para assistir."
         else
             m.top.playRequested = item

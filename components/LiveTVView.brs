@@ -221,7 +221,7 @@ end sub
 sub playSelected()
     if m.visibleChannels.count() = 0 then return
     selected = m.visibleChannels[m.selectedIndex]
-    if isParentallyBlocked(selected.category) then
+    if isParentallyBlockedItem(selected.category, selected.id) then
         m.previewHint.text = "Conteúdo protegido. Valide o PIN em Ajustes para continuar."
         return
     end if
@@ -236,7 +236,7 @@ end sub
 sub openSelected()
     if m.visibleChannels.count() = 0 then return
     selected = m.visibleChannels[m.selectedIndex]
-    if isParentallyBlocked(selected.category) then
+    if isParentallyBlockedItem(selected.category, selected.id) then
         m.previewHint.text = "Conteúdo protegido. Valide o PIN em Ajustes para continuar."
         return
     end if

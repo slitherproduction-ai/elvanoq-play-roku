@@ -4,6 +4,8 @@ sub init()
     m.pin = ""
     m.pinMode = "unlock"
     m.categories = []
+    m.items = []
+    m.mode = "categories"
     m.selectedCategory = 0
     m.top.findNode("title").font = "font:LargeBoldSystemFont"
     m.top.findNode("description").font = "font:MediumSystemFont"
@@ -17,6 +19,13 @@ sub init()
     m.scopeStatus.color = "0x8FA9C4FF"
     m.scopeStatus.text = "Bloqueios são separados por lista ativa."
     m.top.observeField("categories", "onCategoriesChanged")
+    m.top.observeField("items", "onItemsChanged")
+end sub
+
+sub onItemsChanged()
+    m.items = m.top.items
+    if m.items = invalid then m.items = []
+    renderLocks()
 end sub
 
 sub onCategoriesChanged()
@@ -36,7 +45,15 @@ function handleKey(event as Object) as Boolean
         return true
     end if
     if not parentalSessionUnlocked() then return false
-    if event.key = "down" and m.selectedCategory < m.categories.count() - 1 then
+    if event.key = "left" or event.key = "right" then
+        if m.mode = "categories" then m.mode = "items" else m.mode = "categories"
+        m.selectedCategory = 0
+        renderLocks()
+        return true
+    end if
+    selectable = m.categories
+    if m.mode = "items" then selectable = m.items
+    if event.key = "down" and m.selectedCategory < selectable.count() - 1 then
         m.selectedCategory = m.selectedCategory + 1
         renderLocks()
         return true
@@ -46,8 +63,12 @@ function handleKey(event as Object) as Boolean
         renderLocks()
         return true
     end if
-    if event.key = "OK" and m.categories.count() > 0 then
-        toggleCategoryLock(m.categories[m.selectedCategory])
+    if event.key = "OK" and selectable.count() > 0 then
+        if m.mode = "categories" then
+            toggleCategoryLock(m.categories[m.selectedCategory])
+        else
+            toggleItemLock(m.items[m.selectedCategory])
+        end if
         return true
     end if
     return false
@@ -114,30 +135,49 @@ sub renderLocks()
         m.lockedCategories.text = "Digite o PIN para gerenciar categorias."
         return
     end if
-    if m.categories = invalid or m.categories.count() = 0 then
-        m.lockedCategories.text = "Nenhuma categoria recebida da lista atual."
+    entries = m.categories
+    if m.mode = "items" then entries = m.items
+    if entries = invalid or entries.count() = 0 then
+        m.lockedCategories.text = "Nenhum item recebido da lista atual."
         return
     end if
     locks = currentLocks()
+    if m.mode = "items" then locks = currentItemLocks()
     output = "CATEGORIAS DA LISTA\n"
-    lastIndex = m.categories.count() - 1
-    if lastIndex > 5 then lastIndex = 5
-    for index = 0 to lastIndex
-        category = m.categories[index]
+    if m.mode = "items" then output = "CANAIS E TÍTULOS\n"
+    firstIndex = 0
+    if m.selectedCategory > 5 then firstIndex = m.selectedCategory - 5
+    lastIndex = firstIndex + 5
+    if lastIndex > entries.count() - 1 then lastIndex = entries.count() - 1
+    for index = firstIndex to lastIndex
+        entry = entries[index]
+        label = entry
+        entryId = entry
+        if m.mode = "items" then
+            label = entry.title
+            entryId = entry.id
+        end if
         marker = "○"
-        if isCategoryLocked(category, locks) then marker = "●"
+        if isCategoryLocked(entryId, locks) then marker = "●"
         prefix = "  "
         if index = m.selectedCategory then prefix = "› "
-        output = output + prefix + marker + "  " + category
+        output = output + prefix + marker + "  " + label
         if index < lastIndex then output = output + chr(10)
     end for
     m.lockedCategories.text = output
-    m.scopeStatus.text = "↑/↓ selecionar  •  OK bloquear/desbloquear  •  * alterar PIN  •  ● bloqueada"
+    m.scopeStatus.text = "←/→ alternar modo  •  ↑/↓ selecionar  •  OK bloquear/desbloquear  •  * alterar PIN"
 end sub
 
 function currentLocks() as Object
     section = CreateObject("roRegistrySection", "ELVANOQPlay")
     locks = ParseJson(section.Read(parentalScopeKey()))
+    if locks = invalid or type(locks) <> "roArray" then return []
+    return locks
+end function
+
+function currentItemLocks() as Object
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    locks = ParseJson(section.Read(parentalItemScopeKey()))
     if locks = invalid or type(locks) <> "roArray" then return []
     return locks
 end function
@@ -168,6 +208,30 @@ sub toggleCategoryLock(category as String)
     end if
     section = CreateObject("roRegistrySection", "ELVANOQPlay")
     section.Write(parentalScopeKey(), FormatJson(updated))
+    section.Flush()
+    renderLocks()
+end sub
+
+sub toggleItemLock(item as Object)
+    if item = invalid or item.id = invalid or item.id = "" then return
+    locks = currentItemLocks()
+    updated = []
+    removed = false
+    for each locked in locks
+        if locked = item.id then
+            removed = true
+        else
+            updated.push(locked)
+        end if
+    end for
+    if removed then
+        m.status.text = "Item desbloqueado: " + item.title
+    else
+        updated.push(item.id)
+        m.status.text = "Item bloqueado: " + item.title
+    end if
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    section.Write(parentalItemScopeKey(), FormatJson(updated))
     section.Flush()
     renderLocks()
 end sub

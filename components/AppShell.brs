@@ -379,6 +379,7 @@ sub showSection()
     if isSearch and m.catalog <> invalid then m.searchView.callFunc("setCatalog", { items: m.catalog })
     if m.selectedIndex = 5 then m.libraryView.callFunc("refresh")
     if isSettings and m.categories <> invalid then m.parentalView.categories = m.categories
+    if isSettings and m.catalog <> invalid then m.parentalView.items = m.catalog
 end sub
 
 function libraryDescription() as String

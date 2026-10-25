@@ -59,7 +59,7 @@ sub onStreamChanged()
     if m.top.streamUrl = "" then return
     m.lastPersistedSecond = -15
     m.shouldRestorePosition = m.top.resumePosition > 0
-    if isParentallyBlocked(m.top.contentCategory) then
+    if isParentallyBlockedItem(m.top.contentCategory, m.top.contentId) then
         m.video.control = "stop"
         m.hint.text = "Conteúdo protegido. Valide o PIN em Ajustes para assistir."
         showOsd()
