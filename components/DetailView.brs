@@ -173,7 +173,9 @@ function episodeStreamUrl(episode as Object) as String
     if candidate = "" and episode.playback_url <> invalid then candidate = episode.playback_url
     if candidate = "" and episode.url <> invalid then candidate = episode.url
     candidate = trim(candidate)
-    if left(candidate, 8) = "https://" then return candidate
+    ' IPTV providers may expose authorized episode streams over HTTP.
+    ' The URL stays only in memory and is never logged or persisted locally.
+    if left(candidate, 8) = "https://" or left(candidate, 7) = "http://" then return candidate
     return ""
 end function
 
