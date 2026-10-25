@@ -141,7 +141,9 @@ sub returnToHome()
 end sub
 
 sub onHomePlayRequested()
-    playCatalogItem(m.homeView.playRequested, 0)
+    item = m.homeView.playRequested
+    if item = invalid then return
+    playCatalogItem(item, resumePositionFor(item))
 end sub
 
 sub onHomeItemSelected()
@@ -305,8 +307,22 @@ sub onPlayRequested()
     item = m.detailView.playRequested
     if item = invalid then return
     if item.stream_url = invalid or item.stream_url = "" then return
-    playCatalogItem(item, 0)
+    playCatalogItem(item, resumePositionFor(item))
 end sub
+
+function resumePositionFor(item as Object) as Integer
+    if item = invalid or item.id = invalid then return 0
+    state = loadLocalState()
+    if state.continue_watching = invalid then return 0
+    for each saved in state.continue_watching
+        if saved.id = item.id then
+            if saved.completed <> invalid and saved.completed = true then return 0
+            if saved.progress_seconds <> invalid and saved.progress_seconds > 0 then return int(saved.progress_seconds)
+            return 0
+        end if
+    end for
+    return 0
+end function
 
 sub onPlayerClosed()
     if m.playerView.closeRequested <> true then return
