@@ -38,17 +38,36 @@ function parseXmltv(body as String) as Object
         if openingEnd = 0 then exit while
         opening = mid(body, startAt, openingEnd - startAt + 1)
         channelId = xmlAttribute(opening, "channel")
+        startTime = xmlAttribute(opening, "start")
         block = mid(body, openingEnd + 1, closeAt - openingEnd - 1)
         title = xmlTagText(block, "title")
         if channelId <> "" and title <> "" then
             if entries[channelId] = invalid then entries[channelId] = []
-            if entries[channelId].count() < 2 then entries[channelId].push(title)
+            insertProgramme(entries[channelId], { title: title, start: startTime })
             total = total + 1
         end if
         cursor = closeAt + len("</programme>")
     end while
     return entries
 end function
+
+sub insertProgramme(programmes as Object, programme as Object)
+    if programmes.count() >= 6 then return
+    ordered = []
+    inserted = false
+    for each current in programmes
+        if not inserted and programme.start <> "" and current.start <> "" and programme.start < current.start then
+            ordered.push(programme)
+            inserted = true
+        end if
+        ordered.push(current)
+    end for
+    if not inserted then ordered.push(programme)
+    programmes.clear()
+    for each current in ordered
+        if programmes.count() < 6 then programmes.push(current)
+    end for
+end sub
 
 function xmlAttribute(line as String, attribute as String) as String
     token = attribute + "=\""

@@ -217,9 +217,9 @@ sub updateSelection()
     epgId = ""
     if selected.tvg_id <> invalid and selected.tvg_id <> "" then epgId = selected.tvg_id
     if epgId <> "" and m.epg[epgId] <> invalid and m.epg[epgId].count() > 0 then
-        m.epgNow.text = "Guia: " + m.epg[epgId][0]
+        m.epgNow.text = "Guia: " + programmeLabel(m.epg[epgId][0])
         if m.epg[epgId].count() > 1 then
-            m.epgNext.text = "Seguinte: " + m.epg[epgId][1]
+            m.epgNext.text = "Seguinte: " + programmeLabel(m.epg[epgId][1])
         else
             m.epgNext.text = "Seguinte: —"
         end if
@@ -228,6 +228,17 @@ sub updateSelection()
         m.epgNext.text = "Próximo: —"
     end if
 end sub
+
+function programmeLabel(programme as Dynamic) as String
+    if type(programme) = "roAssociativeArray" then
+        label = programme.title
+        if programme.start <> invalid and len(programme.start) >= 12 then
+            label = mid(programme.start, 9, 2) + ":" + mid(programme.start, 11, 2) + "  •  " + label
+        end if
+        return label
+    end if
+    return programme
+end function
 
 sub playSelected()
     if m.visibleChannels.count() = 0 then return
