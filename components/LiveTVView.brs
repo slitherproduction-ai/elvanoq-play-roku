@@ -13,6 +13,7 @@ sub init()
     m.selectedIndex = 0
     m.channelOffset = 0
     m.selectedCategoryIndex = 0
+    m.categoryOffset = 0
     m.focusColumn = "channels"
     m.localState = loadLocalState()
     m.epg = {}
@@ -61,10 +62,11 @@ sub setCatalog(payload as Object)
     m.categories = ["Todas"]
     if payload.categories <> invalid then
         for each category in payload.categories
-            if category <> invalid and category <> "" and m.categories.count() < 6 then m.categories.push(category)
+            if category <> invalid and category <> "" then m.categories.push(category)
         end for
     end if
     m.selectedCategoryIndex = 0
+    m.categoryOffset = 0
     m.selectedIndex = 0
     m.channelOffset = 0
     applyCategory()
@@ -83,9 +85,10 @@ end sub
 
 sub renderGuide()
     for index = 0 to m.categoryLabels.count() - 1
-        if index < m.categories.count() then
-            m.categoryLabels[index].text = m.categories[index]
-            if index = m.selectedCategoryIndex then
+        categoryIndex = m.categoryOffset + index
+        if categoryIndex < m.categories.count() then
+            m.categoryLabels[index].text = m.categories[categoryIndex]
+            if categoryIndex = m.selectedCategoryIndex then
                 m.categoryLabels[index].color = "0xFFFFFFFF"
             else
                 m.categoryLabels[index].color = "0x9EB5CCFF"
@@ -157,6 +160,11 @@ sub moveCategory(delta as Integer)
     if nextIndex > m.categories.count() - 1 then nextIndex = m.categories.count() - 1
     if nextIndex = m.selectedCategoryIndex then return
     m.selectedCategoryIndex = nextIndex
+    if m.selectedCategoryIndex < m.categoryOffset then
+        m.categoryOffset = m.selectedCategoryIndex
+    else if m.selectedCategoryIndex >= m.categoryOffset + 6 then
+        m.categoryOffset = m.selectedCategoryIndex - 5
+    end if
     stopPreview()
     applyCategory()
 end sub
@@ -186,7 +194,10 @@ end sub
 sub updateFocus()
     m.categoryFocus.visible = m.focusColumn = "categories"
     m.channelFocus.visible = m.focusColumn = "channels"
-    m.categoryFocus.translation = [364, 256 + (m.selectedCategoryIndex * 40)]
+    visibleCategoryIndex = m.selectedCategoryIndex - m.categoryOffset
+    if visibleCategoryIndex < 0 then visibleCategoryIndex = 0
+    if visibleCategoryIndex > 5 then visibleCategoryIndex = 5
+    m.categoryFocus.translation = [364, 256 + (visibleCategoryIndex * 40)]
     if m.visibleChannels.count() > 0 then
         visibleIndex = m.selectedIndex - m.channelOffset
         if visibleIndex < 0 then visibleIndex = 0

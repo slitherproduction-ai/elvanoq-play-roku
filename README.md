@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.37
+0.1.38
 
 ## Fluxo de ativação
 
@@ -76,6 +76,8 @@ Quando o stream informa duração, o player marca o título como concluído ao c
 O desbloqueio parental vale apenas enquanto o canal permanece aberto. Ao iniciar o ELVANOQ Play novamente, a sessão desbloqueada é removida e o PIN volta a ser exigido para conteúdo ou categorias protegidas.
 
 Após desbloquear o Controle Parental, ←/→ alterna entre Categorias e Canais e títulos. Use ↑/↓ para selecionar e OK para bloquear ou desbloquear. Os bloqueios individuais usam apenas o identificador local do catálogo, são separados pela lista ativa e são verificados antes de prévia, detalhes e reprodução.
+
+TV ao Vivo exibe seis categorias por vez e percorre as demais de forma incremental ao navegar com ↑/↓. Assim, listas grandes continuam acessíveis sem aumentar a quantidade de elementos visuais simultâneos.
 
 No destaque da Home, ←/→ alterna entre Assistir e Minha Lista; OK executa a ação selecionada. Adicionar/remover usa somente a coleção local protegida e a reprodução ainda recebe a URL exclusivamente do catálogo em memória.
 
