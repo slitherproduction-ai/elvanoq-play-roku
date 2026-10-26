@@ -18,6 +18,7 @@ sub run()
     transfer.AddHeader("Content-Type", "application/json")
     transfer.AddHeader("Accept", "application/json")
     payload = { action: m.top.action, rokuClientId: m.top.rokuClientId, deviceCode: m.top.deviceCode, device_key: m.top.deviceKey, platform: "roku" }
+    if m.top.serverCode <> invalid and m.top.serverCode <> "" then payload.serverCode = m.top.serverCode
     responseText = transfer.PostFromString(FormatJson(payload))
     result.httpStatus = transfer.GetResponseCode()
 

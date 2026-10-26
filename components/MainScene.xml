@@ -2,28 +2,25 @@
 <component name="MainScene" extends="Scene">
   <script type="text/brightscript" uri="pkg:/components/MainScene.brs" />
   <children>
-    <!-- Visual language ported from Android TV login: cinematic backdrop, dark veil and left content column. -->
     <Poster id="background" uri="pkg:/images/elvanoq-login-tv-backdrop.jpg" width="1280" height="720" />
     <Rectangle id="ambientBottom" translation="[0,0]" width="1280" height="720" color="0x020713FF" opacity="0.42" />
     <Rectangle id="ambientLeft" translation="[0,0]" width="650" height="720" color="0x030914FF" opacity="0.66" />
     <Rectangle id="brandPanel" translation="[0,0]" width="1" height="1" color="0x00000000" />
-
     <Poster id="brandMark" uri="pkg:/images/elvanoq-wordmark.png" translation="[92,72]" width="330" height="110" />
 
-    <Rectangle id="activationCard" translation="[92,234]" width="454" height="350" color="0x0A1321FF" opacity="0.82" />
-    <Rectangle id="activationAccent" translation="[92,234]" width="454" height="1" color="0xD7EBFFFF" opacity="0.32" />
-
-    <Label id="eyebrow" translation="[124,264]" text="ACESSO SEGURO" width="390" height="22" />
-    <Label id="headline" translation="[124,294]" text="Ative sua TV" width="390" height="42" />
-    <Label id="description" translation="[124,344]" text="Acesse o Portal e informe o código deste Roku." width="390" height="42" wrap="true" />
-
-    <Rectangle id="codeCard" translation="[124,404]" width="390" height="62" color="0x0A1E35FF" opacity="0.96" />
-    <Label id="deviceCode" translation="[132,411]" width="374" height="48" horizAlign="center" vertAlign="center" />
-
-    <Label id="portalCaption" translation="[124,486]" text="PORTAL ELVANOQ PLAY" width="390" height="18" />
-    <Label id="portal" translation="[124,508]" text="elvanoqplay.app" width="390" height="27" />
-    <Rectangle id="statusDivider" translation="[124,548]" width="390" height="1" color="0xC6DDFEFF" opacity="0.22" />
-    <Label id="status" translation="[124,558]" text="Preparando ativação…" width="390" height="28" wrap="true" />
+    <Rectangle id="activationCard" translation="[92,224]" width="454" height="430" color="0x0A1321FF" opacity="0.84" />
+    <Rectangle id="activationAccent" translation="[92,224]" width="454" height="1" color="0xD7EBFFFF" opacity="0.32" />
+    <Label id="eyebrow" translation="[124,250]" text="ACESSO SEGURO" width="390" height="22" />
+    <Label id="headline" translation="[124,280]" text="Ative sua TV" width="390" height="42" />
+    <Label id="description" translation="[124,330]" text="Acesse o Portal e informe o código deste Roku." width="390" height="42" wrap="true" />
+    <Rectangle id="codeCard" translation="[124,390]" width="390" height="62" color="0x0A1E35FF" opacity="0.96" />
+    <Label id="deviceCode" translation="[132,397]" width="374" height="48" horizAlign="center" vertAlign="center" />
+    <Label id="portalCaption" translation="[124,470]" text="PORTAL ELVANOQ PLAY" width="390" height="18" />
+    <Label id="portal" translation="[124,492]" text="elvanoqplay.app" width="390" height="27" />
+    <Rectangle id="serverCodeButton" translation="[124,534]" width="390" height="50" color="0x1965D6FF" />
+    <Label id="serverCodeButtonText" translation="[134,543]" text="OK  •  Entrar com código do servidor" width="370" height="32" horizAlign="center" />
+    <Rectangle id="statusDivider" translation="[124,600]" width="390" height="1" color="0xC6DDFEFF" opacity="0.22" />
+    <Label id="status" translation="[124,610]" text="Preparando ativação…" width="390" height="34" wrap="true" />
 
     <Label id="homeStatus" translation="[150,340]" width="980" height="50" horizAlign="center" visible="false" />
     <Timer id="licenseTimer" repeat="true" duration="60" />

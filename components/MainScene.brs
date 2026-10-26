@@ -4,13 +4,14 @@ sub init()
     m.activationCard = m.top.findNode("activationCard")
     m.activationAccent = m.top.findNode("activationAccent")
     m.codeCard = m.top.findNode("codeCard")
+    m.serverCodeButton = m.top.findNode("serverCodeButton")
+    m.serverCodeButtonText = m.top.findNode("serverCodeButtonText")
     m.portalCaption = m.top.findNode("portalCaption")
     m.statusDivider = m.top.findNode("statusDivider")
     m.eyebrow = m.top.findNode("eyebrow")
     m.headline = m.top.findNode("headline")
     m.description = m.top.findNode("description")
     m.deviceCode = m.top.findNode("deviceCode")
-    m.portalCaption = m.top.findNode("portalCaption")
     m.portal = m.top.findNode("portal")
     m.status = m.top.findNode("status")
     m.homeStatus = m.top.findNode("homeStatus")
@@ -27,6 +28,8 @@ sub init()
     m.portalCaption.color = "0x8CA6C4FF"
     m.portal.font = "font:MediumBoldSystemFont"
     m.portal.color = "0xFFFFFFFF"
+    m.serverCodeButtonText.font = "font:SmallBoldSystemFont"
+    m.serverCodeButtonText.color = "0xFFFFFFFF"
     m.status.font = "font:SmallSystemFont"
     m.status.color = "0xB8CAE0FF"
     m.homeStatus.font = "font:LargeBoldSystemFont"
@@ -43,6 +46,16 @@ sub init()
     requestPortal("roku-device-register")
     m.licenseTimer.control = "start"
 end sub
+
+function onKeyEvent(key as String, press as Boolean) as Boolean
+    if not press then return false
+    if m.appShell <> invalid and m.appShell.visible then return false
+    if key = "OK" and m.requestInFlight <> true and m.inputDialog = invalid then
+        openServerCodeKeyboard()
+        return true
+    end if
+    return false
+end function
 
 sub clearParentalSession()
     section = CreateObject("roRegistrySection", "ELVANOQPlay")
@@ -62,6 +75,7 @@ sub requestPortal(action as String)
     request.rokuClientId = m.clientId
     request.deviceCode = m.deviceCodeValue
     request.deviceKey = m.deviceKey
+    if action = "roku-server-code-resolve" then request.serverCode = m.serverCodeInput
     request.observeField("result", "onPortalResult")
     m.portalRequest = request
     request.control = "RUN"
@@ -76,6 +90,10 @@ sub onPortalResult()
     end if
     if result.action = "roku-device-register" then
         requestPortal("roku-license-status")
+        return
+    end if
+    if result.action = "roku-server-code-resolve" then
+        handleServerCodeResult(result)
         return
     end if
     if result.action = "roku-playlist-sync" then
@@ -117,10 +135,128 @@ sub showActivationState(state as String, message as String)
     end if
 end sub
 
+sub openServerCodeKeyboard()
+    dialog = CreateObject("roSGNode", "KeyboardDialog")
+    dialog.title = "Código do servidor"
+    dialog.message = "Digite o código recebido no Portal."
+    dialog.buttons = ["Continuar", "Cancelar"]
+    dialog.observeField("buttonSelected", "onServerCodeKeyboardSelected")
+    m.inputDialog = dialog
+    m.top.dialog = dialog
+end sub
+
+sub onServerCodeKeyboardSelected()
+    dialog = m.inputDialog
+    m.top.dialog = invalid
+    m.inputDialog = invalid
+    if dialog = invalid or dialog.buttonSelected <> 0 then
+        m.top.setFocus(true)
+        return
+    end if
+    code = normalizeServerCode(dialog.text)
+    if code = "" then
+        m.status.text = "Código inválido. Confira o código e tente novamente."
+        m.top.setFocus(true)
+        return
+    end if
+    m.serverCodeInput = code
+    m.status.text = "Validando o código do servidor…"
+    requestPortal("roku-server-code-resolve")
+end sub
+
+sub handleServerCodeResult(result as Object)
+    if result.ok <> true then
+        m.status.text = "Não foi possível validar este código. Tente novamente."
+        return
+    end if
+    host = serverHostFromPayload(result.payload)
+    if host = "" then
+        m.status.text = "O Portal não retornou um servidor compatível."
+        return
+    end if
+    m.resolvedHost = host
+    openCredentialKeyboard("username")
+end sub
+
+sub openCredentialKeyboard(step as String)
+    dialog = CreateObject("roSGNode", "KeyboardDialog")
+    if step = "username" then
+        dialog.title = "Usuário da lista"
+        dialog.message = "Informe o usuário do seu acesso."
+        dialog.buttons = ["Continuar", "Cancelar"]
+        dialog.observeField("buttonSelected", "onUsernameKeyboardSelected")
+    else
+        dialog.title = "Senha da lista"
+        dialog.message = "Informe a senha do seu acesso."
+        dialog.buttons = ["Conectar", "Cancelar"]
+        dialog.observeField("buttonSelected", "onPasswordKeyboardSelected")
+    end if
+    m.inputDialog = dialog
+    m.top.dialog = dialog
+end sub
+
+sub onUsernameKeyboardSelected()
+    dialog = m.inputDialog
+    m.top.dialog = invalid
+    m.inputDialog = invalid
+    if dialog = invalid or dialog.buttonSelected <> 0 or trim(dialog.text) = "" then
+        m.status.text = "Login por código cancelado."
+        m.top.setFocus(true)
+        return
+    end if
+    m.manualUsername = trim(dialog.text)
+    openCredentialKeyboard("password")
+end sub
+
+sub onPasswordKeyboardSelected()
+    dialog = m.inputDialog
+    m.top.dialog = invalid
+    m.inputDialog = invalid
+    if dialog = invalid or dialog.buttonSelected <> 0 or dialog.text = "" then
+        m.status.text = "Login por código cancelado."
+        m.top.setFocus(true)
+        return
+    end if
+    password = dialog.text
+    playlist = { source_type: "xtream", credentials: { host: m.resolvedHost, username: m.manualUsername, password: password } }
+    setActivationVisible(false)
+    openAppShell()
+    if m.appShell <> invalid then m.appShell.callFunc("applyPlaylist", { display_name: "Acesso por código", server_code: m.serverCodeInput, playlist: playlist })
+    m.manualUsername = ""
+    m.serverCodeInput = ""
+    m.resolvedHost = ""
+end sub
+
+function serverHostFromPayload(payload as Object) as String
+    if payload = invalid or type(payload) <> "roAssociativeArray" then return ""
+    value = ""
+    if payload.host <> invalid then value = payload.host
+    if value = "" and payload.data <> invalid and type(payload.data) = "roAssociativeArray" and payload.data.host <> invalid then value = payload.data.host
+    if value = "" and payload.server <> invalid and type(payload.server) = "roAssociativeArray" and payload.server.host <> invalid then value = payload.server.host
+    value = trim(value)
+    lower = lcase(value)
+    if left(lower, 7) <> "http://" and left(lower, 8) <> "https://" then return ""
+    if instr(1, value, "@") > 0 or instr(1, value, "?") > 0 or instr(1, value, "#") > 0 then return ""
+    return value
+end function
+
+function normalizeServerCode(value as String) as String
+    normalized = ""
+    for index = 1 to len(value)
+        char = mid(value, index, 1)
+        code = asc(char)
+        if (code >= 48 and code <= 57) or (code >= 65 and code <= 90) or (code >= 97 and code <= 122) or char = "-" then normalized = normalized + ucase(char)
+    end for
+    if len(normalized) < 4 or len(normalized) > 32 then return ""
+    return normalized
+end function
+
 sub setActivationVisible(isVisible as Boolean)
     m.activationCard.visible = isVisible
     m.activationAccent.visible = isVisible
     m.codeCard.visible = isVisible
+    m.serverCodeButton.visible = isVisible
+    m.serverCodeButtonText.visible = isVisible
     m.portalCaption.visible = isVisible
     m.statusDivider.visible = isVisible
     m.eyebrow.visible = isVisible
