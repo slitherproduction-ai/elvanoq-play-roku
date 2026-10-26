@@ -18,7 +18,7 @@ sub init()
     m.homeStatus.font = "font:LargeBoldSystemFont"
     m.licenseTimer.observeField("fire", "onLicenseTimer")
     m.clientId = CreateObject("roDeviceInfo").GetChannelClientId()
-    m.deviceKey = getOrCreateDeviceKey()
+    m.deviceKey = deviceRequestKey(m.clientId)
     m.deviceCodeValue = formatDeviceCode(m.clientId)
     m.deviceCode.text = m.deviceCodeValue
     if m.clientId = "" or m.deviceKey = "" or m.deviceCodeValue = "ROKU-CÓDIGO-INDISPONÍVEL" then
@@ -136,15 +136,13 @@ function formatDeviceCode(clientId as String) as String
     return "ROKU-" + left(normalized, 8) + "-" + mid(normalized, 9, 8)
 end function
 
-function getOrCreateDeviceKey() as String
-    section = CreateObject("roRegistrySection", "ELVANOQPlay")
-    savedKey = section.Read("device_key")
-    if savedKey <> invalid and savedKey <> "" then return savedKey
-
-    generatedKey = CreateObject("roDeviceInfo").GetRandomUUID()
-    generatedKey = replace(generatedKey, "-", "")
-    if generatedKey = "" then return ""
-    section.Write("device_key", generatedKey)
-    section.Flush()
-    return generatedKey
+function deviceRequestKey(clientId as String) as String
+    normalized = ""
+    for index = 1 to len(clientId)
+        char = mid(clientId, index, 1)
+        code = asc(char)
+        if (code >= 48 and code <= 57) or (code >= 65 and code <= 90) or (code >= 97 and code <= 122) then normalized = normalized + ucase(char)
+    end for
+    if len(normalized) < 16 then return ""
+    return left(normalized, 16)
 end function
