@@ -4,11 +4,11 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.61
+0.1.62
 
-## Correção de compatibilidade 0.1.61
+## Interface de ativação 0.1.62
 
-`CatalogService` e `EpgService` usam sintaxe BrightScript conservadora para firmware Roku mais antigo: sem assinaturas tipadas, sem literais associativos de múltiplos campos e com `chr(34)` para delimitadores de atributos. Isso corrige a compilação do parser XMLTV reportada no aparelho.
+A tela inicial de ativação foi refeita para TV 16:9, com marca proporcional, card central, código visual de destaque, endereço do Portal e barra de estado sem sobreposição. `CatalogService` e `EpgService` usam sintaxe BrightScript conservadora para firmware Roku mais antigo.
 
 ## Fluxo de ativação
 
