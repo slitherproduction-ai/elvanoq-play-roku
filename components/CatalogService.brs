@@ -1,10 +1,17 @@
+' Compatibility-first M3U loader. Keep this component free of typed signatures
+' and inline multi-field literals so it also compiles on older Roku firmware.
 sub init()
     m.top.functionName = "run"
 end sub
 
 sub run()
-    result = { ok: false, message: "Catálogo indisponível.", channels: [], categories: [] }
-    sourceUrl = playlistUrl(m.top.playlist)
+    result = {}
+    result.ok = false
+    result.message = "Catálogo indisponível."
+    result.channels = []
+    result.categories = []
+
+    sourceUrl = getPlaylistUrl(m.top.playlist)
     if sourceUrl = "" then
         result.message = "A lista vinculada ainda não possui uma fonte compatível."
         m.top.result = result
@@ -18,6 +25,7 @@ sub run()
     transfer.SetUrl(sourceUrl)
     body = transfer.GetToString()
     status = transfer.GetResponseCode()
+
     if status < 200 or status >= 300 or body = invalid or body = "" then
         result.message = "Não foi possível atualizar o catálogo agora."
         m.top.result = result
@@ -28,128 +36,214 @@ sub run()
     result.ok = true
     result.channels = parsed.items
     result.categories = parsed.categories
-    result.epgUrl = playlistEpgUrl(m.top.playlist)
+    result.epgUrl = getPlaylistEpgUrl(m.top.playlist)
     result.message = "Catálogo atualizado."
     m.top.result = result
 end sub
 
-function playlistUrl(playlist as Object) as String
-    if playlist = invalid or type(playlist) <> "roAssociativeArray" then return ""
-    if playlist.url <> invalid and playlist.url <> "" then return playlist.url
-    if playlist.credentials = invalid or type(playlist.credentials) <> "roAssociativeArray" then return ""
+function getPlaylistUrl(playlist)
+    if playlist = invalid then
+        return ""
+    end if
+    if type(playlist) <> "roAssociativeArray" then
+        return ""
+    end if
+    if playlist.url <> invalid and playlist.url <> "" then
+        return playlist.url
+    end if
+    if playlist.credentials = invalid then
+        return ""
+    end if
+    if type(playlist.credentials) <> "roAssociativeArray" then
+        return ""
+    end if
+
     credentials = playlist.credentials
-    if credentials.url <> invalid and credentials.url <> "" then return credentials.url
+    if credentials.url <> invalid and credentials.url <> "" then
+        return credentials.url
+    end if
     if credentials.host <> invalid and credentials.username <> invalid and credentials.password <> invalid then
         return credentials.host + "/get.php?username=" + credentials.username + "&password=" + credentials.password + "&type=m3u_plus&output=ts"
     end if
     return ""
 end function
 
-function playlistEpgUrl(playlist as Object) as String
-    if playlist = invalid or type(playlist) <> "roAssociativeArray" then return ""
-    if playlist.epg_url <> invalid and playlist.epg_url <> "" then return playlist.epg_url
-    if playlist.xmltv_url <> invalid and playlist.xmltv_url <> "" then return playlist.xmltv_url
-    if playlist.credentials <> invalid and type(playlist.credentials) = "roAssociativeArray" then
-        credentials = playlist.credentials
-        if credentials.epg_url <> invalid and credentials.epg_url <> "" then return credentials.epg_url
-        if credentials.xmltv_url <> invalid and credentials.xmltv_url <> "" then return credentials.xmltv_url
+function getPlaylistEpgUrl(playlist)
+    if playlist = invalid or type(playlist) <> "roAssociativeArray" then
+        return ""
+    end if
+    if playlist.epg_url <> invalid and playlist.epg_url <> "" then
+        return playlist.epg_url
+    end if
+    if playlist.xmltv_url <> invalid and playlist.xmltv_url <> "" then
+        return playlist.xmltv_url
+    end if
+    if playlist.credentials = invalid or type(playlist.credentials) <> "roAssociativeArray" then
+        return ""
+    end if
+
+    credentials = playlist.credentials
+    if credentials.epg_url <> invalid and credentials.epg_url <> "" then
+        return credentials.epg_url
+    end if
+    if credentials.xmltv_url <> invalid and credentials.xmltv_url <> "" then
+        return credentials.xmltv_url
     end if
     return ""
 end function
 
-function parseM3u(body as String) as Object
+function parseM3u(body)
     items = []
-    categories = {}
+    groups = {}
     pending = invalid
     lines = body.Split(chr(10))
+
     for each rawLine in lines
         line = trim(rawLine)
         if left(line, 7) = "#EXTINF" then
-            pending = {
-                title: extinfTitle(line)
-                group: extinfAttribute(line, "group-title")
-                logo: extinfAttribute(line, "tvg-logo")
-                tvg_id: extinfAttribute(line, "tvg-id")
-                tvg_name: extinfAttribute(line, "tvg-name")
-                added_at: firstExtinfAttribute(line, ["added", "date", "release-date"])
-                rating: firstExtinfAttribute(line, ["rating", "tvg-rating", "score"])
-                featured: firstExtinfAttribute(line, ["featured", "weekly-featured", "is-featured"])
-                content_type: firstExtinfAttribute(line, ["content-type", "content_type", "media-type", "media_type", "tvg-type", "tvg_type", "type", "category-type"])
-            }
+            pending = makePendingEntry(line)
         else if pending <> invalid and line <> "" and left(line, 1) <> "#" then
             if items.count() < 1500 then
-                if pending.group = "" then pending.group = "Sem categoria"
-                contentType = contentTypeForEntry(pending)
-                item = { id: channelLocalId(pending, items.count()), title: pending.title, category: pending.group, logo: pending.logo, tvg_id: pending.tvg_id, tvg_name: pending.tvg_name, added_at: pending.added_at, rating: pending.rating, featured: pending.featured, stream_url: line }
-                item.type = contentType
+                item = makeCatalogItem(pending, line, items.count())
                 items.push(item)
-                if contentType = "live" then categories[pending.group] = true
+                if item.type = "live" then
+                    groups[item.category] = true
+                end if
             end if
             pending = invalid
         end if
     end for
-    names = []
-    for each name in categories
-        names.push(name)
+
+    categories = []
+    for each groupName in groups
+        categories.push(groupName)
     end for
-    return { items: items, categories: names }
+
+    parsed = {}
+    parsed.items = items
+    parsed.categories = categories
+    return parsed
 end function
 
-function contentTypeForEntry(pending as Object) as String
-    explicitType = ""
-    if pending.content_type <> invalid then explicitType = normalizedContentType(pending.content_type)
-    if explicitType <> "" then return explicitType
+function makePendingEntry(line)
+    entry = {}
+    entry.title = extinfTitle(line)
+    entry.group = extinfAttribute(line, "group-title")
+    entry.logo = extinfAttribute(line, "tvg-logo")
+    entry.tvg_id = extinfAttribute(line, "tvg-id")
+    entry.tvg_name = extinfAttribute(line, "tvg-name")
+    entry.added_at = firstExtinfAttribute(line, ["added", "date", "release-date"])
+    entry.rating = firstExtinfAttribute(line, ["rating", "tvg-rating", "score"])
+    entry.featured = firstExtinfAttribute(line, ["featured", "weekly-featured", "is-featured"])
+    entry.content_type = firstExtinfAttribute(line, ["content-type", "content_type", "media-type", "media_type", "tvg-type", "tvg_type", "type", "category-type"])
+    return entry
+end function
 
-    inferredType = normalizedContentType(pending.group)
-    if inferredType <> "" then return inferredType
+function makeCatalogItem(pending, streamUrl, position)
+    groupName = pending.group
+    if groupName = "" then
+        groupName = "Sem categoria"
+    end if
+
+    item = {}
+    item.id = channelLocalId(pending, groupName, position)
+    item.title = pending.title
+    item.category = groupName
+    item.logo = pending.logo
+    item.tvg_id = pending.tvg_id
+    item.tvg_name = pending.tvg_name
+    item.added_at = pending.added_at
+    item.rating = pending.rating
+    item.featured = pending.featured
+    item.stream_url = streamUrl
+    item.type = contentTypeForEntry(pending, groupName)
+    return item
+end function
+
+function contentTypeForEntry(pending, groupName)
+    explicitType = normalizedContentType(pending.content_type)
+    if explicitType <> "" then
+        return explicitType
+    end if
+
+    inferredType = normalizedContentType(groupName)
+    if inferredType <> "" then
+        return inferredType
+    end if
     return "live"
 end function
 
-function normalizedContentType(value as String) as String
+function normalizedContentType(value)
     normalized = lcase(trim(value))
-    if normalized = "" then return ""
+    if normalized = "" then
+        return ""
+    end if
 
-    ' Providers use a range of M3U conventions. Explicit attributes are evaluated
-    ' before the display group so a provider can keep a branded group name.
-    if normalized = "series" or normalized = "serie" or normalized = "series tv" or normalized = "tv shows" or normalized = "show" or normalized = "shows" then return "series"
-    if normalized = "movie" or normalized = "movies" or normalized = "film" or normalized = "films" or normalized = "vod" then return "movies"
-    if normalized = "live" or normalized = "live tv" or normalized = "tv" or normalized = "channel" or normalized = "channels" then return "live"
+    if normalized = "series" or normalized = "serie" or normalized = "series tv" or normalized = "tv shows" or normalized = "show" or normalized = "shows" then
+        return "series"
+    end if
+    if normalized = "movie" or normalized = "movies" or normalized = "film" or normalized = "films" or normalized = "vod" then
+        return "movies"
+    end if
+    if normalized = "live" or normalized = "live tv" or normalized = "tv" or normalized = "channel" or normalized = "channels" then
+        return "live"
+    end if
 
-    if instr(1, normalized, "série") > 0 or instr(1, normalized, "serie") > 0 or instr(1, normalized, "tv show") > 0 then return "series"
-    if instr(1, normalized, "filme") > 0 or instr(1, normalized, "movie") > 0 or instr(1, normalized, "film") > 0 or instr(1, normalized, "vod") > 0 then return "movies"
-    if instr(1, normalized, "ao vivo") > 0 or instr(1, normalized, "ao-vivo") > 0 or instr(1, normalized, "live") > 0 then return "live"
+    if instr(1, normalized, "série") > 0 or instr(1, normalized, "serie") > 0 or instr(1, normalized, "tv show") > 0 then
+        return "series"
+    end if
+    if instr(1, normalized, "filme") > 0 or instr(1, normalized, "movie") > 0 or instr(1, normalized, "film") > 0 or instr(1, normalized, "vod") > 0 then
+        return "movies"
+    end if
+    if instr(1, normalized, "ao vivo") > 0 or instr(1, normalized, "ao-vivo") > 0 or instr(1, normalized, "live") > 0 then
+        return "live"
+    end if
     return ""
 end function
 
-function channelLocalId(pending as Object, position as Integer) as String
-    if pending.tvg_id <> invalid and pending.tvg_id <> "" then return "live:" + pending.tvg_id
-    identity = pending.group + ":" + pending.title
-    if identity <> ":" then return "live:" + identity
+function channelLocalId(pending, groupName, position)
+    if pending.tvg_id <> invalid and pending.tvg_id <> "" then
+        return "live:" + pending.tvg_id
+    end if
+    identity = groupName + ":" + pending.title
+    if identity <> ":" then
+        return "live:" + identity
+    end if
     return "live:channel:" + trim(str(position))
 end function
 
-function extinfAttribute(line as String, attribute as String) as String
+function extinfAttribute(line, attribute)
     token = attribute + "=" + chr(34)
     startAt = instr(1, line, token)
-    if startAt = 0 then return ""
+    if startAt = 0 then
+        return ""
+    end if
     valueStart = startAt + len(token)
     valueEnd = instr(valueStart, line, chr(34))
-    if valueEnd = 0 then return ""
+    if valueEnd = 0 then
+        return ""
+    end if
     return mid(line, valueStart, valueEnd - valueStart)
 end function
 
-function firstExtinfAttribute(line as String, attributes as Object) as String
+function firstExtinfAttribute(line, attributes)
     for each attribute in attributes
         value = extinfAttribute(line, attribute)
-        if value <> "" then return value
+        if value <> "" then
+            return value
+        end if
     end for
     return ""
 end function
 
-function extinfTitle(line as String) as String
+function extinfTitle(line)
     commaAt = instr(1, line, ",")
-    if commaAt = 0 then return "Canal"
+    if commaAt = 0 then
+        return "Canal"
+    end if
     title = trim(mid(line, commaAt + 1))
-    if title = "" then return "Canal"
+    if title = "" then
+        return "Canal"
+    end if
     return title
 end function
