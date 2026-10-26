@@ -1,6 +1,11 @@
 sub init()
     clearParentalSession()
     m.playlistSynced = false
+    m.activationCard = m.top.findNode("activationCard")
+    m.activationAccent = m.top.findNode("activationAccent")
+    m.codeCard = m.top.findNode("codeCard")
+    m.portalCaption = m.top.findNode("portalCaption")
+    m.statusDivider = m.top.findNode("statusDivider")
     m.eyebrow = m.top.findNode("eyebrow")
     m.headline = m.top.findNode("headline")
     m.description = m.top.findNode("description")
@@ -88,22 +93,14 @@ end sub
 sub showActivationState(state as String, message as String)
     if state = "active" then
         m.licenseTimer.control = "start"
-        m.headline.visible = false
-        m.description.visible = false
-        m.deviceCode.visible = false
-        m.portal.visible = false
-        m.status.visible = false
+        setActivationVisible(false)
         m.homeStatus.visible = false
         openAppShell()
         return
     end if
     if (state = "expired" or state = "blocked") and m.appShell <> invalid then m.appShell.visible = false
     m.homeStatus.visible = false
-    m.headline.visible = true
-    m.description.visible = true
-    m.deviceCode.visible = true
-    m.portal.visible = true
-    m.status.visible = true
+    setActivationVisible(true)
     if state = "expired" then
         m.status.text = "Licença expirada. Renove em elvanoqplay.app."
     else if state = "blocked" then
@@ -115,6 +112,24 @@ sub showActivationState(state as String, message as String)
     else
         m.status.text = "Aguardando ativação. Vincule este Roku em elvanoqplay.app."
     end if
+end sub
+
+sub setActivationVisible(isVisible as Boolean)
+    m.activationCard.visible = isVisible
+    m.activationAccent.visible = isVisible
+    m.codeCard.visible = isVisible
+    m.portalCaption.visible = isVisible
+    m.statusDivider.visible = isVisible
+    m.eyebrow.visible = isVisible
+    m.headline.visible = isVisible
+    m.description.visible = isVisible
+    m.deviceCode.visible = isVisible
+    m.portal.visible = isVisible
+    m.status.visible = isVisible
+    m.top.findNode("brandMark").visible = isVisible
+    m.top.findNode("brandPanel").visible = isVisible
+    m.top.findNode("ambientLeft").visible = isVisible
+    m.top.findNode("ambientBottom").visible = isVisible
 end sub
 
 sub openAppShell()
