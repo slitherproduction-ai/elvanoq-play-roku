@@ -4,11 +4,11 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.60
+0.1.61
 
-## Correção de compatibilidade 0.1.60
+## Correção de compatibilidade 0.1.61
 
-O `CatalogService` foi reescrito com sintaxe BrightScript conservadora para firmware Roku mais antigo: sem assinaturas tipadas e sem literais associativos de múltiplos campos. O parser M3U preserva a classificação de canais, filmes e séries e mantém o uso de `chr(34)` para atributos.
+`CatalogService` e `EpgService` usam sintaxe BrightScript conservadora para firmware Roku mais antigo: sem assinaturas tipadas, sem literais associativos de múltiplos campos e com `chr(34)` para delimitadores de atributos. Isso corrige a compilação do parser XMLTV reportada no aparelho.
 
 ## Fluxo de ativação
 
