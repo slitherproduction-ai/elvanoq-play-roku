@@ -3,14 +3,26 @@
   <script type="text/brightscript" uri="pkg:/components/MainScene.brs" />
   <children>
     <Rectangle id="background" width="1920" height="1080" color="0x06111FFF" />
-    <Poster id="brandMark" uri="pkg:/images/elvanoq-wordmark.png" translation="110,80" width="430" height="143" />
-    <Label id="brand" translation="110,106" text="" width="1000" height="58" />
-    <Label id="headline" translation="110,240" text="Ative sua TV" width="1000" height="70" />
-    <Label id="description" translation="110,330" text="Use o código abaixo em elvanoqplay.app para vincular este Roku à sua conta." width="1450" height="70" wrap="true" />
-    <Label id="deviceCode" translation="110,455" width="1600" height="90" />
-    <Label id="portal" translation="110,610" text="Portal: elvanoqplay.app" width="800" height="40" />
-    <Label id="status" translation="110,850" text="Preparando ativação…" width="1500" height="45" wrap="true" />
-    <Label id="homeStatus" translation="110,360" width="1500" height="60" visible="false" />
+    <Rectangle id="ambientLeft" translation="[0,0]" width="760" height="1080" color="0x0B3D83FF" opacity="0.34" />
+    <Rectangle id="ambientBottom" translation="[0,780]" width="1920" height="300" color="0x020714FF" opacity="0.72" />
+
+    <Poster id="brandMark" uri="pkg:/images/elvanoq-wordmark.png" translation="[120,82]" width="382" height="127" />
+
+    <Rectangle id="activationCard" translation="[310,248]" width="1300" height="660" color="0x0B1B2DFA" />
+    <Rectangle id="activationAccent" translation="[310,248]" width="10" height="660" color="0x2D8CFFFF" />
+    <Label id="eyebrow" translation="[390,310]" text="ATIVAÇÃO DO DISPOSITIVO" width="1080" height="34" horizAlign="center" />
+    <Label id="headline" translation="[390,365]" text="Conecte sua TV ao ELVANOQ Play" width="1080" height="72" horizAlign="center" />
+    <Label id="description" translation="[485,450]" text="Abra o Portal, entre na sua conta e informe o código exibido abaixo." width="890" height="62" horizAlign="center" wrap="true" />
+
+    <Rectangle id="codeCard" translation="[505,545]" width="910" height="122" color="0x102D4EFF" />
+    <Label id="deviceCode" translation="[520,562]" width="880" height="88" horizAlign="center" vertAlign="center" />
+
+    <Label id="portalCaption" translation="[390,704]" text="ACESSE O PORTAL" width="1080" height="28" horizAlign="center" />
+    <Label id="portal" translation="[390,740]" text="elvanoqplay.app" width="1080" height="46" horizAlign="center" />
+    <Rectangle id="statusDivider" translation="[390,810]" width="1080" height="1" color="0x45617DFF" />
+    <Label id="status" translation="[425,834]" text="Preparando ativação…" width="1010" height="44" horizAlign="center" wrap="true" />
+
+    <Label id="homeStatus" translation="[260,490]" width="1400" height="70" horizAlign="center" visible="false" />
     <Timer id="licenseTimer" repeat="true" duration="60" />
   </children>
 </component>
