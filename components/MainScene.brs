@@ -1,7 +1,7 @@
 sub init()
     clearParentalSession()
     m.playlistSynced = false
-    m.brand = m.top.findNode("brand")
+    m.eyebrow = m.top.findNode("eyebrow")
     m.headline = m.top.findNode("headline")
     m.description = m.top.findNode("description")
     m.deviceCode = m.top.findNode("deviceCode")
@@ -9,12 +9,18 @@ sub init()
     m.status = m.top.findNode("status")
     m.homeStatus = m.top.findNode("homeStatus")
     m.licenseTimer = m.top.findNode("licenseTimer")
-    m.brand.font = "font:LargeBoldSystemFont"
+    m.eyebrow.font = "font:SmallSystemFont"
+    m.eyebrow.color = "0x78B9FFFF"
     m.headline.font = "font:LargeBoldSystemFont"
+    m.headline.color = "0xFFFFFFFF"
     m.description.font = "font:MediumSystemFont"
+    m.description.color = "0xC5D8ECFF"
     m.deviceCode.font = "font:LargeBoldSystemFont"
-    m.portal.font = "font:MediumSystemFont"
-    m.status.font = "font:MediumSystemFont"
+    m.deviceCode.color = "0xFFFFFFFF"
+    m.portal.font = "font:LargeBoldSystemFont"
+    m.portal.color = "0x7EC0FFFF"
+    m.status.font = "font:SmallSystemFont"
+    m.status.color = "0xB9CCE0FF"
     m.homeStatus.font = "font:LargeBoldSystemFont"
     m.licenseTimer.observeField("fire", "onLicenseTimer")
     m.clientId = CreateObject("roDeviceInfo").GetChannelClientId()
