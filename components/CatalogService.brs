@@ -128,11 +128,11 @@ function channelLocalId(pending as Object, position as Integer) as String
 end function
 
 function extinfAttribute(line as String, attribute as String) as String
-    token = attribute + "=\""
+    token = attribute + "=" + chr(34)
     startAt = instr(1, line, token)
     if startAt = 0 then return ""
     valueStart = startAt + len(token)
-    valueEnd = instr(valueStart, line, "\"")
+    valueEnd = instr(valueStart, line, chr(34))
     if valueEnd = 0 then return ""
     return mid(line, valueStart, valueEnd - valueStart)
 end function
