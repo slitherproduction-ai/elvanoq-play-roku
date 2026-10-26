@@ -72,7 +72,8 @@ jobs:
           grep -q 'roku-device-register' components/MainScene.brs
           grep -q 'roku-license-status' components/MainScene.brs
           grep -q 'roku-playlist-sync' components/MainScene.brs
-          grep -q 'getOrCreateDeviceKey' components/MainScene.brs
+          grep -q 'deviceRequestKey' components/MainScene.brs
+          ! grep -q 'GetRandomUUID' components/MainScene.brs
           grep -q 'device_key' components/PortalService.brs
           grep -q 'ROKU-' components/MainScene.brs
           ! grep -RniE 'mac[ _-]?address|\bmac\b' components source
