@@ -4,11 +4,11 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.58
+0.1.59
 
 ## Correção de compatibilidade 0.1.58
 
-O parser M3U usa `chr(34)` para delimitadores de atributos, evitando escapes de aspas incompatíveis com o compilador BrightScript de aparelhos Roku.
+O parser M3U usa `chr(34)` para delimitadores de atributos e atribui campos reservados após criar o objeto, evitando sintaxe incompatível com o compilador BrightScript de aparelhos Roku.
 
 ## Fluxo de ativação
 

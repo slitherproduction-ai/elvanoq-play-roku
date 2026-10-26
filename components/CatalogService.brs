@@ -80,7 +80,8 @@ function parseM3u(body as String) as Object
             if items.count() < 1500 then
                 if pending.group = "" then pending.group = "Sem categoria"
                 contentType = contentTypeForEntry(pending)
-                item = { id: channelLocalId(pending, items.count()), title: pending.title, category: pending.group, logo: pending.logo, tvg_id: pending.tvg_id, tvg_name: pending.tvg_name, added_at: pending.added_at, rating: pending.rating, featured: pending.featured, stream_url: line, type: contentType }
+                item = { id: channelLocalId(pending, items.count()), title: pending.title, category: pending.group, logo: pending.logo, tvg_id: pending.tvg_id, tvg_name: pending.tvg_name, added_at: pending.added_at, rating: pending.rating, featured: pending.featured, stream_url: line }
+                item.type = contentType
                 items.push(item)
                 if contentType = "live" then categories[pending.group] = true
             end if
