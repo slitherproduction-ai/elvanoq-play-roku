@@ -4,6 +4,7 @@ sub Main()
     screen.SetMessagePort(port)
     scene = screen.CreateScene("MainScene")
     screen.Show()
+    scene.SetFocus(true)
 
     while true
         message = wait(0, port)
