@@ -7,7 +7,6 @@
     <Rectangle id="ambientLeft" translation="[0,0]" width="650" height="720" color="0x030914FF" opacity="0.66" />
     <Rectangle id="brandPanel" translation="[0,0]" width="1" height="1" color="0x00000000" />
     <Poster id="brandMark" uri="pkg:/images/elvanoq-wordmark.png" translation="[92,72]" width="330" height="110" />
-
     <Rectangle id="activationCard" translation="[92,224]" width="454" height="430" color="0x0A1321FF" opacity="0.84" />
     <Rectangle id="activationAccent" translation="[92,224]" width="454" height="1" color="0xD7EBFFFF" opacity="0.32" />
     <Label id="eyebrow" translation="[124,250]" text="ACESSO SEGURO" width="390" height="22" />
@@ -21,9 +20,8 @@
     <Label id="serverCodeButtonText" translation="[134,543]" text="OK  •  Entrar com código do servidor" width="370" height="32" horizAlign="center" />
     <Rectangle id="statusDivider" translation="[124,600]" width="390" height="1" color="0xC6DDFEFF" opacity="0.22" />
     <Label id="status" translation="[124,610]" text="Preparando ativação…" width="390" height="34" wrap="true" />
-
     <Label id="homeStatus" translation="[150,340]" width="980" height="50" horizAlign="center" visible="false" />
-    <Label id="appVersion" translation="[1060,678]" text="v0.1.73" width="176" height="24" horizAlign="right" />
+    <Label id="appVersion" translation="[1060,678]" text="v0.1.74" width="176" height="24" horizAlign="right" />
     <Timer id="licenseTimer" repeat="true" duration="60" />
     <Timer id="portalWatchdog" repeat="false" duration="20" />
   </children>
