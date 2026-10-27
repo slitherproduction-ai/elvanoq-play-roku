@@ -21,7 +21,7 @@
     <Rectangle id="statusDivider" translation="[124,600]" width="390" height="1" color="0xC6DDFEFF" opacity="0.22" />
     <Label id="status" translation="[124,610]" text="Preparando ativação…" width="390" height="34" wrap="true" />
     <Label id="homeStatus" translation="[150,340]" width="980" height="50" horizAlign="center" visible="false" />
-    <Label id="appVersion" translation="[1060,678]" text="v0.1.77" width="176" height="24" horizAlign="right" />
+    <Label id="appVersion" translation="[1060,678]" text="v0.1.78" width="176" height="24" horizAlign="right" />
     <Timer id="registerTimer" repeat="false" duration="3" />
     <Timer id="licenseTimer" repeat="true" duration="60" />
     <Timer id="portalWatchdog" repeat="false" duration="20" />
