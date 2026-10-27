@@ -18,6 +18,7 @@ sub init()
     m.appVersion = m.top.findNode("appVersion")
     m.licenseTimer = m.top.findNode("licenseTimer")
     m.portalWatchdog = m.top.findNode("portalWatchdog")
+    m.registerTimer = m.top.findNode("registerTimer")
     m.eyebrow.font = "font:SmallBoldSystemFont"
     m.eyebrow.color = "0x5CDDF6FF"
     m.headline.font = "font:LargeBoldSystemFont"
@@ -39,6 +40,7 @@ sub init()
     m.appVersion.color = "0x90AAC8CC"
     m.licenseTimer.observeField("fire", "onLicenseTimer")
     m.portalWatchdog.observeField("fire", "onPortalWatchdog")
+    m.registerTimer.observeField("fire", "onRegisterTimer")
     m.top.setFocus(true)
     m.clientId = CreateObject("roDeviceInfo").GetChannelClientId()
     m.deviceKey = deviceRequestKey(m.clientId)
@@ -51,6 +53,7 @@ sub init()
     end if
     m.status.text = "Conectando ao Portal para ativação…"
     requestPortal("roku-device-register")
+    m.registerTimer.control = "start"
     m.licenseTimer.control = "start"
 end sub
 
@@ -72,7 +75,11 @@ sub clearParentalSession()
 end sub
 
 sub onLicenseTimer()
-    requestPortal("roku-license-status")
+    requestPortal("roku-device-register")
+end sub
+
+sub onRegisterTimer()
+    requestPortal("roku-device-register")
 end sub
 
 sub onPortalWatchdog()
