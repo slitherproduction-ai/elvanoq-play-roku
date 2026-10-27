@@ -34,6 +34,7 @@ sub init()
     m.status.color = "0xB8CAE0FF"
     m.homeStatus.font = "font:LargeBoldSystemFont"
     m.licenseTimer.observeField("fire", "onLicenseTimer")
+    m.top.setFocus(true)
     m.clientId = CreateObject("roDeviceInfo").GetChannelClientId()
     m.deviceKey = deviceRequestKey(m.clientId)
     m.deviceCodeValue = formatDeviceCode(m.clientId)
