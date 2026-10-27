@@ -178,9 +178,9 @@ sub handleServerCodeResult(result as Object)
     openCredentialKeyboard("username")
 end sub
 
-sub openCredentialKeyboard(step as String)
+sub openCredentialKeyboard(stage as String)
     dialog = CreateObject("roSGNode", "KeyboardDialog")
-    if step = "username" then
+    if stage = "username" then
         dialog.title = "Usuário da lista"
         dialog.message = "Informe o usuário do seu acesso."
         dialog.buttons = ["Continuar", "Cancelar"]
