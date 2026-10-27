@@ -11,19 +11,37 @@ sub run()
     end if
 
     transfer = CreateObject("roUrlTransfer")
+    port = CreateObject("roMessagePort")
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
     transfer.SetConnectTimeout(10)
     transfer.SetMinimumTransferRate(1, 15)
     transfer.SetUrl("https://xrrgjssvdqvtrqhxpask.supabase.co/functions/v1/portal-control")
+    transfer.SetPort(port)
     transfer.AddHeader("Content-Type", "application/json")
     transfer.AddHeader("Accept", "application/json")
     transfer.AddHeader("apikey", "sb_publishable_zTZ9IwqmgdIcQfvsy_Qz0w_ZwIOa1kl")
     transfer.AddHeader("Authorization", "Bearer sb_publishable_zTZ9IwqmgdIcQfvsy_Qz0w_ZwIOa1kl")
+
     payload = { action: m.top.action, rokuClientId: m.top.rokuClientId, deviceCode: m.top.deviceCode, device_key: m.top.deviceKey, deviceName: m.top.deviceName, platform: "roku" }
     if m.top.serverCode <> invalid and m.top.serverCode <> "" then payload.serverCode = m.top.serverCode
-    responseText = transfer.PostFromString(FormatJson(payload))
-    result.httpStatus = transfer.GetResponseCode()
 
+    if transfer.AsyncPostFromString(FormatJson(payload)) <> true then
+        result.state = "offline"
+        result.message = "Não foi possível iniciar a conexão com o Portal."
+        m.top.result = result
+        return
+    end if
+
+    event = wait(15000, port)
+    if event = invalid or type(event) <> "roUrlEvent" then
+        result.state = "offline"
+        result.message = "A conexão com o Portal excedeu o tempo limite. Verifique a internet e tente novamente."
+        m.top.result = result
+        return
+    end if
+
+    result.httpStatus = event.GetResponseCode()
+    responseText = event.GetString()
     if result.httpStatus = 0 then
         result.state = "offline"
         result.message = "Sem conexão. Vamos tentar novamente quando a internet voltar."
@@ -31,10 +49,11 @@ sub run()
         return
     end if
     if result.httpStatus < 200 or result.httpStatus >= 300 or responseText = invalid or responseText = "" then
-        result.message = "O Portal não respondeu corretamente. Tente novamente em instantes."
+        result.message = "O Portal recusou a solicitação. Tente novamente em instantes."
         m.top.result = result
         return
     end if
+
     response = ParseJson(responseText)
     if response = invalid or type(response) <> "roAssociativeArray" then
         result.message = "Resposta inválida do Portal."
