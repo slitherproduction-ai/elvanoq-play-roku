@@ -15,7 +15,9 @@ sub init()
     m.portal = m.top.findNode("portal")
     m.status = m.top.findNode("status")
     m.homeStatus = m.top.findNode("homeStatus")
+    m.appVersion = m.top.findNode("appVersion")
     m.licenseTimer = m.top.findNode("licenseTimer")
+    m.portalWatchdog = m.top.findNode("portalWatchdog")
     m.eyebrow.font = "font:SmallBoldSystemFont"
     m.eyebrow.color = "0x5CDDF6FF"
     m.headline.font = "font:LargeBoldSystemFont"
@@ -33,7 +35,10 @@ sub init()
     m.status.font = "font:SmallSystemFont"
     m.status.color = "0xB8CAE0FF"
     m.homeStatus.font = "font:LargeBoldSystemFont"
+    m.appVersion.font = "font:SmallSystemFont"
+    m.appVersion.color = "0x90AAC8CC"
     m.licenseTimer.observeField("fire", "onLicenseTimer")
+    m.portalWatchdog.observeField("fire", "onPortalWatchdog")
     m.top.setFocus(true)
     m.clientId = CreateObject("roDeviceInfo").GetChannelClientId()
     m.deviceKey = deviceRequestKey(m.clientId)
@@ -69,9 +74,17 @@ sub onLicenseTimer()
     requestPortal("roku-license-status")
 end sub
 
+sub onPortalWatchdog()
+    if m.requestInFlight = true then
+        m.status.text = "A conexão está demorando. Verifique a internet e reinicie o aplicativo."
+    end if
+end sub
+
 sub requestPortal(action as String)
     if m.requestInFlight = true then return
     m.requestInFlight = true
+    m.portalWatchdog.control = "stop"
+    m.portalWatchdog.control = "start"
     request = CreateObject("roSGNode", "PortalService")
     request.action = action
     request.rokuClientId = m.clientId
@@ -87,6 +100,7 @@ end sub
 sub onPortalResult()
     result = m.portalRequest.result
     m.requestInFlight = false
+    m.portalWatchdog.control = "stop"
     if result = invalid or type(result) <> "roAssociativeArray" then
         showActivationState("error", "Não foi possível validar a resposta do Portal.")
         return
