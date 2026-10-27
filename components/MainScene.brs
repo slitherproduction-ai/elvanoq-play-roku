@@ -37,6 +37,7 @@ sub init()
     m.top.setFocus(true)
     m.clientId = CreateObject("roDeviceInfo").GetChannelClientId()
     m.deviceKey = deviceRequestKey(m.clientId)
+    m.deviceName = "ELVANOQ Play Roku"
     m.deviceCodeValue = formatDeviceCode(m.clientId)
     m.deviceCode.text = m.deviceCodeValue
     if m.clientId = "" or m.deviceKey = "" or m.deviceCodeValue = "ROKU-CÓDIGO-INDISPONÍVEL" then
@@ -76,6 +77,7 @@ sub requestPortal(action as String)
     request.rokuClientId = m.clientId
     request.deviceCode = m.deviceCodeValue
     request.deviceKey = m.deviceKey
+    request.deviceName = m.deviceName
     if action = "roku-server-code-resolve" then request.serverCode = m.serverCodeInput
     request.observeField("result", "onPortalResult")
     m.portalRequest = request
@@ -90,6 +92,10 @@ sub onPortalResult()
         return
     end if
     if result.action = "roku-device-register" then
+        if result.ok <> true then
+            showActivationState(result.state, result.message)
+            return
+        end if
         requestPortal("roku-license-status")
         return
     end if
