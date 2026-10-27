@@ -57,7 +57,8 @@ end sub
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
     if m.appShell <> invalid and m.appShell.visible then return false
-    if key = "OK" and m.requestInFlight <> true and m.inputDialog = invalid then
+    if key = "OK" and m.inputDialog = invalid then
+        cancelPendingPortalRequest()
         openServerCodeKeyboard()
         return true
     end if
@@ -78,6 +79,13 @@ sub onPortalWatchdog()
     if m.requestInFlight = true then
         m.status.text = "A conexão está demorando. Verifique a internet e reinicie o aplicativo."
     end if
+end sub
+
+sub cancelPendingPortalRequest()
+    if m.portalRequest <> invalid then m.portalRequest.control = "STOP"
+    m.portalRequest = invalid
+    m.requestInFlight = false
+    m.portalWatchdog.control = "stop"
 end sub
 
 sub requestPortal(action as String)
