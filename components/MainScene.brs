@@ -163,7 +163,11 @@ sub showActivationState(state as String, message as String)
     else if state = "blocked" then
         m.status.text = "Dispositivo bloqueado. Consulte o suporte no Portal."
     else if state = "offline" then
-        m.status.text = "Sem conexão. A tela continuará disponível e a ativação será verificada novamente."
+        if message <> invalid and message <> "" then
+            m.status.text = message
+        else
+            m.status.text = "Sem conexão. A tela continuará disponível e a ativação será verificada novamente."
+        end if
     else if state = "error" then
         m.status.text = "Falha ao consultar o Portal. Vamos tentar novamente."
     else
