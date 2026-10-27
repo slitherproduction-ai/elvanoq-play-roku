@@ -40,6 +40,7 @@ sub run()
         return
     end if
 
+    result.action = m.top.action
     result.httpStatus = event.GetResponseCode()
     responseText = event.GetString()
     if result.httpStatus = 0 then
