@@ -13,6 +13,8 @@ sub run()
     transfer = CreateObject("roUrlTransfer")
     port = CreateObject("roMessagePort")
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
+    transfer.AddHeader("X-Roku-Reserved-Dev-Id", "")
+    transfer.InitClientCertificates()
     transfer.SetConnectTimeout(10)
     transfer.SetMinimumTransferRate(1, 15)
     transfer.SetUrl("https://xrrgjssvdqvtrqhxpask.supabase.co/functions/v1/portal-control")
@@ -45,7 +47,7 @@ sub run()
     responseText = event.GetString()
     if result.httpStatus = 0 then
         result.state = "offline"
-        result.message = "Sem conexão. Vamos tentar novamente quando a internet voltar."
+        result.message = "Não foi possível estabelecer conexão segura com o Portal. RKU-NET-0."
         m.top.result = result
         return
     end if
