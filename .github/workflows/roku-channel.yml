@@ -66,6 +66,10 @@ jobs:
               ET.parse(path)
               print(f'valid XML: {path}')
           PY
+      - name: Compile BrightScript sources
+        run: |
+          npm install --no-save --ignore-scripts brighterscript@0.73.3
+          npx bsc --rootDir . --files "manifest,source/**/*.brs,components/**/*.brs,components/**/*.xml" --createPackage false --copyToStaging false
       - name: Validate activation contract
         run: |
           grep -q 'GetChannelClientId()' components/MainScene.brs
