@@ -19,15 +19,35 @@ sub run()
     end if
 
     transfer = CreateObject("roUrlTransfer")
+    port = CreateObject("roMessagePort")
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
     transfer.SetConnectTimeout(10)
     transfer.SetMinimumTransferRate(1, 20)
     transfer.SetUrl(sourceUrl)
-    body = transfer.GetToString()
-    status = transfer.GetResponseCode()
+    transfer.SetPort(port)
+    transfer.EnableEncodings(true)
 
-    if status < 200 or status >= 300 or body = invalid or body = "" then
-        result.message = "Não foi possível atualizar o catálogo agora."
+    if transfer.AsyncGetToString() <> true then
+        result.message = "Não foi possível iniciar o carregamento do catálogo."
+        m.top.result = result
+        return
+    end if
+
+    event = wait(30000, port)
+    if event = invalid or type(event) <> "roUrlEvent" or event.GetSourceIdentity() <> transfer.GetIdentity() then
+        result.message = "O carregamento do catálogo excedeu o tempo limite."
+        m.top.result = result
+        return
+    end if
+
+    if event.GetResponseCode() < 200 or event.GetResponseCode() >= 300 then
+        result.message = "O servidor da lista não aceitou a solicitação."
+        m.top.result = result
+        return
+    end if
+    body = event.GetString()
+    if body = invalid or body = "" then
+        result.message = "A lista retornou vazia."
         m.top.result = result
         return
     end if
@@ -63,7 +83,10 @@ function getPlaylistUrl(playlist)
         return credentials.url
     end if
     if credentials.host <> invalid and credentials.username <> invalid and credentials.password <> invalid then
-        return credentials.host + "/get.php?username=" + credentials.username + "&password=" + credentials.password + "&type=m3u_plus&output=ts"
+        encoder = CreateObject("roUrlTransfer")
+        host = credentials.host
+        if right(host, 1) = "/" then host = left(host, len(host) - 1)
+        return host + "/get.php?username=" + encoder.Escape(credentials.username) + "&password=" + encoder.Escape(credentials.password) + "&type=m3u_plus&output=ts"
     end if
     return ""
 end function
