@@ -42,7 +42,7 @@ sub init()
     m.licenseTimer.observeField("fire", "onLicenseTimer")
     m.portalWatchdog.observeField("fire", "onPortalWatchdog")
     m.registerTimer.observeField("fire", "onRegisterTimer")
-    m.serverCodeAction.observeField("buttonSelected", "onServerCodeButtonSelected")
+    m.serverCodeAction.observeField("selected", "onServerCodeButtonSelected")
     restoreActivationFocus()
     m.clientId = CreateObject("roDeviceInfo").GetChannelClientId()
     m.deviceKey = deviceRequestKey(m.clientId)
@@ -185,7 +185,7 @@ sub restoreActivationFocus()
     if m.serverCodeAction <> invalid and m.serverCodeAction.visible then
         m.serverCodeAction.setFocus(true)
     else
-        restoreActivationFocus()
+        m.top.setFocus(true)
     end if
 end sub
 
