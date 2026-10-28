@@ -8,6 +8,7 @@ sub run()
         m.top.result = result
         return
     end if
+
     request = {
         action: "roku-metadata"
         rokuClientId: m.top.rokuClientId
@@ -26,19 +27,41 @@ sub run()
         request.tmdb_id = m.top.tmdbId
         if m.top.mode = "season" then request.season_number = m.top.seasonNumber
     end if
+
     transfer = CreateObject("roUrlTransfer")
+    port = CreateObject("roMessagePort")
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
     transfer.SetConnectTimeout(8)
     transfer.SetMinimumTransferRate(1, 15)
     transfer.SetUrl("https://xrrgjssvdqvtrqhxpask.supabase.co/functions/v1/portal-control")
-    transfer.SetRequest("POST")
+    transfer.SetPort(port)
     transfer.AddHeader("Content-Type", "application/json")
-    body = transfer.PostFromString(FormatJson(request))
-    status = transfer.GetResponseCode()
+    transfer.AddHeader("Accept", "application/json")
+    transfer.AddHeader("apikey", "sb_publishable_zTZ9IwqmgdIcQfvsy_Qz0w_ZwIOa1kl")
+    transfer.AddHeader("Authorization", "Bearer sb_publishable_zTZ9IwqmgdIcQfvsy_Qz0w_ZwIOa1kl")
+
+    if transfer.AsyncPostFromString(FormatJson(request)) <> true then
+        m.top.result = result
+        return
+    end if
+
+    event = wait(12000, port)
+    if event = invalid or type(event) <> "roUrlEvent" then
+        m.top.result = result
+        return
+    end if
+    if event.GetSourceIdentity() <> transfer.GetIdentity() then
+        m.top.result = result
+        return
+    end if
+
+    status = event.GetResponseCode()
+    body = event.GetString()
     if status < 200 or status >= 300 or body = invalid or body = "" then
         m.top.result = result
         return
     end if
+
     payload = ParseJson(body)
     if payload = invalid or type(payload) <> "roAssociativeArray" then
         m.top.result = result
