@@ -42,7 +42,6 @@ sub init()
     m.licenseTimer.observeField("fire", "onLicenseTimer")
     m.portalWatchdog.observeField("fire", "onPortalWatchdog")
     m.registerTimer.observeField("fire", "onRegisterTimer")
-    m.serverCodeAction.observeField("buttonSelected", "onServerCodeButtonSelected")
     restoreActivationFocus()
     m.clientId = CreateObject("roDeviceInfo").GetChannelClientId()
     m.deviceKey = deviceRequestKey(m.clientId)
@@ -170,7 +169,11 @@ sub showActivationState(state as String, message as String)
             m.status.text = "Sem conexão. A tela continuará disponível e a ativação será verificada novamente."
         end if
     else if state = "error" then
-        m.status.text = "Falha ao consultar o Portal. Vamos tentar novamente."
+        if message <> invalid and message <> "" then
+            m.status.text = message
+        else
+            m.status.text = "Falha ao consultar o Portal. Vamos tentar novamente."
+        end if
     else
         m.status.text = "Aguardando ativação. Vincule este Roku em elvanoqplay.app."
     end if
@@ -182,11 +185,9 @@ sub onServerCodeButtonSelected()
 end sub
 
 sub restoreActivationFocus()
-    if m.serverCodeAction <> invalid and m.serverCodeAction.visible then
-        m.serverCodeAction.setFocus(true)
-    else
-        m.top.setFocus(true)
-    end if
+    ' The Scene owns the remote focus while activation is displayed.
+    ' This keeps OK delivery independent of a transparent or native overlay.
+    m.top.setFocus(true)
 end sub
 
 sub openServerCodeKeyboard()
