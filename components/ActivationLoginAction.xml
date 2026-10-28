@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="ActivationLoginAction" extends="Group">
+  <script type="text/brightscript" uri="pkg:/components/ActivationLoginAction.brs" />
+  <interface>
+    <field id="selected" type="boolean" alwaysNotify="true" />
+  </interface>
+</component>
