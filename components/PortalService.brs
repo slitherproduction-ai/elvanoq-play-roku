@@ -11,14 +11,12 @@ sub run()
     end if
 
     transfer = CreateObject("roUrlTransfer")
-    port = CreateObject("roMessagePort")
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
     transfer.AddHeader("X-Roku-Reserved-Dev-Id", "")
     transfer.InitClientCertificates()
     transfer.SetConnectTimeout(10)
     transfer.SetMinimumTransferRate(1, 15)
     transfer.SetUrl("https://xrrgjssvdqvtrqhxpask.supabase.co/functions/v1/portal-control")
-    transfer.SetPort(port)
     transfer.AddHeader("Content-Type", "application/json")
     transfer.AddHeader("Accept", "application/json")
     transfer.AddHeader("apikey", "sb_publishable_zTZ9IwqmgdIcQfvsy_Qz0w_ZwIOa1kl")
@@ -27,24 +25,12 @@ sub run()
     payload = { action: m.top.action, rokuClientId: m.top.rokuClientId, deviceCode: m.top.deviceCode, device_key: m.top.deviceKey, deviceName: m.top.deviceName, platform: "roku" }
     if m.top.serverCode <> invalid and m.top.serverCode <> "" then payload.serverCode = m.top.serverCode
 
-    if transfer.AsyncPostFromString(FormatJson(payload)) <> true then
-        result.state = "offline"
-        result.message = "Não foi possível iniciar a conexão com o Portal."
-        m.top.result = result
-        return
-    end if
-
-    event = wait(15000, port)
-    if event = invalid or type(event) <> "roUrlEvent" then
-        result.state = "offline"
-        result.message = "A conexão com o Portal excedeu o tempo limite. Verifique a internet e tente novamente."
-        m.top.result = result
-        return
-    end if
-
+    ' This Task runs off the render thread. A synchronous post here is more
+    ' reliable on Roku firmware than a transparent async event chain.
+    responseText = transfer.PostFromString(FormatJson(payload))
     result.action = m.top.action
-    result.httpStatus = event.GetResponseCode()
-    responseText = event.GetString()
+    result.httpStatus = transfer.GetResponseCode()
+    if result.httpStatus = invalid then result.httpStatus = 0
     if result.httpStatus = 0 then
         result.state = "offline"
         result.message = "Não foi possível estabelecer conexão segura com o Portal. RKU-NET-0."
@@ -65,6 +51,13 @@ sub run()
     end if
     state = portalState(response)
     result.state = state
+    if response.ok <> invalid and response.ok = false then
+        result.ok = false
+        result.message = portalMessage(response, state)
+        result.payload = response
+        m.top.result = result
+        return
+    end if
     result.ok = true
     result.message = portalMessage(response, state)
     result.payload = response
@@ -75,7 +68,9 @@ function portalState(response as Object) as String
     state = ""
     if response.status <> invalid then state = lcase(str(response.status))
     if state = "" and response.licenseStatus <> invalid then state = lcase(str(response.licenseStatus))
+    if state = "" and response.activation_status <> invalid then state = lcase(str(response.activation_status))
     if state = "" and response.license <> invalid and type(response.license) = "roAssociativeArray" and response.license.status <> invalid then state = lcase(str(response.license.status))
+    if state = "" and response.license <> invalid and type(response.license) = "roAssociativeArray" and response.license.can_play = true then state = "active"
     if state = "" and response.data <> invalid and type(response.data) = "roAssociativeArray" and response.data.status <> invalid then state = lcase(str(response.data.status))
     if state = "active" or state = "ativo" then return "active"
     if state = "expired" or state = "expirado" then return "expired"
