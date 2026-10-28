@@ -42,7 +42,7 @@ sub init()
     m.licenseTimer.observeField("fire", "onLicenseTimer")
     m.portalWatchdog.observeField("fire", "onPortalWatchdog")
     m.registerTimer.observeField("fire", "onRegisterTimer")
-    m.serverCodeAction.observeField("selected", "onServerCodeButtonSelected")
+    m.serverCodeAction.observeField("buttonSelected", "onServerCodeButtonSelected")
     restoreActivationFocus()
     m.clientId = CreateObject("roDeviceInfo").GetChannelClientId()
     m.deviceKey = deviceRequestKey(m.clientId)
@@ -191,7 +191,7 @@ end sub
 
 sub openServerCodeKeyboard()
     m.status.text = "Informe o código do servidor para continuar."
-    dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
+    dialog = CreateObject("roSGNode", "KeyboardDialog")
     dialog.title = "Código do servidor"
     dialog.message = "Digite o código recebido no Portal."
     dialog.buttons = ["Continuar", "Cancelar"]
@@ -234,7 +234,7 @@ sub handleServerCodeResult(result as Object)
 end sub
 
 sub openCredentialKeyboard(stage as String)
-    dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
+    dialog = CreateObject("roSGNode", "KeyboardDialog")
     if stage = "username" then
         dialog.title = "Usuário da lista"
         dialog.message = "Informe o usuário do seu acesso."
