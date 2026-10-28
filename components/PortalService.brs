@@ -9,24 +9,17 @@ sub run()
         m.top.result = result
         return
     end if
-
     transfer = CreateObject("roUrlTransfer")
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
     transfer.AddHeader("X-Roku-Reserved-Dev-Id", "")
     transfer.InitClientCertificates()
     transfer.SetConnectTimeout(10)
     transfer.SetMinimumTransferRate(1, 15)
-    transfer.SetUrl("https://xrrgjssvdqvtrqhxpask.supabase.co/functions/v1/portal-control")
+    transfer.SetUrl("https://elvanoq-roku-relay.slitherproduction.chatgpt.site/api/roku")
     transfer.AddHeader("Content-Type", "application/json")
     transfer.AddHeader("Accept", "application/json")
-    transfer.AddHeader("apikey", "sb_publishable_zTZ9IwqmgdIcQfvsy_Qz0w_ZwIOa1kl")
-    transfer.AddHeader("Authorization", "Bearer sb_publishable_zTZ9IwqmgdIcQfvsy_Qz0w_ZwIOa1kl")
-
     payload = { action: m.top.action, rokuClientId: m.top.rokuClientId, deviceCode: m.top.deviceCode, device_key: m.top.deviceKey, deviceName: m.top.deviceName, platform: "roku" }
     if m.top.serverCode <> invalid and m.top.serverCode <> "" then payload.serverCode = m.top.serverCode
-
-    ' This Task runs off the render thread. A synchronous post here is more
-    ' reliable on Roku firmware than a transparent async event chain.
     responseText = transfer.PostFromString(FormatJson(payload))
     result.action = m.top.action
     result.httpStatus = transfer.GetResponseCode()
@@ -42,7 +35,6 @@ sub run()
         m.top.result = result
         return
     end if
-
     response = ParseJson(responseText)
     if response = invalid or type(response) <> "roAssociativeArray" then
         result.message = "Resposta inválida do Portal."
