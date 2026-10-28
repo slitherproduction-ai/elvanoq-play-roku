@@ -18,10 +18,11 @@
     <Label id="portal" translation="[186,738]" text="elvanoqplay.app" width="585" height="41" />
     <Rectangle id="serverCodeButton" translation="[186,801]" width="585" height="75" color="0x1965D6FF" />
     <Label id="serverCodeButtonText" translation="[201,815]" text="OK  •  Entrar com código do servidor" width="555" height="48" horizAlign="center" />
+    <Button id="serverCodeAction" translation="[186,801]" width="585" height="75" text="" opacity="0.01" showFocusFootprint="false" />
     <Rectangle id="statusDivider" translation="[186,900]" width="585" height="2" color="0xC6DDFEFF" opacity="0.22" />
     <Label id="status" translation="[186,915]" text="Preparando ativação…" width="585" height="51" wrap="true" />
     <Label id="homeStatus" translation="[225,510]" width="1470" height="75" horizAlign="center" visible="false" />
-    <Label id="appVersion" translation="[1590,1017]" text="v0.1.80" width="264" height="36" horizAlign="right" />
+    <Label id="appVersion" translation="[1590,1017]" text="v0.1.81" width="264" height="36" horizAlign="right" />
     <Timer id="registerTimer" repeat="false" duration="3" />
     <Timer id="licenseTimer" repeat="true" duration="60" />
     <Timer id="portalWatchdog" repeat="false" duration="20" />
