@@ -83,6 +83,8 @@ sub onStreamChanged()
     content = CreateObject("roSGNode", "ContentNode")
     content.url = m.top.streamUrl
     content.title = m.top.contentTitle
+    streamFormat = streamFormatForUrl(m.top.streamUrl)
+    if streamFormat <> "" then content.streamFormat = streamFormat
     m.video.content = content
     m.video.control = "play"
     if isLivePlayback() then
@@ -513,3 +515,11 @@ sub persistProgress(completed as Boolean)
     saveLocalState(state)
     m.lastPersistedSecond = int(m.video.position)
 end sub
+
+
+function streamFormatForUrl(streamUrl as String) as String
+    url = lcase(streamUrl)
+    if instr(1, url, ".m3u8") > 0 or instr(1, url, "output=m3u8") > 0 then return "hls"
+    if instr(1, url, ".mpd") > 0 then return "dash"
+    return ""
+end function
