@@ -14,14 +14,30 @@ sub run()
     end if
 
     transfer = CreateObject("roUrlTransfer")
+    port = CreateObject("roMessagePort")
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
     transfer.SetConnectTimeout(10)
     transfer.SetMinimumTransferRate(1, 20)
     transfer.SetUrl(m.top.epgUrl)
-    body = transfer.GetToString()
-    status = transfer.GetResponseCode()
+    transfer.SetPort(port)
+    transfer.EnableEncodings(true)
 
-    if status < 200 or status >= 300 or body = invalid or body = "" then
+    if transfer.AsyncGetToString() <> true then
+        m.top.result = result
+        return
+    end if
+
+    event = wait(30000, port)
+    if event = invalid or type(event) <> "roUrlEvent" or event.GetSourceIdentity() <> transfer.GetIdentity() then
+        m.top.result = result
+        return
+    end if
+    if event.GetResponseCode() < 200 or event.GetResponseCode() >= 300 then
+        m.top.result = result
+        return
+    end if
+    body = event.GetString()
+    if body = invalid or body = "" then
         m.top.result = result
         return
     end if
