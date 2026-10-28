@@ -192,7 +192,7 @@ end sub
 
 sub openServerCodeKeyboard()
     m.status.text = "Informe o código do servidor para continuar."
-    dialog = CreateObject("roSGNode", "KeyboardDialog")
+    dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
     dialog.title = "Código do servidor"
     dialog.message = "Digite o código recebido no Portal."
     dialog.buttons = ["Continuar", "Cancelar"]
@@ -235,7 +235,7 @@ sub handleServerCodeResult(result as Object)
 end sub
 
 sub openCredentialKeyboard(stage as String)
-    dialog = CreateObject("roSGNode", "KeyboardDialog")
+    dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
     if stage = "username" then
         dialog.title = "Usuário da lista"
         dialog.message = "Informe o usuário do seu acesso."
