@@ -18,8 +18,11 @@ sub run()
     transfer.SetUrl("https://elvanoq-roku-relay.slitherproduction.chatgpt.site/api/roku")
     transfer.AddHeader("Content-Type", "application/json")
     transfer.AddHeader("Accept", "application/json")
-    payload = { action: m.top.action, rokuClientId: m.top.rokuClientId, deviceCode: m.top.deviceCode, device_key: m.top.deviceKey, deviceName: m.top.deviceName, platform: "roku" }
-    if m.top.serverCode <> invalid and m.top.serverCode <> "" then payload.serverCode = m.top.serverCode
+    if m.top.action = "roku-server-code-resolve" then
+        payload = { action: m.top.action, rokuClientId: m.top.rokuClientId, deviceCode: m.top.deviceCode, code: m.top.serverCode }
+    else
+        payload = { action: m.top.action, rokuClientId: m.top.rokuClientId, deviceCode: m.top.deviceCode, device_key: m.top.deviceKey, deviceName: m.top.deviceName, platform: "roku" }
+    end if
     responseText = transfer.PostFromString(FormatJson(payload))
     result.action = m.top.action
     result.httpStatus = transfer.GetResponseCode()
