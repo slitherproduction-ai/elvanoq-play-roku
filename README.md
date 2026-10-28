@@ -4,7 +4,7 @@ Aplicativo Roku do ELVANOQ Play, criado em BrightScript e SceneGraph.
 
 ## Versão
 
-0.1.65
+0.1.79
 
 ## Ativação e entrada por código
 
@@ -21,6 +21,10 @@ O fluxo não usa, solicita, transmite nem registra identificador físico do apar
 ## Estados tratados
 
 Ativo, pendente, expirado, bloqueado, offline e erro de API.
+
+## Resolução e layout
+
+O canal usa uma única base de projeto **FHD (1920×1080)**. O Roku faz a escala automática para aparelhos HD/720p, mantendo proporções e áreas seguras; não há layouts distintos e conflitantes para HD e FHD.
 
 ## Testes locais
 
