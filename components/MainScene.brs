@@ -6,6 +6,7 @@ sub init()
     m.codeCard = m.top.findNode("codeCard")
     m.serverCodeButton = m.top.findNode("serverCodeButton")
     m.serverCodeButtonText = m.top.findNode("serverCodeButtonText")
+    m.serverCodeAction = m.top.findNode("serverCodeAction")
     m.portalCaption = m.top.findNode("portalCaption")
     m.statusDivider = m.top.findNode("statusDivider")
     m.eyebrow = m.top.findNode("eyebrow")
@@ -41,7 +42,8 @@ sub init()
     m.licenseTimer.observeField("fire", "onLicenseTimer")
     m.portalWatchdog.observeField("fire", "onPortalWatchdog")
     m.registerTimer.observeField("fire", "onRegisterTimer")
-    m.top.setFocus(true)
+    m.serverCodeAction.observeField("buttonSelected", "onServerCodeButtonSelected")
+    restoreActivationFocus()
     m.clientId = CreateObject("roDeviceInfo").GetChannelClientId()
     m.deviceKey = deviceRequestKey(m.clientId)
     m.deviceName = "ELVANOQ Play Roku"
@@ -61,7 +63,6 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
     if m.appShell <> invalid and m.appShell.visible then return false
     if key = "OK" and m.inputDialog = invalid then
-        cancelPendingPortalRequest()
         openServerCodeKeyboard()
         return true
     end if
@@ -175,8 +176,22 @@ sub showActivationState(state as String, message as String)
     end if
 end sub
 
+sub onServerCodeButtonSelected()
+    if m.inputDialog <> invalid then return
+    openServerCodeKeyboard()
+end sub
+
+sub restoreActivationFocus()
+    if m.serverCodeAction <> invalid and m.serverCodeAction.visible then
+        m.serverCodeAction.setFocus(true)
+    else
+        restoreActivationFocus()
+    end if
+end sub
+
 sub openServerCodeKeyboard()
-    dialog = CreateObject("roSGNode", "KeyboardDialog")
+    m.status.text = "Informe o código do servidor para continuar."
+    dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
     dialog.title = "Código do servidor"
     dialog.message = "Digite o código recebido no Portal."
     dialog.buttons = ["Continuar", "Cancelar"]
@@ -190,13 +205,13 @@ sub onServerCodeKeyboardSelected()
     m.top.dialog = invalid
     m.inputDialog = invalid
     if dialog = invalid or dialog.buttonSelected <> 0 then
-        m.top.setFocus(true)
+        restoreActivationFocus()
         return
     end if
     code = normalizeServerCode(dialog.text)
     if code = "" then
         m.status.text = "Código inválido. Confira o código e tente novamente."
-        m.top.setFocus(true)
+        restoreActivationFocus()
         return
     end if
     m.serverCodeInput = code
@@ -219,7 +234,7 @@ sub handleServerCodeResult(result as Object)
 end sub
 
 sub openCredentialKeyboard(stage as String)
-    dialog = CreateObject("roSGNode", "KeyboardDialog")
+    dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
     if stage = "username" then
         dialog.title = "Usuário da lista"
         dialog.message = "Informe o usuário do seu acesso."
@@ -241,7 +256,7 @@ sub onUsernameKeyboardSelected()
     m.inputDialog = invalid
     if dialog = invalid or dialog.buttonSelected <> 0 or trim(dialog.text) = "" then
         m.status.text = "Login por código cancelado."
-        m.top.setFocus(true)
+        restoreActivationFocus()
         return
     end if
     m.manualUsername = trim(dialog.text)
@@ -254,7 +269,7 @@ sub onPasswordKeyboardSelected()
     m.inputDialog = invalid
     if dialog = invalid or dialog.buttonSelected <> 0 or dialog.text = "" then
         m.status.text = "Login por código cancelado."
-        m.top.setFocus(true)
+        restoreActivationFocus()
         return
     end if
     password = dialog.text
@@ -297,6 +312,7 @@ sub setActivationVisible(isVisible as Boolean)
     m.codeCard.visible = isVisible
     m.serverCodeButton.visible = isVisible
     m.serverCodeButtonText.visible = isVisible
+    m.serverCodeAction.visible = isVisible
     m.portalCaption.visible = isVisible
     m.statusDivider.visible = isVisible
     m.eyebrow.visible = isVisible
