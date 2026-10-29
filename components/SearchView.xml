@@ -2,6 +2,9 @@
 <component name="SearchView" extends="Group">
   <interface>
     <field id="selectedItem" type="assocarray" alwaysNotify="true" />
+    <function name="handleKey" />
+    <function name="setQuery" />
+    <function name="setCatalog" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/SearchView.brs" />
   <children>
