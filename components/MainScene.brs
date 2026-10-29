@@ -84,7 +84,9 @@ end sub
 
 sub onPortalWatchdog()
     if m.requestInFlight = true then
-        m.status.text = "A conexão está demorando. Verifique a internet e reinicie o aplicativo."
+        ' Libera o "em andamento": antes a flag ficava presa e nenhuma nova consulta era feita
+        cancelPendingPortalRequest()
+        m.status.text = "A conexão está demorando. Tentaremos novamente em instantes."
     end if
 end sub
 
@@ -112,8 +114,11 @@ sub requestPortal(action as String)
     request.control = "RUN"
 end sub
 
-sub onPortalResult()
-    result = m.portalRequest.result
+sub onPortalResult(event as Object)
+    node = event.getRoSGNode()
+    if m.portalRequest = invalid or node = invalid then return
+    if not node.isSameNode(m.portalRequest) then return
+    result = node.result
     m.requestInFlight = false
     m.portalWatchdog.control = "stop"
     if result = invalid or type(result) <> "roAssociativeArray" then
@@ -155,7 +160,12 @@ sub showActivationState(state as String, message as String)
         openAppShell()
         return
     end if
-    if (state = "expired" or state = "blocked") and m.appShell <> invalid then m.appShell.visible = false
+    if (state = "expired" or state = "blocked") and m.appShell <> invalid and m.appShell.visible then
+        m.appShell.callFunc("stopPlayback")
+        m.appShell.visible = false
+        m.top.dialog = invalid
+        restoreActivationFocus()
+    end if
     m.homeStatus.visible = false
     setActivationVisible(true)
     if state = "expired" then
@@ -246,6 +256,7 @@ sub openCredentialKeyboard(stage as String)
         dialog.message = "Informe a senha do seu acesso."
         dialog.buttons = ["Conectar", "Cancelar"]
         dialog.observeField("buttonSelected", "onPasswordKeyboardSelected")
+        if dialog.textEditBox <> invalid then dialog.textEditBox.secureMode = true
     end if
     m.inputDialog = dialog
     m.top.dialog = dialog
@@ -331,7 +342,7 @@ end sub
 sub openAppShell()
     if m.appShell <> invalid then
         m.appShell.visible = true
-        m.appShell.setFocus(true)
+        if m.top.dialog = invalid and not m.appShell.isInFocusChain() then m.appShell.setFocus(true)
         return
     end if
     m.appShell = CreateObject("roSGNode", "AppShell")
