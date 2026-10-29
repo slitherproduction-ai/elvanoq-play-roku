@@ -11,6 +11,8 @@ sub init()
     m.osdBackground = m.top.findNode("osdBackground")
     m.osdTimer = m.top.findNode("osdTimer")
     m.nextEpisodeTimer = m.top.findNode("nextEpisodeTimer")
+    m.retryTimer = m.top.findNode("retryTimer")
+    m.liveRetries = 0
     m.nextEpisodePanel = m.top.findNode("nextEpisodePanel")
     m.nextEpisodeTitle = m.top.findNode("nextEpisodeTitle")
     m.nextEpisodeHint = m.top.findNode("nextEpisodeHint")
@@ -56,10 +58,11 @@ sub init()
     m.video.observeField("position", "onPositionChanged")
     m.osdTimer.observeField("fire", "onOsdTimerFired")
     m.nextEpisodeTimer.observeField("fire", "onNextEpisodeTimerFired")
+    m.retryTimer.observeField("fire", "onRetryTimer")
     m.top.observeField("streamUrl", "onStreamChanged")
     m.top.observeField("contentTitle", "onTitleChanged")
     m.selectedControl = 1
-    m.lastPersistedSecond = -15
+    m.lastPersistedSecond = -30
     updateControlFocus()
 end sub
 
@@ -72,8 +75,10 @@ sub onStreamChanged()
     cancelNextEpisode(false)
     m.skipIntroAvailable = m.top.skipIntroEnd > 0
     m.subtitlesDisabled = false
-    m.lastPersistedSecond = -15
+    m.lastPersistedSecond = -30
     m.shouldRestorePosition = m.top.resumePosition > 0
+    m.liveRetries = 0
+    m.retryTimer.control = "stop"
     if isParentallyBlockedItem(m.top.contentCategory, m.top.contentId) then
         m.video.control = "stop"
         m.hint.text = "Conteúdo protegido. Valide o PIN em Ajustes para assistir."
@@ -85,6 +90,7 @@ sub onStreamChanged()
     content.title = m.top.contentTitle
     streamFormat = streamFormatForUrl(m.top.streamUrl)
     if streamFormat <> "" then content.streamFormat = streamFormat
+    m.currentContent = content
     m.video.content = content
     m.video.control = "play"
     if isLivePlayback() then
@@ -123,7 +129,15 @@ function programmeText(programme as Dynamic) as String
 end function
 
 sub onVideoState()
+    if isLivePlayback() and (m.video.state = "error" or m.video.state = "finished") and m.liveRetries < 3 then
+        m.liveRetries = m.liveRetries + 1
+        m.hint.text = "Reconectando ao canal… (" + trim(str(m.liveRetries)) + "/3)"
+        showOsd()
+        m.retryTimer.control = "start"
+        return
+    end if
     if m.video.state = "playing" then
+        m.liveRetries = 0
         m.controlLabels[1].text = "❚❚  Pausar"
         if m.shouldRestorePosition then
             m.video.seek = m.top.resumePosition
@@ -162,7 +176,7 @@ end sub
 sub onPositionChanged()
     updateTimeline()
     updateSkipIntroHint()
-    if m.video.position <> invalid and m.video.position - m.lastPersistedSecond >= 15 then persistProgress(false)
+    if m.video.position <> invalid and m.video.position - m.lastPersistedSecond >= 30 then persistProgress(false)
 end sub
 
 sub updateSkipIntroHint()
@@ -186,6 +200,20 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
             cancelNextEpisode(true)
             return true
         end if
+        return true
+    end if
+    if key = "play" then
+        togglePlayPause()
+        return true
+    end if
+    if key = "rev" or key = "replay" then
+        seekBy(-10)
+        showOsd()
+        return true
+    end if
+    if key = "fwd" then
+        seekBy(10)
+        showOsd()
         return true
     end if
     if key = "back" then
@@ -517,9 +545,26 @@ sub persistProgress(completed as Boolean)
 end sub
 
 
-function streamFormatForUrl(streamUrl as String) as String
-    url = lcase(streamUrl)
-    if instr(1, url, ".m3u8") > 0 or instr(1, url, "output=m3u8") > 0 then return "hls"
-    if instr(1, url, ".mpd") > 0 then return "dash"
-    return ""
-end function
+sub togglePlayPause()
+    if m.video.state = "playing" then
+        m.video.control = "pause"
+    else if m.video.state = "paused" then
+        m.video.control = "resume"
+    else if m.video.state = "error" then
+        m.video.control = "retry"
+    end if
+    showOsd()
+end sub
+
+sub onRetryTimer()
+    if not isLivePlayback() or m.currentContent = invalid then return
+    m.video.control = "stop"
+    m.video.content = m.currentContent
+    m.video.control = "play"
+end sub
+
+sub stopPlayback()
+    m.retryTimer.control = "stop"
+    m.awaitingNextEpisode = false
+    m.video.control = "stop"
+end sub
