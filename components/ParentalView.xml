@@ -3,6 +3,9 @@
   <interface>
     <field id="categories" type="array" />
     <field id="items" type="array" />
+    <function name="handleKey" />
+    <function name="enterDigit" />
+    <function name="cancelPinEntry" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/ParentalView.brs" />
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
