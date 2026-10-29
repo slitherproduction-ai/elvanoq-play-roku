@@ -2,6 +2,8 @@
 <component name="LibraryView" extends="Group">
   <interface>
     <field id="itemRequested" type="assocarray" alwaysNotify="true" />
+    <function name="handleKey" />
+    <function name="refresh" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/LibraryView.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
