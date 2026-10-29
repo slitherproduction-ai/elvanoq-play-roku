@@ -15,9 +15,10 @@ sub run()
     transfer.InitClientCertificates()
     transfer.SetConnectTimeout(10)
     transfer.SetMinimumTransferRate(1, 15)
-    transfer.SetUrl("https://elvanoq-roku-relay.slitherproduction.chatgpt.site/api/roku")
+    transfer.SetUrl("https://roku.elvanoqplay.app/api/roku")
     transfer.AddHeader("Content-Type", "application/json")
     transfer.AddHeader("Accept", "application/json")
+    transfer.AddHeader("User-Agent", "ELVANOQPlay-Roku/0.1.88")
     if m.top.action = "roku-server-code-resolve" then
         payload = { action: m.top.action, rokuClientId: m.top.rokuClientId, deviceCode: m.top.deviceCode, code: m.top.serverCode }
     else
