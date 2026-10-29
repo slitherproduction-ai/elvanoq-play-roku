@@ -58,7 +58,7 @@ def static_contract_checks() -> None:
     )
     check(
         "no MAC implementation",
-        not re.search(r"mac[ _-]?address|\\bmac\\b", PORTAL + "\n" + SCENE, flags=re.I),
+        not re.search(r"mac[ _-]?address|\bmac\b", PORTAL + "\n" + SCENE, flags=re.I),
         "Roku code must not use a MAC identifier.",
     )
     for action in (
@@ -112,8 +112,8 @@ def state_machine_checks() -> None:
     for state, target in expected_ui.items():
         if state == "active":
             covered = 'if state = "active" then' in SCENE and "openAppShell()" in SCENE
-        elif state in ("expired", "blocked"):
-            covered = f'state = "{state}"' in SCENE
+        elif state == "pending":
+            covered = "Aguardando ativação. Vincule este Roku em elvanoqplay.app." in SCENE
         else:
             covered = f'state = "{state}"' in SCENE
         check(f"state {state}", covered, f"Synthetic {state} state keeps the UI in {target}.")
