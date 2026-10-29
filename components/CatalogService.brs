@@ -118,6 +118,7 @@ end function
 function parseM3u(body)
     items = []
     groups = {}
+    counts = {}
     pending = invalid
     lines = body.Split(chr(10))
 
@@ -126,14 +127,17 @@ function parseM3u(body)
         if left(line, 7) = "#EXTINF" then
             pending = makePendingEntry(line)
         else if pending <> invalid and line <> "" and left(line, 1) <> "#" then
-            if items.count() < 1500 then
-                item = makeCatalogItem(pending, line, items.count())
+            item = makeCatalogItem(pending, line, items.count())
+            if counts[item.type] = invalid then counts[item.type] = 0
+            if counts[item.type] < typeLimit(item.type) then
+                counts[item.type] = counts[item.type] + 1
                 items.push(item)
                 if item.type = "live" then
                     groups[item.category] = true
                 end if
             end if
             pending = invalid
+            if allTypesFull(counts) then exit for
         end if
     end for
 
@@ -146,6 +150,18 @@ function parseM3u(body)
     parsed.items = items
     parsed.categories = categories
     return parsed
+end function
+
+function typeLimit(itemType)
+    if itemType = "live" then return 1500
+    return 1000
+end function
+
+function allTypesFull(counts)
+    if counts.live = invalid or counts.live < typeLimit("live") then return false
+    if counts.movies = invalid or counts.movies < typeLimit("movies") then return false
+    if counts.series = invalid or counts.series < typeLimit("series") then return false
+    return true
 end function
 
 function makePendingEntry(line)
@@ -260,7 +276,16 @@ function firstExtinfAttribute(line, attributes)
 end function
 
 function extinfTitle(line)
-    commaAt = instr(1, line, ",")
+    ' Atributos podem conter virgulas: usa a virgula depois da ultima aspa
+    lastQuote = 0
+    cursor = 1
+    while true
+        found = instr(cursor, line, chr(34))
+        if found = 0 then exit while
+        lastQuote = found
+        cursor = found + 1
+    end while
+    commaAt = instr(lastQuote + 1, line, ",")
     if commaAt = 0 then
         return "Canal"
     end if
