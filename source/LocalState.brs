@@ -27,10 +27,34 @@ function loadLocalState() as Object
 end function
 
 sub saveLocalState(state as Object)
+    ' O registry da Roku aceita cerca de 32 KB por canal: limite as listas
+    ' para que Write() nunca falhe em silencio.
+    state.favorites = trimLocalItems(state.favorites, 150)
+    state.watch_later = trimLocalItems(state.watch_later, 100)
+    state.continue_watching = trimLocalItems(state.continue_watching, 30)
+    state.history = trimLocalItems(state.history, 40)
+    json = FormatJson(state)
+    if len(json) > 24000 then
+        state.history = trimLocalItems(state.history, 10)
+        state.continue_watching = trimLocalItems(state.continue_watching, 15)
+        state.watch_later = trimLocalItems(state.watch_later, 40)
+        state.favorites = trimLocalItems(state.favorites, 80)
+        json = FormatJson(state)
+    end if
     section = CreateObject("roRegistrySection", "ELVANOQPlay")
-    section.Write("local_state", FormatJson(state))
+    section.Write("local_state", json)
     section.Flush()
 end sub
+
+function trimLocalItems(items as Object, maxCount as Integer) as Object
+    if items = invalid then return []
+    if items.count() <= maxCount then return items
+    trimmed = []
+    for index = items.count() - maxCount to items.count() - 1
+        trimmed.push(items[index])
+    end for
+    return trimmed
+end function
 
 function upsertLocalItem(items as Object, item as Object) as Object
     if item = invalid or item.id = invalid or item.id = "" then return items
