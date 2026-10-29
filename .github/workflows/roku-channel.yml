@@ -56,6 +56,7 @@ jobs:
           test -f components/DetailView.brs
           test -f components/MetadataService.xml
           test -f components/MetadataService.brs
+          test -f tests/roku_preflight_simulator.py
           test -f images/elvanoq-wordmark.png
           test -f images/icon_elvanoq.png
       - name: Validate XML components
@@ -81,6 +82,16 @@ jobs:
           grep -q 'device_key' components/PortalService.brs
           grep -q 'ROKU-' components/MainScene.brs
           ! grep -RniE 'mac[ _-]?address|\bmac\b' components source
+      - name: Run Roku preflight simulator
+        run: python3 tests/roku_preflight_simulator.py
+      - name: Upload simulator report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: roku-preflight-report-${{ github.sha }}
+          path: out/roku-homologation-report.json
+          if-no-files-found: warn
+          retention-days: 14
 
   package:
     name: Package sideload channel
