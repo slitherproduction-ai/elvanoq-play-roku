@@ -4,6 +4,8 @@
     <field id="rokuClientId" type="string" />
     <field id="deviceCode" type="string" />
     <field id="deviceKey" type="string" />
+    <function name="applyPlaylist" />
+    <function name="stopPlayback" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/AppShell.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
