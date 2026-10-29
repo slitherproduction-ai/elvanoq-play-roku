@@ -24,7 +24,7 @@ sub run()
         payload = { action: m.top.action, rokuClientId: m.top.rokuClientId, deviceCode: m.top.deviceCode, device_key: m.top.deviceKey, deviceName: m.top.deviceName, platform: "roku" }
     end if
     port = CreateObject("roMessagePort")
-    transfer.SetMessagePort(port)
+    transfer.SetPort(port)
     started = transfer.AsyncPostFromString(FormatJson(payload))
     result.action = m.top.action
     responseText = ""

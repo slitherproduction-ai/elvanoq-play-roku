@@ -146,6 +146,7 @@ def static_contract_checks() -> None:
         and "SetMinimumTransferRate(1, 15)" in PORTAL
         and "AsyncPostFromString" in PORTAL
         and 'CreateObject("roMessagePort")' in PORTAL
+        and "transfer.SetPort(port)" in PORTAL
         and "wait(20000, port)" in PORTAL
         and "transfer.AsyncCancel()" in PORTAL,
         "All services must avoid unsupported SetConnectTimeout and Portal must bound asynchronous requests.",
