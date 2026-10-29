@@ -13,7 +13,6 @@ sub run()
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
     transfer.AddHeader("X-Roku-Reserved-Dev-Id", "")
     transfer.InitClientCertificates()
-    transfer.SetConnectTimeout(10)
     transfer.SetMinimumTransferRate(1, 15)
     transfer.SetUrl("https://roku.elvanoqplay.app/api/roku")
     transfer.AddHeader("Content-Type", "application/json")
@@ -24,10 +23,36 @@ sub run()
     else
         payload = { action: m.top.action, rokuClientId: m.top.rokuClientId, deviceCode: m.top.deviceCode, device_key: m.top.deviceKey, deviceName: m.top.deviceName, platform: "roku" }
     end if
-    responseText = transfer.PostFromString(FormatJson(payload))
+    port = CreateObject("roMessagePort")
+    transfer.SetMessagePort(port)
+    started = transfer.AsyncPostFromString(FormatJson(payload))
     result.action = m.top.action
-    result.httpStatus = transfer.GetResponseCode()
-    if result.httpStatus = invalid then result.httpStatus = 0
+    responseText = ""
+    result.httpStatus = 0
+    if started <> true then
+        result.state = "offline"
+        result.message = "Não foi possível iniciar a conexão com o Portal. RKU-NET-0."
+        m.top.result = result
+        return
+    end if
+    event = wait(20000, port)
+    if event = invalid then
+        transfer.AsyncCancel()
+        result.state = "offline"
+        result.message = "O Portal não respondeu a tempo. RKU-NET-0."
+        m.top.result = result
+        return
+    end if
+    if type(event) <> "roUrlEvent" then
+        transfer.AsyncCancel()
+        result.state = "offline"
+        result.message = "Não foi possível concluir a conexão com o Portal. RKU-NET-0."
+        m.top.result = result
+        return
+    end if
+    responseText = event.GetString()
+    result.httpStatus = event.GetResponseCode()
+    if result.httpStatus = invalid or result.httpStatus < 0 then result.httpStatus = 0
     if result.httpStatus = 0 then
         result.state = "offline"
         result.message = "Não foi possível estabelecer conexão segura com o Portal. RKU-NET-0."
@@ -35,7 +60,7 @@ sub run()
         return
     end if
     if result.httpStatus < 200 or result.httpStatus >= 300 or responseText = invalid or responseText = "" then
-        result.message = "O Portal recusou a solicitação. Tente novamente em instantes."
+        result.message = portalHttpMessage(responseText, result.httpStatus)
         m.top.result = result
         return
     end if
@@ -59,6 +84,30 @@ sub run()
     result.payload = response
     m.top.result = result
 end sub
+
+function portalHttpMessage(responseText as Dynamic, httpStatus as Integer) as String
+    message = "O Portal recusou a solicitação."
+    if responseText <> invalid and responseText <> "" then
+        response = ParseJson(responseText)
+        if response <> invalid and type(response) = "roAssociativeArray" then
+            if response.message <> invalid and portalDisplayText(response.message) <> "" then
+                message = portalDisplayText(response.message)
+            else if response.error <> invalid and portalDisplayText(response.error) <> "" then
+                message = portalDisplayText(response.error)
+            end if
+        end if
+    end if
+    if httpStatus > 0 then return message + " (HTTP " + trim(str(httpStatus)) + ")"
+    return message
+end function
+
+function portalDisplayText(value as Dynamic) as String
+    if value = invalid then return ""
+    t = type(value)
+    if t = "roString" or t = "String" then return value
+    if t = "roInt" or t = "Integer" or t = "roFloat" or t = "Float" or t = "roDouble" or t = "Double" or t = "LongInteger" or t = "roLongInteger" then return value.ToStr()
+    return ""
+end function
 
 function portalState(response as Object) as String
     state = ""

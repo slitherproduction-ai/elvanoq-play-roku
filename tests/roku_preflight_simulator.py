@@ -24,6 +24,10 @@ from datetime import datetime, timezone
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 REPORT = ROOT / "out" / "roku-homologation-report.json"
 PORTAL = (ROOT / "components" / "PortalService.brs").read_text(encoding="utf-8")
+NETWORK_SERVICES = {
+    name: (ROOT / "components" / name).read_text(encoding="utf-8")
+    for name in ("PortalService.brs", "CatalogService.brs", "EpgService.brs", "MetadataService.brs")
+}
 SCENE = (ROOT / "components" / "MainScene.brs").read_text(encoding="utf-8")
 MANIFEST = (ROOT / "manifest").read_text(encoding="utf-8")
 
@@ -137,9 +141,19 @@ def static_contract_checks() -> None:
         "Resolved IPTV host accepts HTTP and HTTPS.",
     )
     check(
-        "safe HTTP timeouts",
-        "SetConnectTimeout(10)" in PORTAL and "SetMinimumTransferRate(1, 15)" in PORTAL,
-        "Portal client must have bounded timeouts.",
+        "Roku-compatible HTTP timeouts",
+        all("SetConnectTimeout" not in source for source in NETWORK_SERVICES.values())
+        and "SetMinimumTransferRate(1, 15)" in PORTAL
+        and "AsyncPostFromString" in PORTAL
+        and 'CreateObject("roMessagePort")' in PORTAL
+        and "wait(20000, port)" in PORTAL
+        and "transfer.AsyncCancel()" in PORTAL,
+        "All services must avoid unsupported SetConnectTimeout and Portal must bound asynchronous requests.",
+    )
+    check(
+        "descriptive Portal HTTP errors",
+        "portalHttpMessage" in PORTAL and "(HTTP " in PORTAL,
+        "Portal errors must surface the response message and HTTP status.",
     )
     check("version is 0.1.88", "build_version=88" in MANIFEST, "Manifest must match this tested build.")
 
