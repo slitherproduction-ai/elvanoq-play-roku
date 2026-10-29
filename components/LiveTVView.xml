@@ -3,9 +3,18 @@
   <interface>
     <field id="playRequested" type="assocarray" alwaysNotify="true" />
     <field id="epg" type="assocarray" />
+    <function name="moveChannel" />
+    <function name="moveFocus" />
+    <function name="activateRight" />
+    <function name="confirmSelection" />
+    <function name="toggleFavorite" />
+    <function name="stopPreview" />
+    <function name="setCatalog" />
+    <function name="setEpg" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/LiveTVView.brs" />
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
+  <script type="text/brightscript" uri="pkg:/source/StreamFormat.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <children>
     <Rectangle translation="300,0" width="1620" height="1080" color="0x06111FFF" />
