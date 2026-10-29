@@ -8,6 +8,7 @@
     <field id="trailerRequested" type="assocarray" alwaysNotify="true" />
     <field id="episodeRequested" type="assocarray" alwaysNotify="true" />
     <field id="seasonRequested" type="integer" alwaysNotify="true" />
+    <function name="handleKey" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/DetailView.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
