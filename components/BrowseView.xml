@@ -3,6 +3,8 @@
   <interface>
     <field id="kind" type="string" value="movies" />
     <field id="selectedItem" type="assocarray" alwaysNotify="true" />
+    <function name="handleKey" />
+    <function name="setCatalog" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/BrowseView.brs" />
   <children>
