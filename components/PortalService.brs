@@ -62,12 +62,12 @@ end sub
 
 function portalState(response as Object) as String
     state = ""
-    if response.status <> invalid then state = lcase(str(response.status))
-    if state = "" and response.licenseStatus <> invalid then state = lcase(str(response.licenseStatus))
-    if state = "" and response.activation_status <> invalid then state = lcase(str(response.activation_status))
-    if state = "" and response.license <> invalid and type(response.license) = "roAssociativeArray" and response.license.status <> invalid then state = lcase(str(response.license.status))
+    if response.status <> invalid then state = portalText(response.status)
+    if state = "" and response.licenseStatus <> invalid then state = portalText(response.licenseStatus)
+    if state = "" and response.activation_status <> invalid then state = portalText(response.activation_status)
+    if state = "" and response.license <> invalid and type(response.license) = "roAssociativeArray" and response.license.status <> invalid then state = portalText(response.license.status)
     if state = "" and response.license <> invalid and type(response.license) = "roAssociativeArray" and response.license.can_play = true then state = "active"
-    if state = "" and response.data <> invalid and type(response.data) = "roAssociativeArray" and response.data.status <> invalid then state = lcase(str(response.data.status))
+    if state = "" and response.data <> invalid and type(response.data) = "roAssociativeArray" and response.data.status <> invalid then state = portalText(response.data.status)
     if state = "active" or state = "ativo" then return "active"
     if state = "expired" or state = "expirado" then return "expired"
     if state = "blocked" or state = "bloqueado" then return "blocked"
@@ -80,4 +80,12 @@ function portalMessage(response as Object, state as String) as String
     if state = "expired" then return "Sua licença expirou. Renove no Portal."
     if state = "blocked" then return "Este dispositivo está bloqueado. Consulte o suporte no Portal."
     return "Aguardando a vinculação deste Roku no Portal."
+end function
+
+function portalText(value as Dynamic) as String
+    if value = invalid then return ""
+    t = type(value)
+    if t = "roString" or t = "String" then return lcase(value)
+    if t = "roInt" or t = "Integer" or t = "roFloat" or t = "Float" or t = "roDouble" or t = "Double" or t = "LongInteger" or t = "roLongInteger" then return lcase(value.ToStr())
+    return ""
 end function
