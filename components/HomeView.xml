@@ -3,6 +3,9 @@
   <interface>
     <field id="playRequested" type="assocarray" alwaysNotify="true" />
     <field id="selectedItem" type="assocarray" alwaysNotify="true" />
+    <function name="handleKey" />
+    <function name="setActive" />
+    <function name="setCatalog" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/HomeView.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
