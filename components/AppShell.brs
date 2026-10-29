@@ -81,8 +81,9 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
         if m.seriesView.callFunc("handleKey", { key: key, press: press }) then return true
     end if
     if m.selectedIndex = 6 then
-        if key >= "0" and key <= "9" then
-            m.parentalView.callFunc("enterDigit", key)
+        digit = pinDigitFromKey(key)
+        if digit <> "" then
+            m.parentalView.callFunc("enterDigit", digit)
             return true
         end if
         if key = "back" then
@@ -256,7 +257,8 @@ sub onPlayerFavoriteRequested()
     if request = invalid or request.id = invalid then return
     item = resolveCatalogItem(request)
     if item = invalid then return
-    for each favorite in m.localState.favorites
+    state = loadLocalState()
+    for each favorite in state.favorites
         if favorite.id = item.id then
             removeFavorite(item.id)
             return
@@ -428,7 +430,18 @@ sub onPlayerClosed()
     if m.playerView.closeRequested <> true then return
     clearEpisodeQueue()
     m.playerView.visible = false
+    ' Zera a URL: sem isso, reabrir o mesmo canal/titulo nao dispara onStreamChanged
+    m.playerView.streamUrl = ""
     m.playerView.closeRequested = false
+end sub
+
+sub stopPlayback()
+    clearEpisodeQueue()
+    m.liveTVView.callFunc("stopPreview")
+    m.playerView.callFunc("stopPlayback")
+    m.playerView.visible = false
+    m.playerView.streamUrl = ""
+    m.detailView.visible = false
 end sub
 
 sub clearEpisodeQueue()
@@ -490,22 +503,29 @@ sub showSection()
 end sub
 
 function libraryDescription() as String
-    return str(m.localState.favorites.count()) + " favoritos, " + str(m.localState.watch_later.count()) + " para assistir mais tarde e " + str(m.localState.continue_watching.count()) + " em andamento."
+    state = loadLocalState()
+    return trim(str(state.favorites.count())) + " favoritos, " + trim(str(state.watch_later.count())) + " para assistir mais tarde e " + trim(str(state.continue_watching.count())) + " em andamento."
 end function
 
 sub saveFavorite(item as Object)
-    m.localState.favorites = upsertLocalItem(m.localState.favorites, item)
-    saveLocalState(m.localState)
+    state = loadLocalState()
+    state.favorites = upsertLocalItem(state.favorites, item)
+    saveLocalState(state)
+    m.localState = state
 end sub
 
 sub removeFavorite(itemId as String)
-    m.localState.favorites = removeLocalItem(m.localState.favorites, itemId)
-    saveLocalState(m.localState)
+    state = loadLocalState()
+    state.favorites = removeLocalItem(state.favorites, itemId)
+    saveLocalState(state)
+    m.localState = state
 end sub
 
 sub saveProgress(item as Object)
-    m.localState.continue_watching = upsertLocalItem(m.localState.continue_watching, item)
-    saveLocalState(m.localState)
+    state = loadLocalState()
+    state.continue_watching = upsertLocalItem(state.continue_watching, item)
+    saveLocalState(state)
+    m.localState = state
 end sub
 
 sub applyPlaylist(payload as Object)
@@ -579,3 +599,13 @@ sub savePlaylistMetadata(payload as Object)
     section.Write("playlist_metadata", FormatJson(metadata))
     section.Flush()
 end sub
+
+function pinDigitFromKey(key as String) as String
+    ' O controle Roku nao tem teclado numerico; o app mobile envia "Lit_5".
+    if len(key) = 1 and key >= "0" and key <= "9" then return key
+    if len(key) = 5 and left(key, 4) = "Lit_" then
+        digit = right(key, 1)
+        if digit >= "0" and digit <= "9" then return digit
+    end if
+    return ""
+end function
