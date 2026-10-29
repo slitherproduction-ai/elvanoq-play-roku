@@ -23,17 +23,36 @@ O fluxo não usa, solicita, transmite nem registra identificador físico do apar
 
 Ativo, pendente, expirado, bloqueado, offline e erro de API.
 
+## Simulador de homologação
+
+O repositório executa `tests/roku_preflight_simulator.py` em todo push e pull request. É um simulador de contrato e não usa dispositivos, listas, credenciais ou códigos reais.
+
+Ele valida:
+
+- compilação BrightScript e XML SceneGraph;
+- formato do código visual e rejeição de identificador sintético inválido;
+- presença dos estados pendente, ativo, expirado, bloqueado, offline e erro;
+- abertura do login por código pelo evento **OK** do controle;
+- identificador persistente `GetChannelClientId()`, sem MAC;
+- contrato das ações do Portal e proteção HTTP (timeout e `User-Agent`);
+- resposta pública do relay `/health`.
+
+O relatório `roku-homologation-report.json` fica disponível como artefato do GitHub Actions. O pacote de sideload só é criado quando essa suíte e as validações do canal forem aprovadas.
+
+O simulador não substitui o teste físico de reprodução, codecs, desempenho e navegação real pelo controle Roku.
+
 ## Resolução e layout
 
 O canal usa uma única base de projeto **FHD (1920×1080)**. O Roku faz a escala automática para aparelhos HD/720p, mantendo proporções e áreas seguras; não há layouts distintos e conflitantes para HD e FHD.
 
 ## Testes locais
 
-1. Instale o pacote pelo Roku Developer Mode.
-2. Abra o app e confirme o código visual no formato esperado.
-3. Teste vinculação no Portal, pendente, ativo, expirado, bloqueado, sem rede e resposta inválida.
-4. Pressione OK na tela inicial e teste código inválido, código rejeitado e código válido.
-5. Em código válido, informe credenciais de teste e confirme que o catálogo é carregado sem mostrar ou salvar a senha.
-6. Confirme no console de depuração que nenhuma mensagem contém o identificador técnico completo ou credenciais.
+1. Execute `python3 tests/roku_preflight_simulator.py` para a homologação de contrato.
+2. Instale o pacote pelo Roku Developer Mode.
+3. Abra o app e confirme o código visual no formato esperado.
+4. Teste vinculação no Portal, pendente, ativo, expirado, bloqueado, sem rede e resposta inválida.
+5. Pressione OK na tela inicial e teste código inválido, código rejeitado e código válido.
+6. Em código válido, informe credenciais de teste e confirme que o catálogo é carregado sem mostrar ou salvar a senha.
+7. Confirme no console de depuração que nenhuma mensagem contém o identificador técnico completo ou credenciais.
 
 Este repositório não publica na Roku Channel Store.
