@@ -55,6 +55,7 @@ end sub
 
 sub setCatalog(payload as Object)
     if payload = invalid or type(payload) <> "roAssociativeArray" then return
+    m.localState = loadLocalState()
     m.allChannels = []
     for each item in payload.items
         if item.type = invalid or item.type = "live" then m.allChannels.push(item)
@@ -250,6 +251,8 @@ sub playSelected()
     content = CreateObject("roSGNode", "ContentNode")
     content.url = selected.stream_url
     content.title = selected.title
+    previewFormat = streamFormatForUrl(selected.stream_url)
+    if previewFormat <> "" then content.streamFormat = previewFormat
     m.preview.content = content
     m.preview.control = "play"
     m.previewHint.text = "Prévia em execução  •  OK para assistir em tela cheia"
@@ -268,6 +271,7 @@ end sub
 
 sub toggleFavorite()
     if m.visibleChannels.count() = 0 then return
+    m.localState = loadLocalState()
     selected = m.visibleChannels[m.selectedIndex]
     if isFavorite(selected.id) then
         m.localState.favorites = removeLocalItem(m.localState.favorites, selected.id)
