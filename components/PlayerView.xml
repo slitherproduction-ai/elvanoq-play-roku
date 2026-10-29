@@ -16,15 +16,19 @@
     <field id="channelRequested" type="assocarray" alwaysNotify="true" />
     <field id="favoriteRequested" type="assocarray" alwaysNotify="true" />
     <field id="closeRequested" type="boolean" alwaysNotify="true" />
+    <function name="handleKey" />
+    <function name="stopPlayback" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/PlayerView.brs" />
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
+  <script type="text/brightscript" uri="pkg:/source/StreamFormat.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <children>
     <Rectangle width="1920" height="1080" color="0x000000FF" />
     <Video id="video" width="1920" height="1080" enableUI="false" />
     <Timer id="osdTimer" duration="5" repeat="false" />
     <Timer id="nextEpisodeTimer" duration="6" repeat="false" />
+    <Timer id="retryTimer" duration="2" repeat="false" />
     <Rectangle id="osdBackground" translation="0,0" width="1920" height="1080" color="0x030912B8" />
     <Rectangle id="topShade" translation="0,0" width="1920" height="250" color="0x06111FEF" />
     <Label id="backLabel" translation="70,60" text="‹" width="48" height="54" />
