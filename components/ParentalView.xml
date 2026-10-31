@@ -8,35 +8,47 @@
     <function name="cancelPinEntry" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/ParentalView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
   <children>
-    <Rectangle translation="300,0" width="1620" height="1080" color="0x06111FFF" />
-    <Label id="title" translation="390,150" text="Controle Parental" width="800" height="62" />
-    <Label id="description" translation="390,228" text="Digite o PIN para acessar categorias e restrições." width="900" height="40" />
-    <Label id="dots" translation="390,330" text="○  ○  ○  ○" width="420" height="62" />
-    <Label id="status" translation="390,408" text="PIN inicial: 0000" width="800" height="34" />
-    <Rectangle translation="390,495" width="105" height="58" color="0x1D3656FF" />
-    <Label translation="432,510" text="1" width="30" height="32" />
-    <Rectangle translation="510,495" width="105" height="58" color="0x1D3656FF" />
-    <Label translation="552,510" text="2" width="30" height="32" />
-    <Rectangle translation="630,495" width="105" height="58" color="0x1D3656FF" />
-    <Label translation="672,510" text="3" width="30" height="32" />
-    <Rectangle translation="390,565" width="105" height="58" color="0x1D3656FF" />
-    <Label translation="432,580" text="4" width="30" height="32" />
-    <Rectangle translation="510,565" width="105" height="58" color="0x1D3656FF" />
-    <Label translation="552,580" text="5" width="30" height="32" />
-    <Rectangle translation="630,565" width="105" height="58" color="0x1D3656FF" />
-    <Label translation="672,580" text="6" width="30" height="32" />
-    <Rectangle translation="390,635" width="105" height="58" color="0x1D3656FF" />
-    <Label translation="432,650" text="7" width="30" height="32" />
-    <Rectangle translation="510,635" width="105" height="58" color="0x1D3656FF" />
-    <Label translation="552,650" text="8" width="30" height="32" />
-    <Rectangle translation="630,635" width="105" height="58" color="0x1D3656FF" />
-    <Label translation="672,650" text="9" width="30" height="32" />
-    <Rectangle translation="510,705" width="105" height="58" color="0x1D3656FF" />
-    <Label translation="552,720" text="0" width="30" height="32" />
-    <Rectangle id="categoryPanel" translation="870,470" width="720" height="300" color="0x0C2036FF" />
-    <Label id="lockedCategories" translation="900,510" text="Digite o PIN para gerenciar categorias." width="620" height="220" wrap="true" />
-    <Label id="scopeStatus" translation="900,650" width="620" height="70" wrap="true" />
+    <Rectangle width="1920" height="1080" color="0x070B14FF" />
+    <Label id="pageTitle" translation="[64,64]" text="Ajustes" width="900" height="52" />
+    <Label id="pageSubtitle" translation="[64,118]" text="Controle parental e restrições desta TV" width="900" height="28" />
+
+    <Rectangle translation="[64,180]" width="620" height="830" color="0x0D1422FF" />
+    <Label id="title" translation="[104,212]" text="Controle Parental" width="540" height="40" />
+    <Label id="description" translation="[104,258]" text="Digite o PIN para acessar categorias e restrições." width="540" height="56" wrap="true" maxLines="2" />
+    <Label id="dots" translation="[104,326]" text="_  _  _  _" width="540" height="56" />
+    <Label id="status" translation="[104,384]" text="" width="540" height="30" />
+    <Rectangle id="keyFocus" translation="[98,424]" width="172" height="96" color="0x00D7FFFF" />
+    <Rectangle id="keyBg00" translation="[104,430]" width="160" height="84" color="0x111B2DFF" />
+    <Label id="keyLabel00" translation="[104,430]" text="1" width="160" height="84" horizAlign="center" vertAlign="center" />
+    <Rectangle id="keyBg01" translation="[280,430]" width="160" height="84" color="0x111B2DFF" />
+    <Label id="keyLabel01" translation="[280,430]" text="2" width="160" height="84" horizAlign="center" vertAlign="center" />
+    <Rectangle id="keyBg02" translation="[456,430]" width="160" height="84" color="0x111B2DFF" />
+    <Label id="keyLabel02" translation="[456,430]" text="3" width="160" height="84" horizAlign="center" vertAlign="center" />
+    <Rectangle id="keyBg03" translation="[104,530]" width="160" height="84" color="0x111B2DFF" />
+    <Label id="keyLabel03" translation="[104,530]" text="4" width="160" height="84" horizAlign="center" vertAlign="center" />
+    <Rectangle id="keyBg04" translation="[280,530]" width="160" height="84" color="0x111B2DFF" />
+    <Label id="keyLabel04" translation="[280,530]" text="5" width="160" height="84" horizAlign="center" vertAlign="center" />
+    <Rectangle id="keyBg05" translation="[456,530]" width="160" height="84" color="0x111B2DFF" />
+    <Label id="keyLabel05" translation="[456,530]" text="6" width="160" height="84" horizAlign="center" vertAlign="center" />
+    <Rectangle id="keyBg06" translation="[104,630]" width="160" height="84" color="0x111B2DFF" />
+    <Label id="keyLabel06" translation="[104,630]" text="7" width="160" height="84" horizAlign="center" vertAlign="center" />
+    <Rectangle id="keyBg07" translation="[280,630]" width="160" height="84" color="0x111B2DFF" />
+    <Label id="keyLabel07" translation="[280,630]" text="8" width="160" height="84" horizAlign="center" vertAlign="center" />
+    <Rectangle id="keyBg08" translation="[456,630]" width="160" height="84" color="0x111B2DFF" />
+    <Label id="keyLabel08" translation="[456,630]" text="9" width="160" height="84" horizAlign="center" vertAlign="center" />
+    <Rectangle id="keyBg09" translation="[104,730]" width="160" height="84" color="0x111B2DFF" />
+    <Label id="keyLabel09" translation="[104,730]" text="Limpar" width="160" height="84" horizAlign="center" vertAlign="center" />
+    <Rectangle id="keyBg10" translation="[280,730]" width="160" height="84" color="0x111B2DFF" />
+    <Label id="keyLabel10" translation="[280,730]" text="0" width="160" height="84" horizAlign="center" vertAlign="center" />
+    <Rectangle id="keyBg11" translation="[456,730]" width="160" height="84" color="0x111B2DFF" />
+    <Label id="keyLabel11" translation="[456,730]" text="Apagar" width="160" height="84" horizAlign="center" vertAlign="center" />
+
+    <Rectangle id="categoryPanel" translation="[704,180]" width="1152" height="830" color="0x0D1422FF" />
+    <Label id="lockedCategories" translation="[744,212]" text="Digite o PIN para gerenciar categorias." width="1072" height="700" wrap="true" />
+    <Label id="scopeStatus" translation="[744,940]" width="1072" height="56" wrap="true" maxLines="2" />
   </children>
 </component>

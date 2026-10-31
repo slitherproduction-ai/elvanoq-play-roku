@@ -14,14 +14,25 @@ sub run()
     transfer.AddHeader("X-Roku-Reserved-Dev-Id", "")
     transfer.InitClientCertificates()
     transfer.SetMinimumTransferRate(1, 15)
+    ' Sem isto a Roku descarta o corpo das respostas 4xx/5xx e a mensagem do Portal se perde
+    transfer.RetainBodyOnError(true)
     transfer.SetUrl("https://roku.elvanoqplay.app/api/roku")
     transfer.AddHeader("Content-Type", "application/json")
     transfer.AddHeader("Accept", "application/json")
     transfer.AddHeader("User-Agent", "ELVANOQPlay-Roku/0.1.88")
+    ' Chaves de AA literal viram minusculas no FormatJson ("devicecode"); o Portal
+    ' diferencia maiusculas, entao o payload usa um AA case-sensitive.
+    payload = CreateObject("roAssociativeArray")
+    payload.SetModeCaseSensitive()
+    payload["action"] = m.top.action
+    payload["rokuClientId"] = m.top.rokuClientId
+    payload["deviceCode"] = m.top.deviceCode
     if m.top.action = "roku-server-code-resolve" then
-        payload = { action: m.top.action, rokuClientId: m.top.rokuClientId, deviceCode: m.top.deviceCode, code: m.top.serverCode }
+        payload["code"] = m.top.serverCode
     else
-        payload = { action: m.top.action, rokuClientId: m.top.rokuClientId, deviceCode: m.top.deviceCode, device_key: m.top.deviceKey, deviceName: m.top.deviceName, platform: "roku" }
+        payload["device_key"] = m.top.deviceKey
+        payload["deviceName"] = m.top.deviceName
+        payload["platform"] = "roku"
     end if
     port = CreateObject("roMessagePort")
     transfer.SetPort(port)
@@ -97,15 +108,15 @@ function portalHttpMessage(responseText as Dynamic, httpStatus as Integer) as St
             end if
         end if
     end if
-    if httpStatus > 0 then return message + " (HTTP " + trim(str(httpStatus)) + ")"
+    if httpStatus > 0 then return message + " (HTTP " + safeTrim(str(httpStatus)) + ")"
     return message
 end function
 
 function portalDisplayText(value as Dynamic) as String
     if value = invalid then return ""
-    t = type(value)
-    if t = "roString" or t = "String" then return value
-    if t = "roInt" or t = "Integer" or t = "roFloat" or t = "Float" or t = "roDouble" or t = "Double" or t = "LongInteger" or t = "roLongInteger" then return value.ToStr()
+    t = lcase(type(value))
+    if t = "rostring" or t = "string" then return (value)
+    if instr(1, t, "int") > 0 or instr(1, t, "float") > 0 or instr(1, t, "double") > 0 then return str(value).Trim()
     return ""
 end function
 
@@ -133,8 +144,8 @@ end function
 
 function portalText(value as Dynamic) as String
     if value = invalid then return ""
-    t = type(value)
-    if t = "roString" or t = "String" then return lcase(value)
-    if t = "roInt" or t = "Integer" or t = "roFloat" or t = "Float" or t = "roDouble" or t = "Double" or t = "LongInteger" or t = "roLongInteger" then return lcase(value.ToStr())
+    t = lcase(type(value))
+    if t = "rostring" or t = "string" then return lcase(value)
+    if instr(1, t, "int") > 0 or instr(1, t, "float") > 0 or instr(1, t, "double") > 0 then return str(value).Trim()
     return ""
 end function

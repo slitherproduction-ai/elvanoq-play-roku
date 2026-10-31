@@ -1,28 +1,64 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="MainScene" extends="Scene">
   <script type="text/brightscript" uri="pkg:/components/MainScene.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
+  <script type="text/brightscript" uri="pkg:/source/QrCode.brs" />
   <children>
+    <!-- Fundo: arte limpa + degradê escuro só à esquerda (sem véu azul) -->
+    <Rectangle width="1920" height="1080" color="0x070B14FF" />
     <Poster id="background" uri="pkg:/images/elvanoq-login-tv-backdrop.jpg" width="1920" height="1080" />
-    <Rectangle id="ambientBottom" translation="[0,0]" width="1920" height="1080" color="0x020713FF" opacity="0.42" />
-    <Rectangle id="ambientLeft" translation="[0,0]" width="975" height="1080" color="0x030914FF" opacity="0.66" />
-    <Rectangle id="brandPanel" translation="[0,0]" width="2" height="2" color="0x00000000" />
-    <Poster id="brandMark" uri="pkg:/images/elvanoq-wordmark.png" translation="[138,108]" width="495" height="165" />
-    <Rectangle id="activationCard" translation="[138,336]" width="681" height="645" color="0x0A1321FF" opacity="0.84" />
-    <Rectangle id="activationAccent" translation="[138,336]" width="681" height="2" color="0xD7EBFFFF" opacity="0.32" />
-    <Label id="eyebrow" translation="[186,375]" text="ACESSO SEGURO" width="585" height="33" />
-    <Label id="headline" translation="[186,420]" text="Ative sua TV" width="585" height="63" />
-    <Label id="description" translation="[186,495]" text="Acesse o Portal e informe o código deste Roku." width="585" height="63" wrap="true" />
-    <Rectangle id="codeCard" translation="[186,585]" width="585" height="93" color="0x0A1E35FF" opacity="0.96" />
-    <Label id="deviceCode" translation="[198,596]" width="561" height="72" horizAlign="center" vertAlign="center" />
-    <Label id="portalCaption" translation="[186,705]" text="PORTAL ELVANOQ PLAY" width="585" height="27" />
-    <Label id="portal" translation="[186,738]" text="elvanoqplay.app" width="585" height="41" />
-    <Rectangle id="serverCodeButton" translation="[186,801]" width="585" height="75" color="0x1965D6FF" />
-    <Label id="serverCodeButtonText" translation="[201,815]" text="OK  •  Entrar com código do servidor" width="555" height="48" horizAlign="center" />
-    <Group id="serverCodeAction" translation="[186,801]" />
-    <Rectangle id="statusDivider" translation="[186,900]" width="585" height="2" color="0xC6DDFEFF" opacity="0.22" />
-    <Label id="status" translation="[186,915]" text="Preparando ativação…" width="585" height="51" wrap="true" />
+    <Rectangle id="ambientBottom" width="1920" height="1080" color="0x070B14FF" opacity="0.30" />
+    <Poster id="loginShade" uri="pkg:/images/hero_shade_left.png" width="2300" height="1080" />
+    <Poster id="loginShadeBottom" uri="pkg:/images/hero_shade_bottom.png" width="1920" height="1080" />
+
+    <Poster id="brandMark" uri="pkg:/images/elvanoq-wordmark.png" translation="[96,64]" width="240" height="80" />
+    <Timer id="clockTimer" duration="20" repeat="true" />
+    <Label id="clockTime" translation="[1460,60]" width="364" height="48" horizAlign="right" />
+    <Label id="clockDate" translation="[1460,110]" width="364" height="30" horizAlign="right" />
+
+    <Label id="eyebrow" translation="[96,236]" text="ACESSO SEGURO" width="900" height="28" />
+    <Label id="headline" translation="[96,268]" text="Ative sua TV" width="1000" height="84" />
+    <Label id="description" translation="[96,356]" text="Vincule este aparelho ao Portal ELVANOQ Play em três passos." width="960" height="34" />
+
+    <Group id="stepsGroup" translation="[96,418]">
+      <Poster uri="pkg:/images/step_circle.png" width="40" height="40" blendColor="0x147DFFFF" />
+      <Label id="stepNumber1" text="1" width="40" height="40" horizAlign="center" vertAlign="center" />
+      <Label id="stepText1" translation="[60,0]" text="Acesse elvanoqplay.app ou aponte a câmera para o QR code" width="900" height="40" vertAlign="center" />
+      <Poster translation="[0,58]" uri="pkg:/images/step_circle.png" width="40" height="40" blendColor="0x147DFFFF" />
+      <Label id="stepNumber2" translation="[0,58]" text="2" width="40" height="40" horizAlign="center" vertAlign="center" />
+      <Label id="stepText2" translation="[60,58]" text="Informe o código deste aparelho" width="900" height="40" vertAlign="center" />
+      <Poster translation="[0,116]" uri="pkg:/images/step_circle.png" width="40" height="40" blendColor="0x147DFFFF" />
+      <Label id="stepNumber3" translation="[0,116]" text="3" width="40" height="40" horizAlign="center" vertAlign="center" />
+      <Label id="stepText3" translation="[60,116]" text="A TV ativa sozinha em alguns segundos" width="900" height="40" vertAlign="center" />
+    </Group>
+
+    <Label id="portalCaption" translation="[96,612]" text="CÓDIGO DESTE APARELHO" width="700" height="26" />
+    <Rectangle id="codeBorder" translation="[96,646]" width="720" height="116" color="0x00D7FFFF" />
+    <Rectangle id="codeCard" translation="[99,649]" width="714" height="110" color="0x0D1422FF" />
+    <Label id="deviceCode" translation="[99,649]" width="714" height="110" horizAlign="center" vertAlign="center" />
+
+    <Group id="qrGroup" translation="[860,596]">
+      <Rectangle width="234" height="234" color="0xFFFFFFFF" />
+      <Poster id="qrStatic" uri="pkg:/images/qr_portal.png" translation="[7,7]" width="220" height="220" />
+      <Group id="qrModules" translation="[18,18]" />
+      <Label id="qrCaption" translation="[0,246]" text="Aponte a câmera do celular" width="234" height="28" horizAlign="center" />
+    </Group>
+    <Label id="portal" translation="[860,870]" text="elvanoqplay.app" width="234" height="30" horizAlign="center" />
+
+    <Rectangle id="serverCodeButton" translation="[96,790]" width="720" height="72" color="0x8894A8FF" />
+    <Rectangle id="serverCodeInner" translation="[98,792]" width="716" height="68" color="0x0D1422E6" />
+    <Label id="serverCodeButtonText" translation="[98,792]" text="OK   •   Entrar com código do servidor" width="716" height="68" horizAlign="center" vertAlign="center" />
+    <Group id="serverCodeAction" translation="[96,790]" />
+
+    <Poster id="statusDot" uri="pkg:/images/status_dot.png" translation="[96,912]" width="18" height="18" blendColor="0x00D7FFFF" />
+    <Animation id="statusPulse" duration="1.4" repeat="true" easeFunction="inOutQuad">
+      <FloatFieldInterpolator key="[0.0, 0.5, 1.0]" keyValue="[1.0, 0.25, 1.0]" fieldToInterp="statusDot.opacity" />
+    </Animation>
+    <Label id="status" translation="[130,900]" text="Preparando ativação…" width="1000" height="42" vertAlign="center" />
+
     <Label id="homeStatus" translation="[225,510]" width="1470" height="75" horizAlign="center" visible="false" />
-    <Label id="appVersion" translation="[1590,1017]" text="v0.1.88" width="264" height="36" horizAlign="right" />
+    <Label id="appVersion" translation="[1460,1010]" text="v0.1.88" width="364" height="30" horizAlign="right" />
     <Timer id="registerTimer" repeat="false" duration="3" />
     <Timer id="licenseTimer" repeat="true" duration="60" />
     <Timer id="portalWatchdog" repeat="false" duration="20" />

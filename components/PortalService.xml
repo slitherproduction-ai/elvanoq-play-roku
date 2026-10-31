@@ -10,4 +10,5 @@
     <field id="result" type="assocarray" alwaysNotify="true" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/PortalService.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
 </component>

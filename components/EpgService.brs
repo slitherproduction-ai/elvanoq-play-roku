@@ -8,6 +8,12 @@ sub run()
     result.entries = {}
     result.message = "Guia indisponível."
 
+    if m.top.streamId <> "" then
+        runShortEpg(result)
+        m.top.result = result
+        return
+    end if
+
     if m.top.epgUrl = "" then
         m.top.result = result
         return
@@ -141,7 +147,7 @@ function xmltvSeconds(value)
     dt = CreateObject("roDateTime")
     dt.FromISO8601String(iso)
     seconds = dt.AsSeconds()
-    tail = trim(mid(value, 15))
+    tail = safeTrim(mid(value, 15))
     if len(tail) >= 5 then
         sign = left(tail, 1)
         if sign = "+" or sign = "-" then
@@ -181,5 +187,83 @@ function xmlTagText(block, tag)
     if endAt = 0 then
         return ""
     end if
-    return trim(mid(block, contentAt + 1, endAt - contentAt - 1))
+    return safeTrim(mid(block, contentAt + 1, endAt - contentAt - 1))
+end function
+
+' ---------- get_short_epg (Xtream): poucos KB por canal ----------
+sub runShortEpg(result)
+    url = m.top.streamUrl
+    liveAt = instr(1, url, "/live/")
+    if liveAt = 0 or m.top.epgKey = "" then return
+    host = left(url, liveAt - 1)
+    parts = mid(url, liveAt + 6).Split("/")
+    if parts.count() < 3 then return
+    apiUrl = host + "/player_api.php?username=" + parts[0] + "&password=" + parts[1] + "&action=get_short_epg&stream_id=" + m.top.streamId + "&limit=4"
+
+    transfer = CreateObject("roUrlTransfer")
+    port = CreateObject("roMessagePort")
+    transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
+    transfer.InitClientCertificates()
+    transfer.SetMinimumTransferRate(1, 15)
+    transfer.SetUrl(apiUrl)
+    transfer.SetPort(port)
+    transfer.EnableEncodings(true)
+    if transfer.AsyncGetToString() <> true then return
+    event = wait(15000, port)
+    if event = invalid or type(event) <> "roUrlEvent" then
+        transfer.AsyncCancel()
+        return
+    end if
+    if event.GetResponseCode() < 200 or event.GetResponseCode() >= 300 then return
+    json = ParseJson(event.GetString())
+    if json = invalid or type(json) <> "roAssociativeArray" then return
+    listings = json.epg_listings
+    if listings = invalid or type(listings) <> "roArray" then return
+
+    nowSec = CreateObject("roDateTime").AsSeconds()
+    programmes = []
+    for each listing in listings
+        if type(listing) = "roAssociativeArray" then
+            startSec = safeTrim(listing.start_timestamp).ToInt()
+            stopSec = safeTrim(listing.stop_timestamp).ToInt()
+            if stopSec = 0 or stopSec > nowSec then
+                programme = {}
+                programme.title = decodeEpgText(safeTrim(listing.title))
+                programme.start = localStamp(startSec)
+                programme.startSec = startSec
+                programme.stopSec = stopSec
+                if programme.title <> "" then programmes.push(programme)
+            end if
+        end if
+    end for
+    entries = {}
+    entries[m.top.epgKey] = programmes
+    result.entries = entries
+    result.ok = true
+    result.message = "Guia carregado."
+end sub
+
+' Xtream envia os titulos em base64.
+function decodeEpgText(value)
+    if value = "" then return ""
+    bytes = CreateObject("roByteArray")
+    bytes.FromBase64String(value)
+    decoded = bytes.ToAsciiString()
+    if decoded = "" then return value
+    return safeTrim(decoded)
+end function
+
+' Mesmo formato do XMLTV ("AAAAMMDDHHMMSS"), ja no horario local da TV.
+function localStamp(seconds)
+    if seconds <= 0 then return ""
+    dt = CreateObject("roDateTime")
+    dt.FromSeconds(seconds)
+    dt.ToLocalTime()
+    return safeTrim(str(dt.GetYear())) + pad2(dt.GetMonth()) + pad2(dt.GetDayOfMonth()) + pad2(dt.GetHours()) + pad2(dt.GetMinutes()) + "00"
+end function
+
+function pad2(number)
+    text = safeTrim(str(number))
+    if len(text) < 2 then text = "0" + text
+    return text
 end function

@@ -3,6 +3,8 @@
   <interface>
     <field id="playRequested" type="assocarray" alwaysNotify="true" />
     <field id="epg" type="assocarray" />
+    <field id="epgUpdate" type="assocarray" alwaysNotify="true" />
+    <field id="categoryRequested" type="assocarray" alwaysNotify="true" />
     <function name="moveChannel" />
     <function name="moveFocus" />
     <function name="activateRight" />
@@ -11,52 +13,95 @@
     <function name="stopPreview" />
     <function name="setCatalog" />
     <function name="setEpg" />
+    <function name="setCategoryItems" />
+    <function name="focusColumnName" />
+    <function name="isAtTop" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/LiveTVView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
   <script type="text/brightscript" uri="pkg:/source/StreamFormat.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <children>
-    <Rectangle translation="300,0" width="1620" height="1080" color="0x06111FFF" />
-    <Label id="title" translation="350,72" text="TV ao Vivo" width="500" height="54" />
-    <Label id="subtitle" translation="350,126" text="Categorias e canais da sua lista" width="600" height="30" />
-    <Rectangle translation="350,190" width="225" height="720" color="0x0C2036FF" />
-    <Label id="categoriesTitle" translation="378,216" text="CATEGORIAS" width="170" height="30" />
-    <Rectangle id="categoryFocus" translation="364,256" width="198" height="36" color="0x1965D6FF" visible="false" />
-    <Label id="category01" translation="378,265" width="175" height="30" />
-    <Label id="category02" translation="378,305" width="175" height="30" />
-    <Label id="category03" translation="378,345" width="175" height="30" />
-    <Label id="category04" translation="378,385" width="175" height="30" />
-    <Label id="category05" translation="378,425" width="175" height="30" />
-    <Label id="category06" translation="378,465" width="175" height="30" />
-    <Rectangle translation="595,190" width="390" height="720" color="0x091827FF" />
-    <Label id="channelsTitle" translation="625,216" text="CANAIS" width="240" height="30" />
-    <Rectangle id="channelFocus" translation="615,258" width="350" height="48" color="0x1965D6FF" />
-    <Poster id="channelLogo01" translation="630,264" width="34" height="34" loadDisplayMode="scaleToFit" />
-    <Poster id="channelLogo02" translation="630,319" width="34" height="34" loadDisplayMode="scaleToFit" />
-    <Poster id="channelLogo03" translation="630,374" width="34" height="34" loadDisplayMode="scaleToFit" />
-    <Poster id="channelLogo04" translation="630,429" width="34" height="34" loadDisplayMode="scaleToFit" />
-    <Poster id="channelLogo05" translation="630,484" width="34" height="34" loadDisplayMode="scaleToFit" />
-    <Poster id="channelLogo06" translation="630,539" width="34" height="34" loadDisplayMode="scaleToFit" />
-    <Poster id="channelLogo07" translation="630,594" width="34" height="34" loadDisplayMode="scaleToFit" />
-    <Poster id="channelLogo08" translation="630,649" width="34" height="34" loadDisplayMode="scaleToFit" />
-    <Label id="channel01" translation="680,270" width="260" height="30" />
-    <Label id="channel02" translation="680,325" width="260" height="30" />
-    <Label id="channel03" translation="680,380" width="260" height="30" />
-    <Label id="channel04" translation="680,435" width="260" height="30" />
-    <Label id="channel05" translation="680,490" width="260" height="30" />
-    <Label id="channel06" translation="680,545" width="260" height="30" />
-    <Label id="channel07" translation="680,600" width="260" height="30" />
-    <Label id="channel08" translation="680,655" width="260" height="30" />
-    <Rectangle translation="1010,190" width="820" height="460" color="0x000000FF" />
-    <Video id="preview" translation="1010,190" width="820" height="460" enableUI="false" />
-    <Label id="previewTitle" translation="1040,420" text="Selecione um canal para iniciar a prévia" width="700" height="44" />
-    <Label id="previewHint" translation="1040,470" text="OK ou → para reproduzir" width="600" height="30" />
-    <Rectangle translation="1010,675" width="820" height="235" color="0x0C2036FF" />
-    <Label id="epgTitle" translation="1040,704" text="GUIA DE PROGRAMAÇÃO" width="500" height="30" />
-    <Label id="epgNow" translation="1040,750" text="Programação disponível após sincronizar XMLTV." width="700" height="36" />
-    <Rectangle id="epgProgress" translation="1040,800" width="0" height="6" color="0x3CB5FFFF" />
-    <Label id="epgNext" translation="1040,830" text="Próximo: —" width="700" height="32" />
-    <Label id="emptyState" translation="625,740" width="320" height="60" wrap="true" visible="false" />
+    <Rectangle width="1920" height="1080" color="0x070B14FF" />
+    <Label id="title" translation="[64,64]" text="TV ao Vivo" width="700" height="52" />
+    <Label id="subtitle" translation="[64,118]" text="Categorias e canais da sua lista" width="900" height="28" />
+
+    <Rectangle translation="[64,176]" width="450" height="830" color="0x0D1422FF" />
+    <Label id="categoriesTitle" translation="[92,196]" text="CATEGORIAS" width="300" height="26" />
+    <Rectangle id="categoryFocus" translation="[76,236]" width="426" height="46" color="0x147DFFFF" visible="false" />
+    <Label id="category01" translation="[92,242]" width="394" height="40" vertAlign="center" />
+    <Label id="category02" translation="[92,294]" width="394" height="40" vertAlign="center" />
+    <Label id="category03" translation="[92,346]" width="394" height="40" vertAlign="center" />
+    <Label id="category04" translation="[92,398]" width="394" height="40" vertAlign="center" />
+    <Label id="category05" translation="[92,450]" width="394" height="40" vertAlign="center" />
+    <Label id="category06" translation="[92,502]" width="394" height="40" vertAlign="center" />
+    <Label id="category07" translation="[92,554]" width="394" height="40" vertAlign="center" />
+    <Label id="category08" translation="[92,606]" width="394" height="40" vertAlign="center" />
+    <Label id="category09" translation="[92,658]" width="394" height="40" vertAlign="center" />
+    <Label id="category10" translation="[92,710]" width="394" height="40" vertAlign="center" />
+    <Label id="category11" translation="[92,762]" width="394" height="40" vertAlign="center" />
+    <Label id="category12" translation="[92,814]" width="394" height="40" vertAlign="center" />
+    <Label id="category13" translation="[92,866]" width="394" height="40" vertAlign="center" />
+    <Label id="category14" translation="[92,918]" width="394" height="40" vertAlign="center" />
+
+    <Rectangle translation="[534,176]" width="690" height="830" color="0x0D1422FF" />
+    <Label id="channelsTitle" translation="[562,196]" text="CANAIS" width="300" height="26" />
+    <Rectangle id="channelFocus" translation="[546,236]" width="666" height="46" color="0x147DFFFF" />
+    <Poster id="channelLogo01" translation="[558,244]" width="36" height="36" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo02" translation="[558,296]" width="36" height="36" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo03" translation="[558,348]" width="36" height="36" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo04" translation="[558,400]" width="36" height="36" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo05" translation="[558,452]" width="36" height="36" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo06" translation="[558,504]" width="36" height="36" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo07" translation="[558,556]" width="36" height="36" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo08" translation="[558,608]" width="36" height="36" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo09" translation="[558,660]" width="36" height="36" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo10" translation="[558,712]" width="36" height="36" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo11" translation="[558,764]" width="36" height="36" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo12" translation="[558,816]" width="36" height="36" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo13" translation="[558,868]" width="36" height="36" loadDisplayMode="scaleToFit" />
+    <Poster id="channelLogo14" translation="[558,920]" width="36" height="36" loadDisplayMode="scaleToFit" />
+    <Poster id="favHeart01" translation="[606,248]" width="24" height="24" uri="pkg:/images/icon_heart.png" visible="false" />
+    <Label id="channel01" translation="[640,242]" width="560" height="40" vertAlign="center" />
+    <Poster id="favHeart02" translation="[606,300]" width="24" height="24" uri="pkg:/images/icon_heart.png" visible="false" />
+    <Label id="channel02" translation="[640,294]" width="560" height="40" vertAlign="center" />
+    <Poster id="favHeart03" translation="[606,352]" width="24" height="24" uri="pkg:/images/icon_heart.png" visible="false" />
+    <Label id="channel03" translation="[640,346]" width="560" height="40" vertAlign="center" />
+    <Poster id="favHeart04" translation="[606,404]" width="24" height="24" uri="pkg:/images/icon_heart.png" visible="false" />
+    <Label id="channel04" translation="[640,398]" width="560" height="40" vertAlign="center" />
+    <Poster id="favHeart05" translation="[606,456]" width="24" height="24" uri="pkg:/images/icon_heart.png" visible="false" />
+    <Label id="channel05" translation="[640,450]" width="560" height="40" vertAlign="center" />
+    <Poster id="favHeart06" translation="[606,508]" width="24" height="24" uri="pkg:/images/icon_heart.png" visible="false" />
+    <Label id="channel06" translation="[640,502]" width="560" height="40" vertAlign="center" />
+    <Poster id="favHeart07" translation="[606,560]" width="24" height="24" uri="pkg:/images/icon_heart.png" visible="false" />
+    <Label id="channel07" translation="[640,554]" width="560" height="40" vertAlign="center" />
+    <Poster id="favHeart08" translation="[606,612]" width="24" height="24" uri="pkg:/images/icon_heart.png" visible="false" />
+    <Label id="channel08" translation="[640,606]" width="560" height="40" vertAlign="center" />
+    <Poster id="favHeart09" translation="[606,664]" width="24" height="24" uri="pkg:/images/icon_heart.png" visible="false" />
+    <Label id="channel09" translation="[640,658]" width="560" height="40" vertAlign="center" />
+    <Poster id="favHeart10" translation="[606,716]" width="24" height="24" uri="pkg:/images/icon_heart.png" visible="false" />
+    <Label id="channel10" translation="[640,710]" width="560" height="40" vertAlign="center" />
+    <Poster id="favHeart11" translation="[606,768]" width="24" height="24" uri="pkg:/images/icon_heart.png" visible="false" />
+    <Label id="channel11" translation="[640,762]" width="560" height="40" vertAlign="center" />
+    <Poster id="favHeart12" translation="[606,820]" width="24" height="24" uri="pkg:/images/icon_heart.png" visible="false" />
+    <Label id="channel12" translation="[640,814]" width="560" height="40" vertAlign="center" />
+    <Poster id="favHeart13" translation="[606,872]" width="24" height="24" uri="pkg:/images/icon_heart.png" visible="false" />
+    <Label id="channel13" translation="[640,866]" width="560" height="40" vertAlign="center" />
+    <Poster id="favHeart14" translation="[606,924]" width="24" height="24" uri="pkg:/images/icon_heart.png" visible="false" />
+    <Label id="channel14" translation="[640,918]" width="560" height="40" vertAlign="center" />
+
+    <Rectangle translation="[1244,176]" width="612" height="344" color="0x000000FF" />
+    <Video id="preview" translation="[1244,176]" width="612" height="344" enableUI="false" />
+    <Label id="previewTitle" translation="[1244,540]" text="Selecione um canal" width="612" height="36" />
+    <Label id="previewHint" translation="[1244,578]" text="→ prévia   •   OK tela cheia   •   * favorito" width="612" height="28" />
+
+    <Rectangle translation="[1244,628]" width="612" height="378" color="0x0D1422FF" />
+    <Label id="epgTitle" translation="[1272,650]" text="GUIA DE PROGRAMAÇÃO" width="556" height="26" />
+    <Label id="epgNow" translation="[1272,690]" text="Carregando guia…" width="556" height="64" wrap="true" maxLines="2" />
+    <Rectangle id="epgProgress" translation="[1272,766]" width="0" height="4" color="0x00D7FFFF" />
+    <Label id="epgNext" translation="[1272,788]" text="A seguir: —" width="556" height="60" wrap="true" maxLines="2" />
+    <Label id="emptyState" translation="[562,600]" width="634" height="60" wrap="true" visible="false" />
   </children>
 </component>

@@ -41,6 +41,15 @@ sub saveLocalState(state as Object)
         state.favorites = trimLocalItems(state.favorites, 80)
         json = FormatJson(state)
     end if
+    if len(json) > 24000 then
+        ' Ultimo recurso: tira as imagens (o resto continua funcionando).
+        for each listName in ["favorites", "watch_later", "continue_watching", "history"]
+            for each entry in state[listName]
+                entry.Delete("logo")
+            end for
+        end for
+        json = FormatJson(state)
+    end if
     section = CreateObject("roRegistrySection", "ELVANOQPlay")
     section.Write("local_state", json)
     section.Flush()
@@ -91,6 +100,34 @@ function sanitizeLocalItem(item as Object) as Object
     if item.duration_seconds <> invalid then safeItem.duration_seconds = item.duration_seconds
     if item.completed <> invalid then safeItem.completed = item.completed
     if item.updated_at <> invalid then safeItem.updated_at = item.updated_at
+    ' Dados minimos para recriar o item sem a categoria carregada (lista Xtream sob demanda).
+    ' Nunca guarda a URL completa, que contem usuario e senha da lista.
+    if item.type <> invalid then safeItem.type = item.type
+    if item.sid <> invalid then
+        safeItem.sid = item.sid
+    else if item.series_id <> invalid and item.series_id <> "" then
+        safeItem.sid = item.series_id
+    else if item.stream_id <> invalid and item.stream_id <> "" then
+        safeItem.sid = item.stream_id
+    end if
+    if item.ext <> invalid then
+        safeItem.ext = item.ext
+    else if item.type = "movies" and item.stream_url <> invalid then
+        dot = 0
+        for index = len(item.stream_url) to 1 step -1
+            if mid(item.stream_url, index, 1) = "." then
+                dot = index
+                exit for
+            end if
+        end for
+        if dot > 0 and len(item.stream_url) - dot <= 5 then safeItem.ext = mid(item.stream_url, dot + 1)
+    end if
+    if item.tvg <> invalid then
+        safeItem.tvg = item.tvg
+    else if item.tvg_id <> invalid and item.tvg_id <> "" then
+        safeItem.tvg = item.tvg_id
+    end if
+    if item.logo <> invalid and item.logo <> "" and len(item.logo) <= 140 then safeItem.logo = item.logo
     return safeItem
 end function
 

@@ -2,7 +2,19 @@
 <component name="CatalogService" extends="Task">
   <interface>
     <field id="playlist" type="assocarray" />
+    <field id="mode" type="string" value="base" />
+    <field id="kind" type="string" />
+    <field id="categoryId" type="string" />
+    <field id="categoryName" type="string" />
+    <field id="query" type="string" />
+    <field id="searchToken" type="string" />
+    <field id="xtream" type="assocarray" />
+    <field id="categoryNames" type="assocarray" />
+    <field id="kinds" type="array" />
+    <field id="titles" type="array" />
     <field id="result" type="assocarray" alwaysNotify="true" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/CatalogService.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
+  <script type="text/brightscript" uri="pkg:/source/XtreamItems.brs" />
 </component>

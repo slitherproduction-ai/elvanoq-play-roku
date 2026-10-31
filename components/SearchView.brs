@@ -5,30 +5,61 @@ sub init()
     m.resultsTitle = m.top.findNode("resultsTitle")
     m.filterFocus = m.top.findNode("filterFocus")
     m.items = []
+    m.query = ""
+    m.lazy = false
     m.matches = []
     m.selectedIndex = 0
     m.resultOffset = 0
     m.selectedFilter = 0
     m.filterLabels = [m.top.findNode("allLabel"), m.top.findNode("moviesLabel"), m.top.findNode("seriesLabel"), m.top.findNode("channelsLabel")]
     m.resultsGrid.observeField("itemSelected", "onItemSelected")
-    m.top.findNode("title").font = "font:LargeBoldSystemFont"
-    m.queryLabel.font = "font:MediumSystemFont"
-    m.queryLabel.color = "0xB9CBE0FF"
-    m.top.findNode("allLabel").font = "font:SmallSystemFont"
+    m.top.findNode("title").font = appFont(40, "bold")
+    m.top.findNode("title").color = "0xF4F8FFFF"
+    m.queryLabel.font = appFont(26, "medium")
+    m.queryLabel.color = "0xF4F8FFFF"
+    m.top.findNode("queryHint").font = appFont(20, "regular")
+    m.top.findNode("queryHint").color = "0x8894A8FF"
+    m.top.findNode("allLabel").font = appFont(20, "regular")
     m.top.findNode("allLabel").color = "0xFFFFFFFF"
-    m.top.findNode("moviesLabel").font = "font:SmallSystemFont"
-    m.top.findNode("seriesLabel").font = "font:SmallSystemFont"
-    m.top.findNode("channelsLabel").font = "font:SmallSystemFont"
-    m.resultsTitle.font = "font:MediumBoldSystemFont"
-    m.emptyState.font = "font:MediumSystemFont"
-    m.emptyState.color = "0x8FA9C4FF"
+    m.top.findNode("moviesLabel").font = appFont(20, "regular")
+    m.top.findNode("seriesLabel").font = appFont(20, "regular")
+    m.top.findNode("channelsLabel").font = appFont(20, "regular")
+    m.resultsTitle.font = appFont(26, "semibold")
+    m.resultsTitle.color = "0xF4F8FFFF"
+    m.columns = 8
+    m.windowSize = 16
+    m.emptyState.font = appFont(24, "regular")
+    m.emptyState.color = "0x8894A8FF"
     m.emptyState.text = "Use o teclado do Roku para pesquisar no catálogo da sua lista."
     updateFilterFocus()
 end sub
 
 sub setCatalog(payload as Object)
     if payload = invalid or type(payload) <> "roAssociativeArray" then return
+    if payload.lazy = true then
+        ' Lista Xtream: a busca roda no servidor (todo o catalogo), nao so no que esta carregado.
+        if m.lazy <> true then
+            m.items = []
+            m.resultsQuery = invalid
+        end if
+        m.lazy = true
+        return
+    end if
+    m.lazy = false
     m.items = payload.items
+end sub
+
+sub setResults(payload as Object)
+    if payload = invalid or payload.query = invalid or m.query = invalid then return
+    if payload.query <> m.query then return
+    m.items = []
+    if payload.items <> invalid then m.items = payload.items
+    m.resultsQuery = payload.query
+    m.searchError = ""
+    if payload.error <> invalid then m.searchError = payload.error
+    m.selectedIndex = 0
+    m.resultOffset = 0
+    renderQuery()
 end sub
 
 sub setQuery(query as String)
@@ -43,7 +74,7 @@ sub renderQuery()
     query = m.query
     m.matches = []
     if query = "" then
-        m.queryLabel.text = "Buscar filmes, séries, canais e episódios…"
+        m.queryLabel.text = "Buscar filmes, séries e canais"
         m.resultsGrid.content = CreateObject("roSGNode", "ContentNode")
         m.resultsTitle.text = "Resultados"
         m.emptyState.visible = true
@@ -51,24 +82,38 @@ sub renderQuery()
         return
     end if
     m.queryLabel.text = query
+    if m.lazy = true and (m.resultsQuery = invalid or m.resultsQuery <> query) then
+        m.resultsGrid.content = CreateObject("roSGNode", "ContentNode")
+        m.top.findNode("resultsFocus").visible = false
+        m.resultsTitle.text = "Resultados"
+        m.emptyState.visible = true
+        m.emptyState.text = "Buscando em todo o catálogo… a primeira busca pode levar alguns segundos."
+        m.top.searchRequested = { query: query }
+        return
+    end if
     needle = lcase(query)
     matches = 0
     for each item in m.items
-        if matchesFilter(item) and (instr(1, lcase(item.title), needle) > 0 or instr(1, lcase(item.category), needle) > 0) then
+        if matchesFilter(item) and (m.lazy = true or instr(1, lcase(item.title), needle) > 0 or instr(1, lcase(item.category), needle) > 0) then
             m.matches.push(item)
             matches = matches + 1
             if matches = 300 then exit for
         end if
     end for
     m.emptyState.visible = matches = 0
-    m.resultsTitle.text = "Resultados — " + trim(str(matches)) + " encontrados"
+    m.resultsTitle.text = "Resultados — " + safeTrim(str(matches)) + " encontrados"
     if matches = 0 then m.emptyState.text = "Nenhum " + filterName() + " encontrado na lista atual."
+    if matches = 0 and m.lazy = true and m.searchError <> invalid and m.searchError <> "" then m.emptyState.text = m.searchError
+    if matches = 0 then
+        m.resultsGrid.content = CreateObject("roSGNode", "ContentNode")
+        m.top.findNode("resultsFocus").visible = false
+    end if
     if matches > 0 then renderResultsWindow()
 end sub
 
 sub renderResultsWindow()
     content = CreateObject("roSGNode", "ContentNode")
-    lastIndex = m.resultOffset + 11
+    lastIndex = m.resultOffset + m.windowSize - 1
     if lastIndex > m.matches.count() - 1 then lastIndex = m.matches.count() - 1
     for index = m.resultOffset to lastIndex
         item = m.matches[index]
@@ -79,7 +124,7 @@ sub renderResultsWindow()
     end for
     m.resultsGrid.content = content
     m.resultsGrid.jumpToItem = m.selectedIndex - m.resultOffset
-    m.resultsGrid.setFocus(true)
+    updateResultsFocus()
 end sub
 
 sub onItemSelected()
@@ -113,18 +158,19 @@ function handleKey(event as Object) as Boolean
         updateResultViewport()
         return true
     end if
+    if event.key = "left" and (m.selectedIndex mod m.columns) = 0 then return false
     if event.key = "left" and m.selectedIndex > 0 then
         m.selectedIndex = m.selectedIndex - 1
         updateResultViewport()
         return true
     end if
-    if event.key = "down" and m.selectedIndex + 6 < m.matches.count() then
-        m.selectedIndex = m.selectedIndex + 6
+    if event.key = "down" and m.selectedIndex + m.columns < m.matches.count() then
+        m.selectedIndex = m.selectedIndex + m.columns
         updateResultViewport()
         return true
     end if
-    if event.key = "up" and m.selectedIndex - 6 >= 0 then
-        m.selectedIndex = m.selectedIndex - 6
+    if event.key = "up" and m.selectedIndex - m.columns >= 0 then
+        m.selectedIndex = m.selectedIndex - m.columns
         updateResultViewport()
         return true
     end if
@@ -137,14 +183,31 @@ end function
 
 sub updateSelection()
     m.resultsGrid.jumpToItem = m.selectedIndex - m.resultOffset
+    updateResultsFocus()
+end sub
+
+sub updateResultsFocus()
+    frame = m.top.findNode("resultsFocus")
+    if m.showFocus = false or m.top.visible <> true or m.matches = invalid or m.matches.count() = 0 then
+        frame.visible = false
+        return
+    end if
+    placeFocusFrame(frame, m.resultsGrid, m.selectedIndex - m.resultOffset, m.columns, 200, 300, 28, 36)
+end sub
+
+sub setFocusVisible(visible as Boolean)
+    m.showFocus = visible
+    updateResultsFocus()
 end sub
 
 sub updateResultViewport()
+    ' A janela anda de fileira em fileira para nao desalinhar a grade.
+    row = int(m.selectedIndex / m.columns)
     if m.selectedIndex < m.resultOffset then
-        m.resultOffset = m.selectedIndex
+        m.resultOffset = row * m.columns
         renderResultsWindow()
-    else if m.selectedIndex >= m.resultOffset + 12 then
-        m.resultOffset = m.selectedIndex - 11
+    else if m.selectedIndex >= m.resultOffset + m.windowSize then
+        m.resultOffset = (row - 1) * m.columns
         renderResultsWindow()
     else
         updateSelection()
@@ -176,15 +239,14 @@ function filterName() as String
 end function
 
 sub updateFilterFocus()
-    positions = [386, 510, 610, 710]
-    widths = [113, 98, 98, 108]
-    m.filterFocus.translation = [positions[m.selectedFilter], 288]
-    m.filterFocus.width = widths[m.selectedFilter]
+    positions = [64, 204, 344, 484]
+    m.filterFocus.translation = [positions[m.selectedFilter], 236]
+    m.filterFocus.width = 124
     for index = 0 to m.filterLabels.count() - 1
         if index = m.selectedFilter then
-            m.filterLabels[index].color = "0xFFFFFFFF"
+            m.filterLabels[index].color = "0xF4F8FFFF"
         else
-            m.filterLabels[index].color = "0x9EB5CCFF"
+            m.filterLabels[index].color = "0x8894A8FF"
         end if
     end for
 end sub

@@ -103,7 +103,7 @@ jobs:
       - name: Create channel archive
         run: |
           mkdir -p out
-          zip -r out/elvanoq-play-roku-${{ github.sha }}.zip manifest source components images -x '*.DS_Store'
+          zip -r out/elvanoq-play-roku-${{ github.sha }}.zip manifest source components images fonts -x '*.DS_Store'
       - uses: actions/upload-artifact@v4
         with:
           name: elvanoq-play-roku-sideload-${{ github.sha }}

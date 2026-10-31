@@ -2,24 +2,34 @@
 <component name="SearchView" extends="Group">
   <interface>
     <field id="selectedItem" type="assocarray" alwaysNotify="true" />
+    <field id="searchRequested" type="assocarray" alwaysNotify="true" />
     <function name="handleKey" />
     <function name="setQuery" />
     <function name="setCatalog" />
+    <function name="setResults" />
+    <function name="setFocusVisible" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/SearchView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
+  <script type="text/brightscript" uri="pkg:/source/FocusFrame.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
   <children>
-    <Rectangle translation="300,0" width="1620" height="1080" color="0x06111FFF" />
-    <Label id="title" translation="390,100" text="Busca" width="600" height="62" />
-    <Rectangle translation="390,190" width="980" height="64" color="0x102944FF" />
-    <Label id="queryLabel" translation="422,208" text="Buscar filmes, séries, canais e episódios…" width="880" height="34" />
-    <Rectangle id="filterAll" translation="390,292" width="105" height="42" color="0x1965D6FF" />
-    <Rectangle id="filterFocus" translation="386,288" width="113" height="50" color="0x2E91EFAA" />
-    <Label id="allLabel" translation="415,302" text="Todos" width="80" height="24" />
-    <Label id="moviesLabel" translation="525,302" text="Filmes" width="90" height="24" />
-    <Label id="seriesLabel" translation="625,302" text="Séries" width="90" height="24" />
-    <Label id="channelsLabel" translation="725,302" text="Canais" width="90" height="24" />
-    <Label id="resultsTitle" translation="390,382" text="Resultados" width="600" height="40" />
-    <PosterGrid id="resultsGrid" translation="390,440" itemSize="210,294" itemSpacing="22,26" numColumns="6" numRows="2" drawFocusFeedback="true" />
-    <Label id="emptyState" translation="390,465" width="900" height="42" />
+    <Rectangle width="1920" height="1080" color="0x070B14FF" />
+    <Label id="title" translation="[64,64]" text="Busca" width="600" height="52" />
+    <Rectangle translation="[64,140]" width="1100" height="68" color="0x111B2DFF" />
+    <Rectangle translation="[64,206]" width="1100" height="2" color="0x00D7FFFF" />
+    <Poster translation="[88,156]" width="36" height="36" uri="pkg:/images/icon_search.png" opacity="0.7" />
+    <Label id="queryLabel" translation="[140,154]" text="Buscar filmes, séries e canais" width="900" height="40" vertAlign="center" />
+    <Label id="queryHint" translation="[1184,160]" text="OK: digitar   •   *: filtro" width="672" height="30" horizAlign="right" />
+    <Rectangle id="filterAll" width="1" height="1" color="0x00000000" />
+    <Rectangle id="filterFocus" translation="[64,236]" width="124" height="44" color="0x147DFFFF" />
+    <Label id="allLabel" translation="[64,236]" text="Todos" width="124" height="44" horizAlign="center" vertAlign="center" />
+    <Label id="moviesLabel" translation="[204,236]" text="Filmes" width="124" height="44" horizAlign="center" vertAlign="center" />
+    <Label id="seriesLabel" translation="[344,236]" text="Séries" width="124" height="44" horizAlign="center" vertAlign="center" />
+    <Label id="channelsLabel" translation="[484,236]" text="Canais" width="124" height="44" horizAlign="center" vertAlign="center" />
+    <Label id="resultsTitle" translation="[64,312]" text="Resultados" width="1200" height="34" />
+    <Rectangle id="resultsFocus" width="212" height="312" color="0x00D7FFFF" visible="false" />
+    <PosterGrid id="resultsGrid" translation="[64,360]" basePosterSize="[200,300]" itemSpacing="[28,36]" numColumns="8" numRows="2" drawFocusFeedback="false" posterDisplayMode="scaleToZoom" vertFocusAnimationStyle="floatingFocus" />
+    <Label id="emptyState" translation="[64,420]" width="1500" height="42" />
   </children>
 </component>

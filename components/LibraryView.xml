@@ -6,14 +6,45 @@
     <function name="refresh" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/LibraryView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <children>
-    <Rectangle translation="300,0" width="1620" height="1080" color="0x06111FFF" />
-    <Label id="title" translation="390,100" text="Minha Lista" width="700" height="62" />
-    <Label id="tabs" translation="390,200" width="1100" height="38" />
-    <Rectangle id="tabFocus" translation="390,246" width="220" height="6" color="0x2E91EFFF" />
-    <Rectangle id="itemFocus" translation="370,302" width="1200" height="40" color="0x174D87FF" visible="false" />
-    <Label id="items" translation="390,310" width="1180" height="580" wrap="true" />
-    <Label id="hint" translation="390,930" text="←/→: trocar coleção  •  ↑/↓: selecionar  •  OK: abrir" width="1000" height="36" />
+    <Rectangle width="1920" height="1080" color="0x070B14FF" />
+    <Label id="title" translation="[64,64]" text="Minha Lista" width="900" height="52" />
+    <Rectangle id="tabFocus" translation="[64,146]" width="200" height="48" color="0x147DFFFF" />
+    <Label id="tab0" translation="[64,146]" text="Minha Lista" width="200" height="48" horizAlign="center" vertAlign="center" />
+    <Label id="tab1" translation="[280,146]" text="Favoritos" width="200" height="48" horizAlign="center" vertAlign="center" />
+    <Label id="tab2" translation="[496,146]" text="Continuar" width="200" height="48" horizAlign="center" vertAlign="center" />
+    <Label id="tab3" translation="[712,146]" text="Histórico" width="200" height="48" horizAlign="center" vertAlign="center" />
+    <Label id="tabs" width="1" height="1" visible="false" />
+    <Rectangle translation="[64,228]" width="1792" height="790" color="0x0D1422FF" />
+    <Rectangle id="itemFocus" translation="[76,256]" width="1768" height="54" color="0x147DFFFF" visible="false" />
+    <Label id="rowTitle01" translation="[100,264]" width="1240" height="40" vertAlign="center" />
+    <Label id="rowMeta01" translation="[1360,264]" width="470" height="40" horizAlign="right" vertAlign="center" />
+    <Label id="rowTitle02" translation="[100,326]" width="1240" height="40" vertAlign="center" />
+    <Label id="rowMeta02" translation="[1360,326]" width="470" height="40" horizAlign="right" vertAlign="center" />
+    <Label id="rowTitle03" translation="[100,388]" width="1240" height="40" vertAlign="center" />
+    <Label id="rowMeta03" translation="[1360,388]" width="470" height="40" horizAlign="right" vertAlign="center" />
+    <Label id="rowTitle04" translation="[100,450]" width="1240" height="40" vertAlign="center" />
+    <Label id="rowMeta04" translation="[1360,450]" width="470" height="40" horizAlign="right" vertAlign="center" />
+    <Label id="rowTitle05" translation="[100,512]" width="1240" height="40" vertAlign="center" />
+    <Label id="rowMeta05" translation="[1360,512]" width="470" height="40" horizAlign="right" vertAlign="center" />
+    <Label id="rowTitle06" translation="[100,574]" width="1240" height="40" vertAlign="center" />
+    <Label id="rowMeta06" translation="[1360,574]" width="470" height="40" horizAlign="right" vertAlign="center" />
+    <Label id="rowTitle07" translation="[100,636]" width="1240" height="40" vertAlign="center" />
+    <Label id="rowMeta07" translation="[1360,636]" width="470" height="40" horizAlign="right" vertAlign="center" />
+    <Label id="rowTitle08" translation="[100,698]" width="1240" height="40" vertAlign="center" />
+    <Label id="rowMeta08" translation="[1360,698]" width="470" height="40" horizAlign="right" vertAlign="center" />
+    <Label id="rowTitle09" translation="[100,760]" width="1240" height="40" vertAlign="center" />
+    <Label id="rowMeta09" translation="[1360,760]" width="470" height="40" horizAlign="right" vertAlign="center" />
+    <Label id="rowTitle10" translation="[100,822]" width="1240" height="40" vertAlign="center" />
+    <Label id="rowMeta10" translation="[1360,822]" width="470" height="40" horizAlign="right" vertAlign="center" />
+    <Label id="rowTitle11" translation="[100,884]" width="1240" height="40" vertAlign="center" />
+    <Label id="rowMeta11" translation="[1360,884]" width="470" height="40" horizAlign="right" vertAlign="center" />
+    <Label id="rowTitle12" translation="[100,946]" width="1240" height="40" vertAlign="center" />
+    <Label id="rowMeta12" translation="[1360,946]" width="470" height="40" horizAlign="right" vertAlign="center" />
+    <Label id="items" translation="[100,264]" width="1600" height="40" />
+    <Label id="hint" translation="[64,1030]" text="←/→ trocar coleção   •   ↑/↓ selecionar   •   OK abrir" width="1200" height="30" />
   </children>
 </component>

@@ -4,13 +4,33 @@ sub init()
     m.tabFocus = m.top.findNode("tabFocus")
     m.itemFocus = m.top.findNode("itemFocus")
     m.items = m.top.findNode("items")
-    m.title.font = "font:LargeBoldSystemFont"
-    m.tabs.font = "font:MediumBoldSystemFont"
-    m.tabs.color = "0xB9CBE0FF"
-    m.items.font = "font:MediumSystemFont"
-    m.items.color = "0xD7E3F0FF"
-    m.top.findNode("hint").font = "font:SmallSystemFont"
-    m.top.findNode("hint").color = "0x8FA9C4FF"
+    m.rows = 12
+    m.title.font = appFont(40, "bold")
+    m.title.color = "0xF4F8FFFF"
+    m.items.font = appFont(24, "regular")
+    m.items.color = "0x8894A8FF"
+    m.top.findNode("hint").font = appFont(20, "regular")
+    m.top.findNode("hint").color = "0x8894A8FF"
+    m.tabLabels = []
+    for index = 0 to 3
+        label = m.top.findNode("tab" + safeTrim(str(index)))
+        label.font = appFont(22, "semibold")
+        m.tabLabels.push(label)
+    end for
+    m.rowTitles = []
+    m.rowMetas = []
+    for index = 1 to m.rows
+        suffix = safeTrim(str(index))
+        if len(suffix) < 2 then suffix = "0" + suffix
+        titleLabel = m.top.findNode("rowTitle" + suffix)
+        metaLabel = m.top.findNode("rowMeta" + suffix)
+        titleLabel.font = appFont(24, "medium")
+        titleLabel.color = "0xF4F8FFFF"
+        metaLabel.font = appFont(20, "regular")
+        metaLabel.color = "0x8894A8FF"
+        m.rowTitles.push(titleLabel)
+        m.rowMetas.push(metaLabel)
+    end for
     m.selectedTab = 0
     m.selectedItemIndex = 0
     m.collectionOffset = 0
@@ -53,30 +73,47 @@ end function
 
 sub refresh()
     state = loadLocalState()
-    labels = ["Minha Lista", "Favoritos", "Continuar", "Histórico"]
     collections = [state.watch_later, state.favorites, state.continue_watching, state.history]
-    m.tabs.text = "Minha Lista     Favoritos     Continuar     Histórico"
-    m.title.text = labels[m.selectedTab]
-    m.tabFocus.translation = [390 + (m.selectedTab * 235), 246]
+    m.tabFocus.translation = [64 + (m.selectedTab * 216), 146]
+    for index = 0 to 3
+        if index = m.selectedTab then
+            m.tabLabels[index].color = "0xF4F8FFFF"
+        else
+            m.tabLabels[index].color = "0x8894A8FF"
+        end if
+    end for
     collection = collections[m.selectedTab]
+    if collection = invalid then collection = []
     m.collection = collection
-    if collection = invalid or collection.count() = 0 then
+    for index = 0 to m.rows - 1
+        m.rowTitles[index].text = ""
+        m.rowMetas[index].text = ""
+    end for
+    if collection.count() = 0 then
         m.items.text = "Nenhum item salvo nesta coleção ainda."
+        m.items.visible = true
         m.itemFocus.visible = false
         return
     end if
+    m.items.visible = false
     if m.selectedItemIndex > collection.count() - 1 then m.selectedItemIndex = collection.count() - 1
-    output = ""
-    firstIndex = m.collectionOffset
-    lastIndex = firstIndex + 11
-    if lastIndex > collection.count() - 1 then lastIndex = collection.count() - 1
-    for index = firstIndex to lastIndex
-        item = collection[index]
-        if index > firstIndex then output = output + chr(10)
-        output = output + "•  " + item.title
-        if item.progress_seconds <> invalid and item.duration_seconds <> invalid and item.duration_seconds > 0 then output = output + "  —  " + trim(str(int((item.progress_seconds / item.duration_seconds) * 100))) + "%"
+    for row = 0 to m.rows - 1
+        index = m.collectionOffset + row
+        if index < collection.count() then
+            item = collection[index]
+            title = ""
+            if item.title <> invalid then title = item.title
+            m.rowTitles[row].text = title
+            meta = ""
+            if item.category <> invalid then meta = item.category
+            if item.progress_seconds <> invalid and item.duration_seconds <> invalid and item.duration_seconds > 0 then
+                percent = safeTrim(str(int((item.progress_seconds / item.duration_seconds) * 100))) + "% assistido"
+                if meta <> "" then meta = meta + "   •   "
+                meta = meta + percent
+            end if
+            m.rowMetas[row].text = meta
+        end if
     end for
-    m.items.text = output
     updateItemFocus()
 end sub
 
@@ -86,17 +123,24 @@ sub updateItemFocus()
         return
     end if
     visibleIndex = m.selectedItemIndex - m.collectionOffset
-    if visibleIndex > 11 then visibleIndex = 11
+    if visibleIndex > m.rows - 1 then visibleIndex = m.rows - 1
     m.itemFocus.visible = true
-    m.itemFocus.translation = [370, 302 + (visibleIndex * 48)]
+    for row = 0 to m.rows - 1
+        if row = visibleIndex then
+            m.rowMetas[row].color = "0xD6DEEBFF"
+        else
+            m.rowMetas[row].color = "0x8894A8FF"
+        end if
+    end for
+    m.itemFocus.translation = [76, 256 + (visibleIndex * 62)]
 end sub
 
 sub updateViewport()
     if m.selectedItemIndex < m.collectionOffset then
         m.collectionOffset = m.selectedItemIndex
         refresh()
-    else if m.selectedItemIndex >= m.collectionOffset + 12 then
-        m.collectionOffset = m.selectedItemIndex - 11
+    else if m.selectedItemIndex >= m.collectionOffset + m.rows then
+        m.collectionOffset = m.selectedItemIndex - (m.rows - 1)
         refresh()
     else
         updateItemFocus()

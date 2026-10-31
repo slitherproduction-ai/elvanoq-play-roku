@@ -2,7 +2,11 @@
 <component name="EpgService" extends="Task">
   <interface>
     <field id="epgUrl" type="string" />
+    <field id="streamUrl" type="string" />
+    <field id="streamId" type="string" />
+    <field id="epgKey" type="string" />
     <field id="result" type="assocarray" alwaysNotify="true" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/EpgService.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
 </component>

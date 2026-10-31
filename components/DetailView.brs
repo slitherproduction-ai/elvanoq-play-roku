@@ -19,38 +19,89 @@ sub init()
     m.selectedSeasonIndex = 0
     m.top.observeField("item", "onItemChanged")
     m.top.observeField("metadata", "onMetadataChanged")
-    m.top.findNode("eyebrow").font = "font:SmallSystemFont"
-    m.top.findNode("eyebrow").color = "0x73B7FFFF"
-    m.title.font = "font:LargeBoldSystemFont"
-    m.meta.font = "font:SmallSystemFont"
-    m.meta.color = "0x9AB2CCFF"
-    m.genreLabel.font = "font:SmallSystemFont"
-    m.genreLabel.color = "0x73B7FFFF"
-    m.overview.font = "font:MediumSystemFont"
-    m.overview.color = "0xD7E3F0FF"
-    m.top.findNode("watchLabel").font = "font:MediumBoldSystemFont"
-    m.top.findNode("watchLabel").color = "0x06111FFF"
-    m.listLabel.font = "font:MediumSystemFont"
-    m.laterLabel.font = "font:SmallSystemFont"
-    m.actionStatus.font = "font:SmallSystemFont"
-    m.actionStatus.color = "0x8FA9C4FF"
-    m.seriesLabel.font = "font:SmallSystemFont"
-    m.seriesLabel.color = "0xB9CBE0FF"
-    m.seasonHint.font = "font:SmallSystemFont"
-    m.seasonHint.color = "0x73B7FFFF"
-    m.episodeLabel.font = "font:SmallSystemFont"
-    m.episodeLabel.color = "0xB9CBE0FF"
-    m.episodeHint.font = "font:SmallSystemFont"
-    m.episodeHint.color = "0x73B7FFFF"
+    m.top.observeField("seriesInfo", "onSeriesInfoChanged")
+    m.backdrop = m.top.findNode("backdrop")
+    m.seasonFocus = m.top.findNode("seasonFocus")
+    m.episodesPanel = m.top.findNode("episodesPanel")
+    m.episodeFocusBar = m.top.findNode("episodeFocusBar")
+    ' Cards de episodio: imagem 16:9, numero e titulo (7 visiveis).
+    m.cardCount = 7
+    m.cardWidth = 240
+    m.cardGap = 18
+    m.episodeCards = []
+    cardsGroup = m.top.findNode("episodeCards")
+    for index = 0 to m.cardCount - 1
+        x = index * (m.cardWidth + m.cardGap)
+        background = cardsGroup.createChild("Rectangle")
+        background.translation = [x, 0]
+        background.width = m.cardWidth
+        background.height = 135
+        background.color = "0x111B2DFF"
+        thumb = cardsGroup.createChild("Poster")
+        thumb.translation = [x, 0]
+        thumb.width = m.cardWidth
+        thumb.height = 135
+        thumb.loadDisplayMode = "scaleToZoom"
+        number = cardsGroup.createChild("Label")
+        number.translation = [x, 146]
+        number.width = m.cardWidth
+        number.height = 26
+        number.font = appFont(18, "bold")
+        number.color = "0x00D7FFFF"
+        title = cardsGroup.createChild("Label")
+        title.translation = [x, 172]
+        title.width = m.cardWidth
+        title.height = 56
+        title.wrap = true
+        title.maxLines = 2
+        title.font = appFont(20, "medium")
+        title.color = "0xF4F8FFFF"
+        m.episodeCards.push({ background: background, thumb: thumb, number: number, title: title })
+    end for
+    m.episodeRows = []
+    m.episodeOffset = 0
+    m.detailFocus = "actions"
+    m.top.findNode("eyebrow").font = appFont(18, "bold")
+    m.top.findNode("eyebrow").color = "0x00D7FFFF"
+    m.title.font = appFont(54, "bold")
+    m.title.color = "0xF4F8FFFF"
+    m.meta.font = appFont(20, "regular")
+    m.meta.color = "0xB6C2D6FF"
+    m.genreLabel.font = appFont(20, "regular")
+    m.genreLabel.color = "0x00D7FFFF"
+    m.overview.font = appFont(24, "regular")
+    m.overview.color = "0xD6DEEBFF"
+    m.top.findNode("watchLabel").font = appFont(26, "semibold")
+    m.top.findNode("watchLabel").color = "0x070B14FF"
+    m.listLabel.font = appFont(26, "semibold")
+    m.listLabel.color = "0xF4F8FFFF"
+    m.laterLabel.font = appFont(26, "semibold")
+    m.laterLabel.color = "0xF4F8FFFF"
+    m.trailerLabel.font = appFont(26, "semibold")
+    m.trailerLabel.color = "0xF4F8FFFF"
+    m.actionStatus.font = appFont(20, "regular")
+    m.actionStatus.color = "0x00D7FFFF"
+    m.top.findNode("similarTitle").color = "0xF4F8FFFF"
+    m.top.findNode("similarHint").color = "0x8894A8FF"
+    m.seriesLabel.font = appFont(26, "semibold")
+    m.seriesLabel.color = "0xF4F8FFFF"
+    m.seasonHint.font = appFont(20, "regular")
+    m.seasonHint.color = "0x8894A8FF"
+    m.episodeLabel.font = appFont(24, "regular")
+    m.episodeLabel.color = "0xF4F8FFFF"
+    m.episodeHint.font = appFont(20, "regular")
+    m.episodeHint.color = "0x8894A8FF"
     m.episodeFocus = false
     m.selectedEpisodeIndex = 0
-    m.top.findNode("similarTitle").font = "font:MediumBoldSystemFont"
-    m.top.findNode("similarHint").font = "font:SmallSystemFont"
+    m.top.findNode("similarTitle").font = appFont(26, "semibold")
+    m.top.findNode("similarHint").font = appFont(20, "regular")
     updateActionFocus()
 end sub
 
 sub onMetadataChanged()
     if m.top.metadata = invalid or m.top.metadata.found <> true then return
+    ' Series Xtream usam temporadas e episodios do servidor da lista, nao do TMDB.
+    if isXtreamSeries() and m.top.metadata.mode = "season" then return
     if m.top.metadata.mode = "season" then
         renderEpisodes(m.top.metadata)
         return
@@ -60,11 +111,12 @@ sub onMetadataChanged()
     if details.title <> invalid and details.title <> "" then m.title.text = details.title
     if details.overview <> invalid and details.overview <> "" then m.overview.text = details.overview
     if details.release_date <> invalid and details.vote_average <> invalid then
-        m.meta.text = details.release_date + "  •  Avaliação " + str(details.vote_average)
+        m.meta.text = safeTrim(details.release_date) + "   •   Avaliação " + safeTrim(str(details.vote_average))
     end if
     if details.genres <> invalid and details.genres.count() > 0 then m.genreLabel.text = genreSummary(details.genres)
     if details.poster_path <> invalid and details.poster_path <> "" then m.poster.uri = "https://image.tmdb.org/t/p/w780" + details.poster_path
-    if details.seasons <> invalid and details.seasons.count() > 0 then
+    if details.backdrop_path <> invalid and details.backdrop_path <> "" then m.backdrop.uri = "https://image.tmdb.org/t/p/w1280" + details.backdrop_path
+    if details.seasons <> invalid and details.seasons.count() > 0 and not isXtreamSeries() then
         m.seasons = details.seasons
         m.selectedSeasonIndex = 0
         m.seriesLabel.visible = true
@@ -89,7 +141,7 @@ function trailerUrlFromDetails(details as Object) as String
             candidate = details.trailer
         end if
     end if
-    candidate = trim(candidate)
+    candidate = safeTrim(candidate)
     if left(candidate, 8) = "https://" then return candidate
     return ""
 end function
@@ -117,7 +169,7 @@ function seasonSummary(seasons as Object) as String
     for index = 0 to lastIndex
         season = seasons[index]
         if index > 0 then summary = summary + "  •  "
-        summary = summary + season.name + " (" + trim(str(season.episode_count)) + ")"
+        summary = summary + season.name + " (" + safeTrim(str(season.episode_count)) + ")"
     end for
     return summary
 end function
@@ -125,8 +177,13 @@ end function
 sub updateSeasonSelection()
     if m.seasons = invalid or m.seasons.count() = 0 then return
     season = m.seasons[m.selectedSeasonIndex]
-    m.seriesLabel.text = "Temporada selecionada: " + season.name + " (" + trim(str(season.episode_count)) + " episódios)"
-    m.seasonHint.text = "↑/↓: trocar temporada  •  episódios da fonte autorizada"
+    m.seriesLabel.text = season.name + "   •   " + safeTrim(str(season.episode_count)) + " episódios   •   " + safeTrim(str(m.selectedSeasonIndex + 1)) + " de " + safeTrim(str(m.seasons.count()))
+    if m.xtreamEpisodes <> invalid then
+        m.seasonHint.text = "←/→ trocar temporada   •   ↓ ver episódios"
+    else
+        m.seasonHint.text = "↑/↓: trocar temporada"
+    end if
+    m.seasonFocus.visible = m.detailFocus = "seasons"
 end sub
 
 function recommendationSummary(items as Object) as String
@@ -145,24 +202,48 @@ sub renderEpisodes(payload as Object)
     if episodes = invalid or episodes.count() = 0 then return
     m.episodes = episodes
     m.selectedEpisodeIndex = 0
-    m.episodeLabel.visible = true
+    m.episodeOffset = 0
     m.episodeHint.visible = true
     renderEpisodeSelection()
 end sub
 
+' Fileira de cards; a janela anda com o episodio selecionado.
 sub renderEpisodeSelection()
     if m.episodes = invalid or m.episodes.count() = 0 then return
-    selected = m.episodes[m.selectedEpisodeIndex]
-    number = ""
-    if selected.number <> invalid then number = trim(str(selected.number)) + ". "
-    name = episodeDisplayName(selected)
-    prefix = "Episódio selecionado: "
-    if m.episodeFocus then prefix = "▶ " + prefix
-    m.episodeLabel.text = prefix + number + name
-    if m.episodeFocus then
-        m.episodeHint.text = "←/→ escolher  •  OK assistir  •  * voltar às ações"
+    m.top.findNode("episodeCards").visible = true
+    if m.selectedEpisodeIndex < m.episodeOffset then m.episodeOffset = m.selectedEpisodeIndex
+    if m.selectedEpisodeIndex >= m.episodeOffset + m.cardCount then m.episodeOffset = m.selectedEpisodeIndex - (m.cardCount - 1)
+    for slot = 0 to m.cardCount - 1
+        index = m.episodeOffset + slot
+        card = m.episodeCards[slot]
+        visible = index < m.episodes.count()
+        card.background.visible = visible
+        card.thumb.visible = visible
+        card.number.visible = visible
+        card.title.visible = visible
+        if visible then
+            episode = m.episodes[index]
+            number = index + 1
+            if episode.number <> invalid and type(episode.number) <> "roString" and type(episode.number) <> "String" and episode.number > 0 then number = episode.number
+            card.number.text = "EPISÓDIO " + safeTrim(str(number))
+            card.title.text = episodeDisplayName(episode)
+            image = ""
+            if episode.image <> invalid then image = episode.image
+            if image = "" and m.top.item <> invalid and m.top.item.backdrop <> invalid then image = m.top.item.backdrop
+            if image = "" and m.top.item <> invalid and m.top.item.logo <> invalid then image = m.top.item.logo
+            card.thumb.uri = image
+        end if
+    end for
+    focused = m.detailFocus = "episodes" or m.episodeFocus = true
+    m.episodeFocusBar.visible = focused
+    slot = m.selectedEpisodeIndex - m.episodeOffset
+    m.episodeFocusBar.translation = [64 + slot * (m.cardWidth + m.cardGap) - 6, 786 - 6]
+    m.episodeFocusBar.width = m.cardWidth + 12
+    m.episodeFocusBar.height = 135 + 12
+    if focused then
+        m.episodeHint.text = "←/→ escolher episódio   •   OK assistir   •   ↑ temporadas"
     else
-        m.episodeHint.text = "*: selecionar episódio para assistir"
+        m.episodeHint.text = "↓ para escolher um episódio"
     end if
 end sub
 
@@ -172,7 +253,7 @@ function episodeStreamUrl(episode as Object) as String
     if episode.stream_url <> invalid then candidate = episode.stream_url
     if candidate = "" and episode.playback_url <> invalid then candidate = episode.playback_url
     if candidate = "" and episode.url <> invalid then candidate = episode.url
-    candidate = trim(candidate)
+    candidate = safeTrim(candidate)
     ' IPTV providers may expose authorized episode streams over HTTP.
     ' The URL stays only in memory and is never logged or persisted locally.
     if left(candidate, 8) = "https://" or left(candidate, 7) = "http://" then return candidate
@@ -200,7 +281,7 @@ function episodeRequestAt(index as Integer) as Object
     if streamUrl = "" then return invalid
     episodeNumber = index + 1
     if episode.number <> invalid then episodeNumber = int(episode.number)
-    request = { url: streamUrl, title: m.top.item.title + " • " + episodeDisplayName(episode), id: m.top.item.id + ":episode:" + trim(str(episodeNumber)), parentId: m.top.item.id, category: m.top.item.category, introEnd: episodeSkipIntroEnd(episode) }
+    request = { url: streamUrl, title: m.top.item.title + " • " + episodeDisplayName(episode), id: m.top.item.id + ":episode:" + safeTrim(str(episodeNumber)), parentId: m.top.item.id, category: m.top.item.category, introEnd: episodeSkipIntroEnd(episode) }
     return request
 end function
 
@@ -223,8 +304,26 @@ sub onItemChanged()
     m.genreLabel.text = ""
     m.overview.text = "Informações complementares, elenco, trailer e recomendações serão exibidos quando os metadados estiverem disponíveis."
     if item.logo <> invalid then m.poster.uri = item.logo
+    ' Fundo: imagem larga da lista (series) ou o proprio poster ampliado.
+    m.backdrop.uri = ""
+    if item.backdrop <> invalid and item.backdrop <> "" then
+        m.backdrop.uri = item.backdrop
+    else if item.logo <> invalid then
+        m.backdrop.uri = item.logo
+    end if
+    m.top.findNode("similarTitle").visible = not isXtreamSeries()
+    m.top.findNode("similarHint").visible = not isXtreamSeries()
+    m.top.findNode("similarHint").text = ""
+    if isXtreamSeries() then
+        m.top.findNode("watchLabel").text = "Ver episódios"
+    else
+        m.top.findNode("watchLabel").text = "Assistir"
+    end if
     m.actionStatus.text = ""
     m.trailerUrl = ""
+    m.seasons = invalid
+    m.selectedSeasonIndex = 0
+    m.xtreamEpisodes = invalid
     m.episodes = invalid
     m.episodeFocus = false
     m.episodeLabel.visible = false
@@ -232,6 +331,14 @@ sub onItemChanged()
     m.trailerButton.visible = false
     m.trailerLabel.visible = false
     m.seasonPanel.visible = false
+    m.seasonFocus.visible = false
+    m.episodesPanel.visible = false
+    m.episodeFocusBar.visible = false
+    m.top.findNode("episodeCards").visible = false
+    m.episodeOffset = 0
+    m.detailFocus = "actions"
+    m.watchFocus.visible = true
+    if isXtreamSeries() then m.actionStatus.text = "Carregando temporadas…"
     updateCollectionLabels()
 end sub
 
@@ -239,12 +346,12 @@ sub updateCollectionLabels()
     if m.top.item = invalid then return
     state = loadLocalState()
     if collectionContains(state.favorites, m.top.item.id) then
-        m.listLabel.text = "✓ Minha Lista"
+        m.listLabel.text = "Na Minha Lista"
     else
         m.listLabel.text = "+ Minha Lista"
     end if
     if collectionContains(state.watch_later, m.top.item.id) then
-        m.laterLabel.text = "✓ Assistir mais tarde"
+        m.laterLabel.text = "Na lista: mais tarde"
     else
         m.laterLabel.text = "Assistir mais tarde"
     end if
@@ -260,6 +367,10 @@ end function
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
+    if isXtreamSeries() and m.seasons <> invalid and m.seasons.count() > 0 then
+        handled = handleSeriesKey(key)
+        if handled then return true
+    end if
     if key = "back" then
         if m.episodeFocus then
             m.episodeFocus = false
@@ -313,13 +424,21 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     if key = "down" and m.seasons <> invalid and m.selectedSeasonIndex < m.seasons.count() - 1 then
         m.selectedSeasonIndex = m.selectedSeasonIndex + 1
         updateSeasonSelection()
-        m.top.seasonRequested = m.seasons[m.selectedSeasonIndex].number
+        if m.xtreamEpisodes <> invalid then
+            renderXtreamSeason()
+        else
+            m.top.seasonRequested = m.seasons[m.selectedSeasonIndex].number
+        end if
         return true
     end if
     if key = "up" and m.seasons <> invalid and m.selectedSeasonIndex > 0 then
         m.selectedSeasonIndex = m.selectedSeasonIndex - 1
         updateSeasonSelection()
-        m.top.seasonRequested = m.seasons[m.selectedSeasonIndex].number
+        if m.xtreamEpisodes <> invalid then
+            renderXtreamSeason()
+        else
+            m.top.seasonRequested = m.seasons[m.selectedSeasonIndex].number
+        end if
         return true
     end if
     if key = "OK" then
@@ -334,11 +453,11 @@ function handleKey(event as Object) as Boolean
 end function
 
 sub updateActionFocus()
-    positions = [150, 386, 632, 850]
-    widths = [220, 230, 205, 150]
-    m.watchFocus.translation = [positions[m.selectedAction], 500]
-    m.watchFocus.width = widths[m.selectedAction]
-    if m.selectedAction = 0 then m.watchFocus.color = "0xFFFFFFFF" else m.watchFocus.color = "0x2E91EFFF"
+    ' Contorno ciano atras do botao selecionado.
+    positions = [64, 324, 604, 914]
+    widths = [240, 260, 290, 180]
+    m.watchFocus.translation = [positions[m.selectedAction] - 6, 534]
+    m.watchFocus.width = widths[m.selectedAction] + 12
 end sub
 
 sub runAction()
@@ -347,6 +466,18 @@ sub runAction()
     if m.selectedAction = 0 then
         if isParentallyBlockedItem(item.category, item.id) then
             m.actionStatus.text = "Conteúdo protegido. Valide o PIN em Ajustes para assistir."
+        else if isXtreamSeries() then
+            ' Serie: "Assistir" toca o episodio selecionado da temporada atual.
+            if m.episodes = invalid or m.episodes.count() = 0 then
+                m.actionStatus.text = "Carregando episódios…"
+            else
+                queue = authorizedEpisodeQueue(m.selectedEpisodeIndex)
+                if queue.count() > 0 then
+                    request = queue[0]
+                    request.queue = queue
+                    m.top.episodeRequested = request
+                end if
+            end if
         else
             m.top.playRequested = item
         end if
@@ -375,4 +506,103 @@ sub runAction()
     else if m.trailerUrl <> invalid and m.trailerUrl <> "" then
         m.top.trailerRequested = { url: m.trailerUrl, title: item.title + " • Trailer", id: item.id, category: item.category }
     end if
+end sub
+
+function isXtreamSeries() as Boolean
+    item = m.top.item
+    if item = invalid then return false
+    return item.series_id <> invalid and safeTrim(item.series_id) <> ""
+end function
+
+sub onSeriesInfoChanged()
+    info = m.top.seriesInfo
+    if info = invalid or m.top.item = invalid then return
+    if safeTrim(info.seriesId) <> safeTrim(m.top.item.series_id) then return
+    if info.ok <> true then
+        m.actionStatus.text = info.message
+        return
+    end if
+    m.seasons = info.seasons
+    m.xtreamEpisodes = info.episodes
+    m.selectedSeasonIndex = 0
+    m.seriesLabel.visible = true
+    m.seasonHint.visible = true
+    m.seasonPanel.visible = true
+    updateSeasonSelection()
+    renderXtreamSeason()
+    m.top.findNode("watchLabel").text = "Assistir"
+    m.actionStatus.text = ""
+end sub
+
+sub renderXtreamSeason()
+    if m.seasons = invalid or m.xtreamEpisodes = invalid then return
+    season = m.seasons[m.selectedSeasonIndex]
+    key = ""
+    if season.key <> invalid then key = season.key
+    if key = "" then key = str(season.number).Trim()
+    list = m.xtreamEpisodes[key]
+    if list = invalid then
+        return
+    end if
+    m.episodeFocus = false
+    renderEpisodes({ episodes: list })
+end sub
+
+' Navegacao das series: acoes -> temporadas -> episodios.
+function handleSeriesKey(key as String) as Boolean
+    if m.detailFocus = "actions" then
+        if key = "down" then
+            setDetailFocus("seasons")
+            return true
+        end if
+        return key = "up"
+    end if
+    if key = "back" then
+        setDetailFocus("actions")
+        return true
+    end if
+    if m.detailFocus = "seasons" then
+        if key = "left" and m.selectedSeasonIndex > 0 then
+            m.selectedSeasonIndex = m.selectedSeasonIndex - 1
+            renderXtreamSeason()
+            updateSeasonSelection()
+        else if key = "right" and m.selectedSeasonIndex < m.seasons.count() - 1 then
+            m.selectedSeasonIndex = m.selectedSeasonIndex + 1
+            renderXtreamSeason()
+            updateSeasonSelection()
+        else if key = "up" then
+            setDetailFocus("actions")
+        else if (key = "down" or key = "OK") and m.episodes <> invalid and m.episodes.count() > 0 then
+            setDetailFocus("episodes")
+        end if
+        return true
+    end if
+    ' episodios (fileira horizontal)
+    if key = "up" then
+        setDetailFocus("seasons")
+    else if key = "left" and m.selectedEpisodeIndex > 0 then
+        m.selectedEpisodeIndex = m.selectedEpisodeIndex - 1
+        renderEpisodeSelection()
+    else if key = "right" and m.selectedEpisodeIndex < m.episodes.count() - 1 then
+        m.selectedEpisodeIndex = m.selectedEpisodeIndex + 1
+        renderEpisodeSelection()
+    else if key = "OK" then
+        queue = authorizedEpisodeQueue(m.selectedEpisodeIndex)
+        if queue.count() = 0 then
+            m.actionStatus.text = "Este episódio não possui reprodução disponível na sua lista."
+        else
+            request = queue[0]
+            request.queue = queue
+            m.top.episodeRequested = request
+        end if
+    end if
+    return true
+end function
+
+sub setDetailFocus(zone as String)
+    m.detailFocus = zone
+    m.episodeFocus = false
+    m.watchFocus.visible = zone = "actions"
+    m.seasonFocus.visible = zone = "seasons"
+    if m.episodes <> invalid then renderEpisodeSelection()
 end sub

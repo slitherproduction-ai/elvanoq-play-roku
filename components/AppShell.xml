@@ -8,24 +8,17 @@
     <function name="stopPlayback" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/AppShell.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
+  <script type="text/brightscript" uri="pkg:/source/XtreamItems.brs" />
   <children>
-    <Rectangle id="rail" width="300" height="1080" color="0x081827F2" />
-    <Poster id="brandMark" uri="pkg:/images/elvanoq-wordmark.png" translation="32,48" width="236" height="79" />
-    <Rectangle id="focusRail" translation="20,210" width="260" height="58" color="0x1965D6FF" />
-    <Label id="navHome" translation="44,224" text="Início" width="220" height="42" />
-    <Label id="navLive" translation="44,294" text="TV ao Vivo" width="220" height="42" />
-    <Label id="navMovies" translation="44,364" text="Filmes" width="220" height="42" />
-    <Label id="navSeries" translation="44,434" text="Séries" width="220" height="42" />
-    <Label id="navSearch" translation="44,504" text="Busca" width="220" height="42" />
-    <Label id="navLibrary" translation="44,574" text="Minha Lista" width="220" height="42" />
-    <Label id="navSettings" translation="44,644" text="Ajustes" width="220" height="42" />
-    <Rectangle id="contentBackground" translation="300,0" width="1620" height="1080" color="0x06111FFF" />
-    <Poster id="heroMark" uri="pkg:/images/elvanoq-logo.png" translation="1080,120" width="650" height="217" opacity="0.18" />
-    <Label id="sectionEyebrow" translation="390,180" text="ELVANOQ PLAY" width="900" height="36" />
-    <Label id="sectionTitle" translation="390,235" text="Início" width="900" height="74" />
-    <Label id="sectionDescription" translation="390,332" width="980" height="86" wrap="true" />
-    <Label id="sectionHint" translation="390,890" width="1100" height="40" />
+    <Rectangle id="contentBackground" translation="[0,0]" width="1920" height="1080" color="0x070B14FF" />
+    <Label id="sectionEyebrow" translation="[64,180]" text="ELVANOQ PLAY" width="900" height="36" />
+    <Label id="sectionTitle" translation="[64,235]" text="Início" width="900" height="74" />
+    <Label id="sectionDescription" translation="[64,332]" width="980" height="86" wrap="true" />
+    <Label id="sectionHint" translation="[64,890]" width="1100" height="40" />
     <HomeView id="homeView" visible="false" />
     <LiveTVView id="liveTVView" visible="false" />
     <BrowseView id="moviesView" kind="movies" visible="false" />
@@ -33,6 +26,9 @@
     <SearchView id="searchView" visible="false" />
     <LibraryView id="libraryView" visible="false" />
     <ParentalView id="parentalView" visible="false" />
+    <Timer id="clockTimer" duration="20" repeat="true" />
+    <Label id="clockTime" translation="[1506,44]" width="350" height="50" horizAlign="right" />
+    <Label id="clockDate" translation="[1506,94]" width="350" height="32" horizAlign="right" />
     <DetailView id="detailView" visible="false" />
     <PlayerView id="playerView" visible="false" />
   </children>

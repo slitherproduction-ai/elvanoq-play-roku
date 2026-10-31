@@ -3,31 +3,57 @@
   <interface>
     <field id="playRequested" type="assocarray" alwaysNotify="true" />
     <field id="selectedItem" type="assocarray" alwaysNotify="true" />
+    <field id="sectionRequested" type="integer" alwaysNotify="true" />
     <function name="handleKey" />
     <function name="setActive" />
     <function name="setCatalog" />
+    <function name="setFocusVisible" />
+    <function name="focusTile" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/HomeView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
+  <script type="text/brightscript" uri="pkg:/source/FocusFrame.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
   <children>
     <Timer id="heroTimer" duration="8" repeat="true" />
-    <Rectangle translation="300,0" width="1620" height="560" color="0x0B1C31FF" />
-    <Rectangle translation="300,445" width="1620" height="115" color="0x06111FFF" />
-    <Poster id="heroImage" translation="1240,72" width="560" height="315" loadDisplayMode="scaleToFill" />
-    <Label id="eyebrow" translation="390,110" text="DESTAQUE ELVANOQ" width="500" height="32" />
-    <Label id="heroTitle" translation="390,158" text="Sua TV, do seu jeito" width="780" height="72" />
-    <Label id="heroMeta" translation="390,245" width="780" height="34" />
-    <Label id="heroDescription" translation="390,298" width="740" height="76" wrap="true" />
-    <Rectangle id="watchButton" translation="390,404" width="190" height="56" color="0xFFFFFFFF" />
-    <Rectangle id="detailsButton" translation="596,404" width="200" height="56" color="0x1D3656FF" />
-    <Rectangle id="actionFocus" translation="384,398" width="202" height="68" color="0x2E91EFAA" />
-    <Label id="watchLabel" translation="420,420" text="▶  Assistir" width="150" height="32" />
-    <Label id="detailsLabel" translation="622,420" text="+  Minha Lista" width="164" height="32" />
-    <Label id="continueTitle" translation="390,600" text="Continuar assistindo" width="900" height="44" />
-    <Label id="continueHint" translation="390,644" text="Retome de onde parou" width="600" height="28" />
-    <PosterGrid id="continueGrid" translation="390,692" itemSize="235,132" itemSpacing="20,0" numColumns="5" numRows="1" drawFocusFeedback="true" />
-    <Label id="catalogTitle" translation="390,860" text="Canais em destaque" width="900" height="42" />
-    <PosterGrid id="catalogGrid" translation="390,910" itemSize="182,102" itemSpacing="16,0" numColumns="7" numRows="1" drawFocusFeedback="true" />
-    <Label id="emptyState" translation="390,720" width="1000" height="52" visible="false" />
+    <Rectangle id="pageBackground" width="1920" height="1080" color="0x070B14FF" />
+
+    <!-- Pagina rolavel: ao descer ate a fileira, o Inicio sobe com animacao -->
+    <Group id="page">
+      <!-- Destaque em tela larga: arte + degradês (paleta do app Android) -->
+      <Poster id="heroArt" width="1920" height="640" loadDisplayMode="scaleToZoom" />
+      <Poster id="heroShadeLeft" uri="pkg:/images/hero_shade_left.png" width="1920" height="640" />
+      <Poster id="heroShadeBottom" uri="pkg:/images/hero_shade_bottom.png" width="1920" height="640" />
+      <Poster id="heroShadeTop" uri="pkg:/images/hero_shade_top.png" width="1920" height="220" />
+      <Poster id="brandMark" uri="pkg:/images/elvanoq-wordmark.png" translation="[64,44]" width="210" height="70" />
+
+      <Label id="eyebrow" translation="[64,214]" text="DESTAQUE ELVANOQ" width="800" height="32" />
+      <Label id="heroTitle" translation="[64,252]" text="Sua TV, do seu jeito" width="980" height="80" />
+      <Label id="heroMeta" translation="[64,336]" width="980" height="34" />
+      <Label id="heroDescription" translation="[64,378]" width="860" height="104" wrap="true" maxLines="3" />
+      <Rectangle id="actionFocus" translation="[58,494]" width="252" height="76" color="0x00D7FFFF" />
+      <Rectangle id="watchButton" translation="[64,500]" width="240" height="64" color="0xF4F8FFFF" />
+      <Label id="watchLabel" translation="[64,500]" text="Assistir agora" width="240" height="64" horizAlign="center" vertAlign="center" />
+      <Rectangle id="detailsButton" translation="[324,500]" width="260" height="64" color="0x111B2DE6" />
+      <Label id="detailsLabel" translation="[324,500]" text="+ Minha Lista" width="260" height="64" horizAlign="center" vertAlign="center" />
+      <Rectangle id="dot0" translation="[1766,592]" width="14" height="14" color="0x00D7FFFF" visible="false" />
+      <Rectangle id="dot1" translation="[1790,592]" width="14" height="14" color="0x8894A880" visible="false" />
+      <Rectangle id="dot2" translation="[1814,592]" width="14" height="14" color="0x8894A880" visible="false" />
+
+      <!-- Blocos de navegação (substituem o menu) -->
+      <Rectangle id="tileFocus" translation="[58,656]" width="292" height="162" color="0x00D7FFFF" visible="false" />
+      <Group id="tiles" translation="[64,662]" />
+
+      <!-- Fileira de conteúdo -->
+      <Label id="continueTitle" translation="[64,842]" text="Continuar assistindo" width="900" height="40" />
+      <Label id="continueHint" translation="[1056,846]" text="" width="800" height="32" horizAlign="right" />
+      <Rectangle id="continueFocus" width="208" height="306" color="0x00D7FFFF" visible="false" />
+      <PosterGrid id="continueGrid" translation="[64,892]" basePosterSize="[196,294]" itemSpacing="[24,0]" numColumns="8" numRows="1" drawFocusFeedback="false" posterDisplayMode="scaleToZoom" />
+      <Label id="emptyState" translation="[64,900]" width="1500" height="52" visible="false" />
+    </Group>
+    <Animation id="scrollAnimation" duration="0.28" easeFunction="outCubic" repeat="false">
+      <Vector2DFieldInterpolator id="scrollInterpolator" key="[0.0, 1.0]" keyValue="[[0.0, 0.0], [0.0, 0.0]]" fieldToInterp="page.translation" />
+    </Animation>
   </children>
 </component>
