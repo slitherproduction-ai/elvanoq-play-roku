@@ -156,7 +156,7 @@ def static_contract_checks() -> None:
         "portalHttpMessage" in PORTAL and "(HTTP " in PORTAL,
         "Portal errors must surface the response message and HTTP status.",
     )
-    check("version is 0.1.88", "build_version=88" in MANIFEST, "Manifest must match this tested build.")
+    check("version is 1.0.1", "major_version=1" in MANIFEST and "minor_version=0" in MANIFEST and "build_version=1" in MANIFEST, "Manifest must match this tested build.")
 
 
 def state_machine_checks() -> None:

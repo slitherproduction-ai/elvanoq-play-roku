@@ -1,8 +1,8 @@
 title=ELVANOQ Play
 subtitle=Sua TV, do seu jeito
-major_version=0
-minor_version=1
-build_version=88
+major_version=1
+minor_version=0
+build_version=1
 mm_icon_focus_fhd=pkg:/images/icon_elvanoq.png
 mm_icon_focus_hd=pkg:/images/icon_elvanoq_focus_hd.png
 mm_icon_focus_sd=pkg:/images/icon_elvanoq_focus_sd.png
@@ -14,3 +14,5 @@ splash_color=#02070D
 splash_min_time=1500
 ui_resolutions=fhd
 rsg_version=1.2
+# true = modo sem Portal (lista so na TV, sem licenca). false = Portal + QR + licenca (padrao)
+store_edition=false

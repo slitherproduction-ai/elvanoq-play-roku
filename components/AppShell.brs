@@ -44,6 +44,8 @@ sub init()
     m.pendingCategory = {}
     m.searchItems = []
     m.searchToken = left(CreateObject("roDeviceInfo").GetRandomUUID(), 8)
+    m.top.observeField("deepLink", "onDeepLink")
+    m.top.observeField("storeEdition", "onStoreEditionChanged")
     m.clockTime = m.top.findNode("clockTime")
     m.clockDate = m.top.findNode("clockDate")
     m.clockTime.font = appFont(36, "semibold")
@@ -132,6 +134,10 @@ function handleContentKey(key as String, press as Boolean) as Boolean
     if m.selectedIndex = 2 then return isTrue(m.moviesView.callFunc("handleKey", { key: key, press: press }))
     if m.selectedIndex = 3 then return isTrue(m.seriesView.callFunc("handleKey", { key: key, press: press }))
     if m.selectedIndex = 6 then
+        if key = "replay" and m.top.storeEdition then
+            openDisconnectDialog()
+            return true
+        end if
         digit = pinDigitFromKey(key)
         if digit <> "" then
             m.parentalView.callFunc("enterDigit", digit)
@@ -203,7 +209,7 @@ sub onHomeItemSelected()
 end sub
 
 sub openSearchKeyboard()
-    dialog = CreateObject("roSGNode", "KeyboardDialog")
+    dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
     dialog.title = "Buscar no ELVANOQ Play"
     dialog.message = "Filmes, séries e canais da sua lista"
     dialog.buttons = ["Buscar", "Cancelar"]
@@ -467,7 +473,7 @@ sub onBrowseSearchRequested(event as Object)
     if request = invalid then return
     m.browseSearchView = view
     m.browseSearchKind = request.kind
-    dialog = CreateObject("roSGNode", "KeyboardDialog")
+    dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
     if request.kind = "series" then
         dialog.title = "Buscar séries"
     else
@@ -491,6 +497,11 @@ sub onBrowseSearchKeyboardSelected()
     m.browseSearchView.callFunc("setSearchResults", { query: query, loading: true, items: [] })
     if not m.lazy then
         m.browseSearchView.callFunc("setSearchResults", { query: query, items: localTitleSearch(query, m.browseSearchKind) })
+        return
+    end if
+    if m.top.storeEdition then
+        m.browseSearchPerson = ""
+        runBrowseCatalogSearch([])
         return
     end if
     ' Primeiro pergunta ao Portal se o texto e um ator (filmografia via TMDB); depois busca na lista.
@@ -660,6 +671,8 @@ sub onBrowseItemSelected()
 end sub
 
 sub loadMetadata(item as Object, mode as String, tmdbId as Integer, seasonNumber as Integer)
+    ' Versao da loja nao usa o Portal (sem licenca): os detalhes vem so da propria lista.
+    if m.top.storeEdition then return
     if m.top.rokuClientId = "" or m.top.deviceCode = "" or m.top.deviceKey = "" then return
     mediaType = "movie"
     if item <> invalid and item.category <> invalid then
@@ -916,7 +929,11 @@ end sub
 
 sub onCatalogResult()
     result = m.catalogService.result
-    if result = invalid or result.ok <> true then return
+    if result = invalid then return
+    state = { ok: result.ok = true, message: "" }
+    if result.message <> invalid then state.message = result.message
+    m.top.catalogState = state
+    if result.ok <> true then return
     m.categories = result.categories
     m.lazy = (result.lazy = true)
     m.categoryCache = {}
@@ -937,6 +954,7 @@ sub onCatalogResult()
     end if
     if result.epgUrl <> invalid and result.epgUrl <> "" then loadEpg(result.epgUrl)
     pushSectionCatalog()
+    tryDeepLink()
 end sub
 
 sub loadEpg(epgUrl as String)
@@ -1008,4 +1026,92 @@ function detailIsXtreamSeries() as Boolean
     item = m.detailView.item
     if item = invalid then return false
     return item.series_id <> invalid and safeTrim(item.series_id) <> ""
+end function
+
+' ---------- Versao da loja ----------
+
+sub onStoreEditionChanged()
+    if not m.top.storeEdition then return
+    subtitle = m.parentalView.findNode("pageSubtitle")
+    if subtitle <> invalid then subtitle.text = "Controle parental   •   Tecla Replay: desconectar a lista desta TV"
+end sub
+
+sub openDisconnectDialog()
+    dialog = CreateObject("roSGNode", "StandardMessageDialog")
+    dialog.title = "Desconectar lista"
+    dialog.message = ["Os dados de acesso da lista serão apagados desta TV. Favoritos e progresso continuam salvos."]
+    dialog.buttons = ["Desconectar", "Cancelar"]
+    dialog.observeField("buttonSelected", "onDisconnectDialogSelected")
+    m.disconnectDialog = dialog
+    m.top.getScene().dialog = dialog
+end sub
+
+sub onDisconnectDialogSelected()
+    choice = m.disconnectDialog.buttonSelected
+    m.top.getScene().dialog = invalid
+    m.disconnectDialog = invalid
+    m.top.setFocus(true)
+    if choice <> 0 then return
+    m.selectedIndex = 0
+    showSection()
+    m.top.disconnectRequested = true
+end sub
+
+' ---------- Deep linking (busca e voz da Roku) ----------
+' contentId aceito: o id de um item ja conhecido, ou "movie:<stream_id>[:ext]",
+' "episode:<id>[:ext]", "series:<series_id>", "channel:<stream_id>".
+
+sub onDeepLink()
+    link = m.top.deepLink
+    if link = invalid or link.contentId = invalid or link.contentId = "" then return
+    m.pendingDeepLink = link
+    tryDeepLink()
+end sub
+
+sub tryDeepLink()
+    link = m.pendingDeepLink
+    if link = invalid or m.catalog = invalid then return
+    m.pendingDeepLink = invalid
+    contentId = safeTrim(link.contentId)
+    mediaType = ""
+    if link.mediaType <> invalid then mediaType = lcase(safeTrim(link.mediaType))
+    item = resolveCatalogItem({ id: contentId })
+    if item = invalid then item = deepLinkItem(contentId)
+    if item = invalid then return
+    m.detailView.visible = false
+    if item.type = "live" or mediaType = "live" then
+        playLiveItem(item, [item], 0)
+    else if item.type = "series" or mediaType = "series" or mediaType = "season" then
+        openCatalogItem(item)
+    else if item.stream_url <> invalid and item.stream_url <> "" then
+        ' Direct to Play: filme/episodio comecam direto, retomando de onde parou.
+        playCatalogItem(item, resumePositionFor(item))
+    else
+        openCatalogItem(item)
+    end if
+end sub
+
+function deepLinkItem(contentId as String) as Object
+    if m.xtream = invalid then return invalid
+    parts = contentId.Split(":")
+    if parts.count() < 2 then return invalid
+    kind = lcase(parts[0])
+    sid = safeTrim(parts[1])
+    if sid = "" then return invalid
+    ext = ""
+    if parts.count() > 2 then ext = safeTrim(parts[2])
+    if kind = "episode" then
+        if ext = "" then ext = "mp4"
+        item = { id: contentId, title: "Episódio", category: "", type: "movies", logo: "" }
+        item.stream_url = m.xtream.host + "/series/" + m.xtream.userEscaped + "/" + m.xtream.passEscaped + "/" + sid + "." + ext
+        return item
+    end if
+    itemType = ""
+    if kind = "movie" then itemType = "movies"
+    if kind = "series" then itemType = "series"
+    if kind = "channel" then itemType = "live"
+    if itemType = "" then return invalid
+    if itemType = "movies" and ext = "" then ext = "mp4"
+    saved = { id: contentId, type: itemType, sid: sid, ext: ext, title: "" }
+    return xtreamItemFromSaved(m.xtream, saved)
 end function

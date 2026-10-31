@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="MainScene" extends="Scene">
+  <interface>
+    <field id="deepLink" type="assocarray" alwaysNotify="true" />
+  </interface>
   <script type="text/brightscript" uri="pkg:/components/MainScene.brs" />
   <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
   <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
@@ -57,8 +60,24 @@
     </Animation>
     <Label id="status" translation="[130,900]" text="Preparando ativação…" width="1000" height="42" vertAlign="center" />
 
+    <!-- Aviso de teste encerrado / sem licenca (sem pagamento nem link externo) -->
+    <Group id="expiredOverlay" visible="false">
+      <Rectangle width="1920" height="1080" color="0x02070DEB" />
+      <RoundRect translation="[300,150]" width="1320" height="780" color="0x0B121EFF" radius="28" borderColor="0xBEDCFF33" />
+      <Poster translation="[810,196]" width="300" height="100" uri="pkg:/images/elvanoq-logo.png" />
+      <Label id="expiredTitle" translation="[300,330]" width="1320" height="60" horizAlign="center" text="Seu teste gratuito terminou" />
+      <Label id="expiredMessage" translation="[420,400]" width="1080" height="72" horizAlign="center" wrap="true" maxLines="2" text="Este aparelho ainda não possui uma licença ativa. Assim que a licença for ativada, a TV libera o acesso automaticamente." />
+      <Label id="expiredCaption" translation="[300,506]" width="1320" height="26" horizAlign="center" text="CÓDIGO DESTE APARELHO" />
+      <RoundRect translation="[560,544]" width="800" height="104" color="0x00D7FFFF" radius="18" stroke="3" />
+      <RoundRect translation="[563,547]" width="794" height="98" color="0x0D1422FF" radius="16" />
+      <Label id="expiredCode" translation="[563,547]" width="794" height="98" horizAlign="center" vertAlign="center" />
+      <Label id="expiredInfo" translation="[300,672]" width="1320" height="30" horizAlign="center" text="A ativação é verificada automaticamente a cada minuto." />
+      <RoundRect translation="[740,738]" width="440" height="72" color="0xF4F8FFFF" radius="28" />
+      <Label id="expiredButton" translation="[740,738]" width="440" height="72" horizAlign="center" vertAlign="center" text="OK   •   Verificar agora" />
+      <Label id="expiredFooter" translation="[300,852]" width="1320" height="28" horizAlign="center" text="Voltar   •   Sair do aplicativo" />
+    </Group>
     <Label id="homeStatus" translation="[225,510]" width="1470" height="75" horizAlign="center" visible="false" />
-    <Label id="appVersion" translation="[1460,1010]" text="v0.1.88" width="364" height="30" horizAlign="right" />
+    <Label id="appVersion" translation="[1460,1010]" text="v1.0.1" width="364" height="30" horizAlign="right" />
     <Timer id="registerTimer" repeat="false" duration="3" />
     <Timer id="licenseTimer" repeat="true" duration="60" />
     <Timer id="portalWatchdog" repeat="false" duration="20" />

@@ -137,7 +137,7 @@ end function
 function portalMessage(response as Object, state as String) as String
     if response.message <> invalid and response.message <> "" then return response.message
     if state = "active" then return "Licença ativa."
-    if state = "expired" then return "Sua licença expirou. Renove no Portal."
+    if state = "expired" then return "Sua licença expirou."
     if state = "blocked" then return "Este dispositivo está bloqueado. Consulte o suporte no Portal."
     return "Aguardando a vinculação deste Roku no Portal."
 end function

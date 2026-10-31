@@ -56,6 +56,14 @@ sub init()
     m.clockDate.color = "0x8894A8FF"
     m.appVersion.font = appFont(16, "regular")
     m.appVersion.color = "0x8894A899"
+    m.expiredOverlay = m.top.findNode("expiredOverlay")
+    ' Lista (e nao AA): chaves de AA literal viram minusculas e o findNode diferencia maiusculas.
+    styles = [["expiredTitle", 44, "bold", "0xF4F8FFFF"], ["expiredMessage", 24, "regular", "0xB8C4D6FF"], ["expiredCaption", 18, "bold", "0x8894A8FF"], ["expiredCode", 44, "bold", "0xFFFFFFFF"], ["expiredInfo", 20, "regular", "0x8894A8FF"], ["expiredButton", 24, "semibold", "0x070B14FF"], ["expiredFooter", 18, "regular", "0x8894A8FF"]]
+    for each style in styles
+        label = m.top.findNode(style[0])
+        label.font = appFont(style[1], style[2])
+        label.color = style[3]
+    end for
     m.clockTimer.observeField("fire", "updateActivationClock")
     m.clockTimer.control = "start"
     updateActivationClock()
@@ -69,6 +77,14 @@ sub init()
     m.deviceName = "ELVANOQ Play Roku"
     m.deviceCodeValue = formatDeviceCode(m.clientId)
     m.deviceCode.text = m.deviceCodeValue
+    m.top.observeField("deepLink", "onDeepLink")
+    ' Versao da Roku Store (manifest store_edition=true): gratuita, sem Portal nem licenca;
+    ' a lista e conectada na propria TV (exigencia de certificacao da Roku).
+    m.storeEdition = (CreateObject("roAppInfo").GetValue("store_edition") = "true")
+    if m.storeEdition then
+        startStoreEdition()
+        return
+    end if
     if m.clientId = "" or m.deviceKey = "" or m.deviceCodeValue = "ROKU-CÓDIGO-INDISPONÍVEL" then
         m.status.text = "Não foi possível preparar a ativação deste Roku. Reinicie o aplicativo."
         setStatusTone("error")
@@ -80,11 +96,194 @@ sub init()
     requestPortal("roku-device-register")
     m.registerTimer.control = "start"
     m.licenseTimer.control = "start"
+    signalLaunch()
+end sub
+
+' Avisa a Roku que a primeira tela esta pronta (certificacao 3.2: medir o tempo de abertura).
+sub signalLaunch()
+    if m.launchSignaled = true then return
+    m.launchSignaled = true
+    m.top.signalBeacon("AppLaunchComplete")
+end sub
+
+sub onDeepLink()
+    link = m.top.deepLink
+    if link = invalid or link.contentId = invalid or link.contentId = "" then return
+    m.pendingDeepLink = link
+    if m.appShell <> invalid then
+        m.appShell.deepLink = link
+        m.pendingDeepLink = invalid
+    end if
+end sub
+
+' ---------- Versao da loja: lista conectada na TV ----------
+
+sub startStoreEdition()
+    saved = loadStorePlaylist()
+    if saved <> invalid then
+        connectStorePlaylist(saved, false)
+        return
+    end if
+    showStoreConnect("Nenhuma lista conectada neste aparelho.", "waiting")
+end sub
+
+sub showStoreConnect(message as String, tone as String)
+    setActivationVisible(true)
+    for each id in ["portalCaption", "codeBorder", "codeCard", "deviceCode", "qrGroup", "portal"]
+        m.top.findNode(id).visible = false
+    end for
+    m.eyebrow.text = "PRIMEIRO ACESSO"
+    m.headline.text = "Conecte sua lista"
+    m.description.text = "O ELVANOQ Play é um player: ele não fornece canais nem conteúdo."
+    m.top.findNode("stepText1").text = "Tenha em mãos o servidor, usuário e senha do seu provedor"
+    m.top.findNode("stepText2").text = "Aperte OK e informe os dados com o controle remoto"
+    m.top.findNode("stepText3").text = "Pronto: canais, filmes e séries aparecem na sua TV"
+    m.serverCodeButton.translation = [96, 640]
+    m.top.findNode("serverCodeInner").translation = [98, 642]
+    m.serverCodeButtonText.translation = [98, 642]
+    m.top.findNode("statusDot").translation = [96, 762]
+    m.status.translation = [130, 750]
+    if m.retryPlaylist <> invalid then
+        m.serverCodeButtonText.text = "OK   •   Tentar de novo        *   Outra lista"
+    else
+        m.serverCodeButtonText.text = "OK   •   Conectar minha lista"
+    end if
+    m.status.text = message
+    setStatusTone(tone)
+    restoreActivationFocus()
+    signalLaunch()
+end sub
+
+function loadStorePlaylist() as Object
+    raw = CreateObject("roRegistrySection", "ELVANOQPlay").Read("store_playlist")
+    if raw = "" then return invalid
+    playlist = ParseJson(raw)
+    if playlist = invalid or type(playlist) <> "roAssociativeArray" then return invalid
+    return playlist
+end function
+
+sub saveStorePlaylist(playlist as Object)
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    section.Write("store_playlist", FormatJson(playlist))
+    section.Flush()
+end sub
+
+sub clearStorePlaylist()
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    section.Delete("store_playlist")
+    section.Delete("playlist_metadata")
+    section.Flush()
+end sub
+
+sub openStoreServerKeyboard()
+    m.status.text = "Informe o servidor da sua lista."
+    setStatusTone("waiting")
+    dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
+    dialog.title = "Servidor da lista"
+    dialog.message = "Digite o endereço do servidor (ex.: http://servidor.com:8080) ou o link completo da lista M3U."
+    dialog.buttons = ["Continuar", "Cancelar"]
+    dialog.text = "http://"
+    dialog.observeField("buttonSelected", "onStoreServerKeyboardSelected")
+    m.inputDialog = dialog
+    m.top.dialog = dialog
+end sub
+
+sub onStoreServerKeyboardSelected()
+    dialog = m.inputDialog
+    m.top.dialog = invalid
+    m.inputDialog = invalid
+    if dialog = invalid or dialog.buttonSelected <> 0 then
+        showStoreConnect("Conexão cancelada.", "waiting")
+        return
+    end if
+    value = safeTrim(dialog.text)
+    lower = lcase(value)
+    if value = "" or lower = "http://" or lower = "https://" or instr(1, value, " ") > 0 then
+        showStoreConnect("Endereço inválido. Confira e tente novamente.", "error")
+        return
+    end if
+    if left(lower, 7) <> "http://" and left(lower, 8) <> "https://" then
+        value = "http://" + value
+        lower = lcase(value)
+    end if
+    ' Link completo (get.php ou .m3u): conecta direto; o carregador reconhece o get.php como Xtream.
+    if instr(1, lower, "get.php?") > 0 or instr(1, lower, "username=") > 0 or instr(1, lower, ".m3u") > 0 then
+        connectStorePlaylist({ source_type: "m3u", url: value }, true)
+        return
+    end if
+    while right(value, 1) = "/"
+        value = left(value, len(value) - 1)
+    end while
+    m.resolvedHost = value
+    openCredentialKeyboard("username")
+end sub
+
+sub connectStorePlaylist(playlist as Object, isNew as Boolean)
+    m.storePlaylist = playlist
+    m.storeIsNew = isNew
+    m.retryPlaylist = invalid
+    setActivationVisible(false)
+    openAppShell()
+    if m.appShell = invalid then return
+    m.appShell.callFunc("applyPlaylist", { display_name: "Minha lista", playlist: playlist })
+    signalLaunch()
+end sub
+
+sub onStoreCatalogState()
+    if not m.storeEdition or m.appShell = invalid then return
+    state = m.appShell.catalogState
+    if state = invalid then return
+    if state.ok = true then
+        if m.storeIsNew = true and m.storePlaylist <> invalid then saveStorePlaylist(m.storePlaylist)
+        m.storeIsNew = false
+        return
+    end if
+    message = "Não foi possível carregar a lista."
+    if state.message <> invalid and state.message <> "" then message = state.message
+    if m.storeIsNew <> true and m.storePlaylist <> invalid then m.retryPlaylist = m.storePlaylist
+    returnToStoreConnect(message, "error")
+end sub
+
+sub onStoreDisconnect()
+    if m.appShell = invalid or m.appShell.disconnectRequested <> true then return
+    clearStorePlaylist()
+    m.storePlaylist = invalid
+    m.retryPlaylist = invalid
+    returnToStoreConnect("Lista desconectada. Conecte uma nova lista quando quiser.", "waiting")
+end sub
+
+sub returnToStoreConnect(message as String, tone as String)
+    if m.appShell <> invalid then
+        m.appShell.callFunc("stopPlayback")
+        m.appShell.visible = false
+    end if
+    m.top.dialog = invalid
+    showStoreConnect(message, tone)
 end sub
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
     if m.appShell <> invalid and m.appShell.visible then return false
+    ' Aviso de teste encerrado: OK verifica de novo; Voltar sai do app (Roku exige sair pela tela inicial).
+    if m.expiredOverlay <> invalid and m.expiredOverlay.visible then
+        if key = "back" then return false
+        if key = "OK" then
+            m.top.findNode("expiredInfo").text = "Verificando a ativação…"
+            requestPortal("roku-device-register")
+        end if
+        return true
+    end if
+    if m.storeEdition = true and m.inputDialog = invalid then
+        if key = "OK" and m.retryPlaylist <> invalid then
+            connectStorePlaylist(m.retryPlaylist, false)
+            return true
+        end if
+        if key = "OK" or key = "options" then
+            openStoreServerKeyboard()
+            return true
+        end if
+        return false
+    end if
     if key = "OK" and m.inputDialog = invalid then
         openServerCodeKeyboard()
         return true
@@ -178,6 +377,11 @@ sub onPortalResult(event as Object)
 end sub
 
 sub showActivationState(state as String, message as String)
+    m.expiredOverlay.visible = (state = "expired")
+    if state = "expired" then
+        m.top.findNode("expiredCode").text = m.deviceCodeValue
+        m.top.findNode("expiredInfo").text = "A ativação é verificada automaticamente a cada minuto."
+    end if
     if state = "active" then
         m.licenseTimer.control = "start"
         setActivationVisible(false)
@@ -194,7 +398,7 @@ sub showActivationState(state as String, message as String)
     m.homeStatus.visible = false
     setActivationVisible(true)
     if state = "expired" then
-        m.status.text = "Licença expirada. Renove em elvanoqplay.app."
+        m.status.text = "Teste gratuito encerrado. Este aparelho não possui licença ativa."
         setStatusTone("error")
     else if state = "blocked" then
         m.status.text = "Dispositivo bloqueado. Consulte o suporte no Portal."
@@ -304,6 +508,10 @@ sub onUsernameKeyboardSelected()
     m.top.dialog = invalid
     m.inputDialog = invalid
     if dialog = invalid or dialog.buttonSelected <> 0 or safeTrim(dialog.text) = "" then
+        if m.storeEdition = true then
+            showStoreConnect("Conexão cancelada.", "waiting")
+            return
+        end if
         m.status.text = "Login por código cancelado."
         setStatusTone("waiting")
         restoreActivationFocus()
@@ -318,6 +526,10 @@ sub onPasswordKeyboardSelected()
     m.top.dialog = invalid
     m.inputDialog = invalid
     if dialog = invalid or dialog.buttonSelected <> 0 or dialog.text = "" then
+        if m.storeEdition = true then
+            showStoreConnect("Conexão cancelada.", "waiting")
+            return
+        end if
         m.status.text = "Login por código cancelado."
         setStatusTone("waiting")
         restoreActivationFocus()
@@ -325,6 +537,12 @@ sub onPasswordKeyboardSelected()
     end if
     password = dialog.text
     playlist = { source_type: "xtream", credentials: { host: m.resolvedHost, username: m.manualUsername, password: password } }
+    if m.storeEdition = true then
+        m.manualUsername = ""
+        m.resolvedHost = ""
+        connectStorePlaylist(playlist, true)
+        return
+    end if
     setActivationVisible(false)
     openAppShell()
     if m.appShell <> invalid then m.appShell.callFunc("applyPlaylist", { display_name: "Acesso por código", server_code: m.serverCodeInput, playlist: playlist })
@@ -448,8 +666,16 @@ sub openAppShell()
     m.appShell.rokuClientId = m.clientId
     m.appShell.deviceCode = m.deviceCodeValue
     m.appShell.deviceKey = m.deviceKey
+    m.appShell.storeEdition = (m.storeEdition = true)
+    m.appShell.observeField("catalogState", "onStoreCatalogState")
+    m.appShell.observeField("disconnectRequested", "onStoreDisconnect")
     m.top.appendChild(m.appShell)
     m.appShell.setFocus(true)
+    if m.pendingDeepLink <> invalid then
+        m.appShell.deepLink = m.pendingDeepLink
+        m.pendingDeepLink = invalid
+    end if
+    signalLaunch()
 end sub
 
 function formatDeviceCode(clientId as String) as String
