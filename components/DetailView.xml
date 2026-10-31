@@ -22,31 +22,31 @@
     <Poster uri="pkg:/images/hero_shade_left.png" width="1920" height="1080" />
     <Poster uri="pkg:/images/hero_shade_bottom.png" width="1920" height="1080" />
     <Poster uri="pkg:/images/hero_shade_top.png" width="1920" height="220" />
-    <Rectangle translation="[1484,134]" width="372" height="552" color="0x111B2DFF" />
+    <RoundRect translation="[1484,134]" width="372" height="552" color="0x111B2DFF"  radius="20" />
     <Poster id="poster" translation="[1490,140]" width="360" height="540" loadDisplayMode="scaleToZoom" />
     <Label id="eyebrow" translation="[64,140]" text="DETALHES" width="700" height="30" />
     <Label id="title" translation="[64,180]" width="1200" height="84" />
     <Label id="meta" translation="[64,268]" width="1200" height="34" />
     <Label id="genreLabel" translation="[64,306]" width="1200" height="30" />
     <Label id="overview" translation="[64,350]" width="1150" height="160" wrap="true" maxLines="4" />
-    <Rectangle id="watchFocus" translation="[58,534]" width="252" height="76" color="0x00D7FFFF" />
-    <Rectangle id="watchButton" translation="[64,540]" width="240" height="64" color="0xF4F8FFFF" />
+    <RoundRect id="watchFocus" translation="[58,534]" width="252" height="76" color="0xF4F8FFFF"  radius="20" stroke="4" />
+    <RoundRect id="watchButton" translation="[64,540]" width="240" height="64" color="0xF4F8FFFF"  radius="14" />
     <Label id="watchLabel" translation="[64,540]" text="Assistir" width="240" height="64" horizAlign="center" vertAlign="center" />
-    <Rectangle id="listButton" translation="[324,540]" width="260" height="64" color="0x111B2DFF" />
+    <RoundRect id="listButton" translation="[324,540]" width="260" height="64" color="0x111B2DFF"  radius="14" borderColor="0xFFFFFF38" />
     <Label id="listLabel" translation="[324,540]" text="+ Minha Lista" width="260" height="64" horizAlign="center" vertAlign="center" />
-    <Rectangle id="laterButton" translation="[604,540]" width="290" height="64" color="0x111B2DFF" />
+    <RoundRect id="laterButton" translation="[604,540]" width="290" height="64" color="0x111B2DFF"  radius="14" borderColor="0xFFFFFF38" />
     <Label id="laterLabel" translation="[604,540]" text="Assistir mais tarde" width="290" height="64" horizAlign="center" vertAlign="center" />
-    <Rectangle id="trailerButton" translation="[914,540]" width="180" height="64" color="0x111B2DFF" visible="false" />
+    <RoundRect id="trailerButton" translation="[914,540]" width="180" height="64" color="0x111B2DFF" visible="false"  radius="14" borderColor="0xFFFFFF38" />
     <Label id="trailerLabel" translation="[914,540]" text="Trailer" width="180" height="64" horizAlign="center" vertAlign="center" visible="false" />
     <Label id="actionStatus" translation="[64,628]" width="1150" height="36" />
     <Label id="similarTitle" translation="[64,720]" text="Mais como este" width="900" height="42" />
     <Label id="similarHint" translation="[64,766]" text="" width="1150" height="64" wrap="true" maxLines="2" />
-    <Rectangle id="seasonFocus" translation="[58,654]" width="1162" height="100" color="0x00D7FFFF" visible="false" />
-    <Rectangle id="seasonPanel" translation="[64,660]" width="1150" height="88" color="0x111B2DFF" visible="false" />
+    <RoundRect id="seasonFocus" translation="[58,654]" width="1162" height="100" color="0xF4F8FFFF" visible="false"  radius="22" stroke="4" />
+    <RoundRect id="seasonPanel" translation="[64,660]" width="1150" height="88" color="0x111B2DFF" visible="false"  radius="16" />
     <Label id="seriesLabel" translation="[92,670]" width="1100" height="38" visible="false" />
     <Label id="seasonHint" translation="[92,708]" width="1100" height="30" visible="false" />
     <Rectangle id="episodesPanel" width="1" height="1" color="0x00000000" visible="false" />
-    <Rectangle id="episodeFocusBar" width="244" height="139" color="0x00D7FFFF" visible="false" />
+    <RoundRect id="episodeFocusBar" width="244" height="139" color="0xF4F8FFFF" visible="false"  radius="14" stroke="4" />
     <Group id="episodeCards" translation="[64,786]" visible="false" />
     <Label id="episodeLabel" width="1" height="1" visible="false" />
     <Label id="episodeHint" translation="[64,1036]" width="1150" height="30" visible="false" />

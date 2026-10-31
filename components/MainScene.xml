@@ -34,20 +34,20 @@
     </Group>
 
     <Label id="portalCaption" translation="[96,612]" text="CÓDIGO DESTE APARELHO" width="700" height="26" />
-    <Rectangle id="codeBorder" translation="[96,646]" width="720" height="116" color="0x00D7FFFF" />
-    <Rectangle id="codeCard" translation="[99,649]" width="714" height="110" color="0x0D1422FF" />
+    <RoundRect id="codeBorder" translation="[96,646]" width="720" height="116" color="0x00D7FFFF"  radius="18" stroke="3" />
+    <RoundRect id="codeCard" translation="[99,649]" width="714" height="110" color="0x0D1422FF"  radius="16" />
     <Label id="deviceCode" translation="[99,649]" width="714" height="110" horizAlign="center" vertAlign="center" />
 
     <Group id="qrGroup" translation="[860,596]">
-      <Rectangle width="234" height="234" color="0xFFFFFFFF" />
+      <RoundRect width="234" height="234" color="0xFFFFFFFF"  radius="16" />
       <Poster id="qrStatic" uri="pkg:/images/qr_portal.png" translation="[7,7]" width="220" height="220" />
       <Group id="qrModules" translation="[18,18]" />
       <Label id="qrCaption" translation="[0,246]" text="Aponte a câmera do celular" width="234" height="28" horizAlign="center" />
     </Group>
     <Label id="portal" translation="[860,870]" text="elvanoqplay.app" width="234" height="30" horizAlign="center" />
 
-    <Rectangle id="serverCodeButton" translation="[96,790]" width="720" height="72" color="0x8894A8FF" />
-    <Rectangle id="serverCodeInner" translation="[98,792]" width="716" height="68" color="0x0D1422E6" />
+    <RoundRect id="serverCodeButton" translation="[96,790]" width="720" height="72" color="0x8894A8FF"  radius="16" stroke="2" />
+    <RoundRect id="serverCodeInner" translation="[98,792]" width="716" height="68" color="0x0D1422E6"  radius="15" />
     <Label id="serverCodeButtonText" translation="[98,792]" text="OK   •   Entrar com código do servidor" width="716" height="68" horizAlign="center" vertAlign="center" />
     <Group id="serverCodeAction" translation="[96,790]" />
 

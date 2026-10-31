@@ -12,14 +12,14 @@
   <children>
     <Rectangle width="1920" height="1080" color="0x070B14FF" />
     <Label id="title" translation="[64,64]" text="Minha Lista" width="900" height="52" />
-    <Rectangle id="tabFocus" translation="[64,146]" width="200" height="48" color="0x147DFFFF" />
+    <RoundRect id="tabFocus" translation="[64,146]" width="200" height="48" color="0x147DFFFF"  radius="24" />
     <Label id="tab0" translation="[64,146]" text="Minha Lista" width="200" height="48" horizAlign="center" vertAlign="center" />
     <Label id="tab1" translation="[280,146]" text="Favoritos" width="200" height="48" horizAlign="center" vertAlign="center" />
     <Label id="tab2" translation="[496,146]" text="Continuar" width="200" height="48" horizAlign="center" vertAlign="center" />
     <Label id="tab3" translation="[712,146]" text="Histórico" width="200" height="48" horizAlign="center" vertAlign="center" />
     <Label id="tabs" width="1" height="1" visible="false" />
-    <Rectangle translation="[64,228]" width="1792" height="790" color="0x0D1422FF" />
-    <Rectangle id="itemFocus" translation="[76,256]" width="1768" height="54" color="0x147DFFFF" visible="false" />
+    <RoundRect translation="[64,228]" width="1792" height="790" color="0x0D1422FF"  radius="20" borderColor="0xBEDCFF22" />
+    <RoundRect id="itemFocus" translation="[76,256]" width="1768" height="54" color="0x147DFFFF" visible="false"  radius="10" />
     <Label id="rowTitle01" translation="[100,264]" width="1240" height="40" vertAlign="center" />
     <Label id="rowMeta01" translation="[1360,264]" width="470" height="40" horizAlign="right" vertAlign="center" />
     <Label id="rowTitle02" translation="[100,326]" width="1240" height="40" vertAlign="center" />

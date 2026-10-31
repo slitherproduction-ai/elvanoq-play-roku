@@ -42,7 +42,7 @@
     <Label id="hint" translation="[64,52]" text="OK: controles   •   Voltar: sair" width="1400" height="34" />
     <Label id="contentBadge" translation="[1456,52]" text="ELVANOQ PLAY" width="400" height="34" horizAlign="right" />
 
-    <Rectangle id="nextEpisodePanel" translation="[660,420]" width="600" height="176" color="0x0D1422F2" visible="false" />
+    <RoundRect id="nextEpisodePanel" translation="[660,420]" width="600" height="176" color="0x0D1422F2" visible="false"  radius="20" borderColor="0xBEDCFF22" />
     <Label id="nextEpisodeTitle" translation="[696,448]" text="PRÓXIMO EPISÓDIO" width="540" height="30" visible="false" />
     <Label id="nextEpisodeHint" translation="[696,492]" width="540" height="80" wrap="true" visible="false" />
 
@@ -55,7 +55,7 @@
     <Label id="timeLabel" translation="[64,914]" width="700" height="30" />
     <Label id="trackStatus" translation="[856,914]" width="1000" height="30" horizAlign="right" />
 
-    <Rectangle id="controlFocus" translation="[240,958]" width="160" height="56" color="0xF4F8FFFF" />
+    <RoundRect id="controlFocus" translation="[240,958]" width="160" height="56" color="0xF4F8FFFF"  radius="28" />
     <Label id="controlBack" translation="[64,958]" text="-10s" width="160" height="56" horizAlign="center" vertAlign="center" />
     <Label id="controlPlay" translation="[240,958]" text="Pausar" width="160" height="56" horizAlign="center" vertAlign="center" />
     <Label id="controlForward" translation="[416,958]" text="+10s" width="160" height="56" horizAlign="center" vertAlign="center" />

@@ -32,7 +32,8 @@ sub init()
     cardsGroup = m.top.findNode("episodeCards")
     for index = 0 to m.cardCount - 1
         x = index * (m.cardWidth + m.cardGap)
-        background = cardsGroup.createChild("Rectangle")
+        background = cardsGroup.createChild("RoundRect")
+        background.radius = 12
         background.translation = [x, 0]
         background.width = m.cardWidth
         background.height = 135

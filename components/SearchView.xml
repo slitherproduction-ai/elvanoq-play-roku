@@ -16,20 +16,36 @@
   <children>
     <Rectangle width="1920" height="1080" color="0x070B14FF" />
     <Label id="title" translation="[64,64]" text="Busca" width="600" height="52" />
-    <Rectangle translation="[64,140]" width="1100" height="68" color="0x111B2DFF" />
-    <Rectangle translation="[64,206]" width="1100" height="2" color="0x00D7FFFF" />
+    <RoundRect translation="[64,140]" width="1100" height="68" color="0x111B2DFF"  radius="16" borderColor="0xBEDCFF22" />
     <Poster translation="[88,156]" width="36" height="36" uri="pkg:/images/icon_search.png" opacity="0.7" />
     <Label id="queryLabel" translation="[140,154]" text="Buscar filmes, séries e canais" width="900" height="40" vertAlign="center" />
     <Label id="queryHint" translation="[1184,160]" text="OK: digitar   •   *: filtro" width="672" height="30" horizAlign="right" />
     <Rectangle id="filterAll" width="1" height="1" color="0x00000000" />
-    <Rectangle id="filterFocus" translation="[64,236]" width="124" height="44" color="0x147DFFFF" />
+    <RoundRect id="filterFocus" translation="[64,236]" width="124" height="44" color="0x147DFFFF"  radius="22" />
     <Label id="allLabel" translation="[64,236]" text="Todos" width="124" height="44" horizAlign="center" vertAlign="center" />
     <Label id="moviesLabel" translation="[204,236]" text="Filmes" width="124" height="44" horizAlign="center" vertAlign="center" />
     <Label id="seriesLabel" translation="[344,236]" text="Séries" width="124" height="44" horizAlign="center" vertAlign="center" />
     <Label id="channelsLabel" translation="[484,236]" text="Canais" width="124" height="44" horizAlign="center" vertAlign="center" />
     <Label id="resultsTitle" translation="[64,312]" text="Resultados" width="1200" height="34" />
-    <Rectangle id="resultsFocus" width="212" height="312" color="0x00D7FFFF" visible="false" />
+    <RoundRect id="resultsFocus" width="212" height="312" color="0xF4F8FFFF" visible="false"  radius="16" stroke="4" />
     <PosterGrid id="resultsGrid" translation="[64,360]" basePosterSize="[200,300]" itemSpacing="[28,36]" numColumns="8" numRows="2" drawFocusFeedback="false" posterDisplayMode="scaleToZoom" vertFocusAnimationStyle="floatingFocus" />
+    <!-- Cantos arredondados dos posteres (mascara na cor do fundo) -->
+    <RoundRect translation="[64,360]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[292,360]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[520,360]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[748,360]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[976,360]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[1204,360]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[1432,360]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[1660,360]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[64,696]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[292,696]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[520,696]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[748,696]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[976,696]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[1204,696]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[1432,696]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[1660,696]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
     <Label id="emptyState" translation="[64,420]" width="1500" height="42" />
   </children>
 </component>

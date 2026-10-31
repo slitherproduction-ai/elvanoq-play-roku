@@ -16,38 +16,38 @@
     <Label id="pageTitle" translation="[64,64]" text="Ajustes" width="900" height="52" />
     <Label id="pageSubtitle" translation="[64,118]" text="Controle parental e restrições desta TV" width="900" height="28" />
 
-    <Rectangle translation="[64,180]" width="620" height="830" color="0x0D1422FF" />
+    <RoundRect translation="[64,180]" width="620" height="830" color="0x0D1422FF"  radius="20" borderColor="0xBEDCFF22" />
     <Label id="title" translation="[104,212]" text="Controle Parental" width="540" height="40" />
     <Label id="description" translation="[104,258]" text="Digite o PIN para acessar categorias e restrições." width="540" height="56" wrap="true" maxLines="2" />
     <Label id="dots" translation="[104,326]" text="_  _  _  _" width="540" height="56" />
     <Label id="status" translation="[104,384]" text="" width="540" height="30" />
-    <Rectangle id="keyFocus" translation="[98,424]" width="172" height="96" color="0x00D7FFFF" />
-    <Rectangle id="keyBg00" translation="[104,430]" width="160" height="84" color="0x111B2DFF" />
+    <RoundRect id="keyFocus" translation="[98,424]" width="172" height="96" color="0xF4F8FFFF"  radius="20" stroke="4" />
+    <RoundRect id="keyBg00" translation="[104,430]" width="160" height="84" color="0x111B2DFF"  radius="14" />
     <Label id="keyLabel00" translation="[104,430]" text="1" width="160" height="84" horizAlign="center" vertAlign="center" />
-    <Rectangle id="keyBg01" translation="[280,430]" width="160" height="84" color="0x111B2DFF" />
+    <RoundRect id="keyBg01" translation="[280,430]" width="160" height="84" color="0x111B2DFF"  radius="14" />
     <Label id="keyLabel01" translation="[280,430]" text="2" width="160" height="84" horizAlign="center" vertAlign="center" />
-    <Rectangle id="keyBg02" translation="[456,430]" width="160" height="84" color="0x111B2DFF" />
+    <RoundRect id="keyBg02" translation="[456,430]" width="160" height="84" color="0x111B2DFF"  radius="14" />
     <Label id="keyLabel02" translation="[456,430]" text="3" width="160" height="84" horizAlign="center" vertAlign="center" />
-    <Rectangle id="keyBg03" translation="[104,530]" width="160" height="84" color="0x111B2DFF" />
+    <RoundRect id="keyBg03" translation="[104,530]" width="160" height="84" color="0x111B2DFF"  radius="14" />
     <Label id="keyLabel03" translation="[104,530]" text="4" width="160" height="84" horizAlign="center" vertAlign="center" />
-    <Rectangle id="keyBg04" translation="[280,530]" width="160" height="84" color="0x111B2DFF" />
+    <RoundRect id="keyBg04" translation="[280,530]" width="160" height="84" color="0x111B2DFF"  radius="14" />
     <Label id="keyLabel04" translation="[280,530]" text="5" width="160" height="84" horizAlign="center" vertAlign="center" />
-    <Rectangle id="keyBg05" translation="[456,530]" width="160" height="84" color="0x111B2DFF" />
+    <RoundRect id="keyBg05" translation="[456,530]" width="160" height="84" color="0x111B2DFF"  radius="14" />
     <Label id="keyLabel05" translation="[456,530]" text="6" width="160" height="84" horizAlign="center" vertAlign="center" />
-    <Rectangle id="keyBg06" translation="[104,630]" width="160" height="84" color="0x111B2DFF" />
+    <RoundRect id="keyBg06" translation="[104,630]" width="160" height="84" color="0x111B2DFF"  radius="14" />
     <Label id="keyLabel06" translation="[104,630]" text="7" width="160" height="84" horizAlign="center" vertAlign="center" />
-    <Rectangle id="keyBg07" translation="[280,630]" width="160" height="84" color="0x111B2DFF" />
+    <RoundRect id="keyBg07" translation="[280,630]" width="160" height="84" color="0x111B2DFF"  radius="14" />
     <Label id="keyLabel07" translation="[280,630]" text="8" width="160" height="84" horizAlign="center" vertAlign="center" />
-    <Rectangle id="keyBg08" translation="[456,630]" width="160" height="84" color="0x111B2DFF" />
+    <RoundRect id="keyBg08" translation="[456,630]" width="160" height="84" color="0x111B2DFF"  radius="14" />
     <Label id="keyLabel08" translation="[456,630]" text="9" width="160" height="84" horizAlign="center" vertAlign="center" />
-    <Rectangle id="keyBg09" translation="[104,730]" width="160" height="84" color="0x111B2DFF" />
+    <RoundRect id="keyBg09" translation="[104,730]" width="160" height="84" color="0x111B2DFF"  radius="14" />
     <Label id="keyLabel09" translation="[104,730]" text="Limpar" width="160" height="84" horizAlign="center" vertAlign="center" />
-    <Rectangle id="keyBg10" translation="[280,730]" width="160" height="84" color="0x111B2DFF" />
+    <RoundRect id="keyBg10" translation="[280,730]" width="160" height="84" color="0x111B2DFF"  radius="14" />
     <Label id="keyLabel10" translation="[280,730]" text="0" width="160" height="84" horizAlign="center" vertAlign="center" />
-    <Rectangle id="keyBg11" translation="[456,730]" width="160" height="84" color="0x111B2DFF" />
+    <RoundRect id="keyBg11" translation="[456,730]" width="160" height="84" color="0x111B2DFF"  radius="14" />
     <Label id="keyLabel11" translation="[456,730]" text="Apagar" width="160" height="84" horizAlign="center" vertAlign="center" />
 
-    <Rectangle id="categoryPanel" translation="[704,180]" width="1152" height="830" color="0x0D1422FF" />
+    <RoundRect id="categoryPanel" translation="[704,180]" width="1152" height="830" color="0x0D1422FF"  radius="20" borderColor="0xBEDCFF22" />
     <Label id="lockedCategories" translation="[744,212]" text="Digite o PIN para gerenciar categorias." width="1072" height="700" wrap="true" />
     <Label id="scopeStatus" translation="[744,940]" width="1072" height="56" wrap="true" maxLines="2" />
   </children>

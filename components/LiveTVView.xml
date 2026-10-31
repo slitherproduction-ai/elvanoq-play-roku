@@ -28,9 +28,9 @@
     <Label id="title" translation="[64,64]" text="TV ao Vivo" width="700" height="52" />
     <Label id="subtitle" translation="[64,118]" text="Categorias e canais da sua lista" width="900" height="28" />
 
-    <Rectangle translation="[64,176]" width="450" height="830" color="0x0D1422FF" />
+    <RoundRect translation="[64,176]" width="450" height="830" color="0x0D1422FF"  radius="20" borderColor="0xBEDCFF22" />
     <Label id="categoriesTitle" translation="[92,196]" text="CATEGORIAS" width="300" height="26" />
-    <Rectangle id="categoryFocus" translation="[76,236]" width="426" height="46" color="0x147DFFFF" visible="false" />
+    <RoundRect id="categoryFocus" translation="[76,236]" width="426" height="46" color="0x147DFFFF" visible="false"  radius="10" />
     <Label id="category01" translation="[92,242]" width="394" height="40" vertAlign="center" />
     <Label id="category02" translation="[92,294]" width="394" height="40" vertAlign="center" />
     <Label id="category03" translation="[92,346]" width="394" height="40" vertAlign="center" />
@@ -46,9 +46,9 @@
     <Label id="category13" translation="[92,866]" width="394" height="40" vertAlign="center" />
     <Label id="category14" translation="[92,918]" width="394" height="40" vertAlign="center" />
 
-    <Rectangle translation="[534,176]" width="690" height="830" color="0x0D1422FF" />
+    <RoundRect translation="[534,176]" width="690" height="830" color="0x0D1422FF"  radius="20" borderColor="0xBEDCFF22" />
     <Label id="channelsTitle" translation="[562,196]" text="CANAIS" width="300" height="26" />
-    <Rectangle id="channelFocus" translation="[546,236]" width="666" height="46" color="0x147DFFFF" />
+    <RoundRect id="channelFocus" translation="[546,236]" width="666" height="46" color="0x147DFFFF"  radius="10" />
     <Poster id="channelLogo01" translation="[558,244]" width="36" height="36" loadDisplayMode="scaleToFit" />
     <Poster id="channelLogo02" translation="[558,296]" width="36" height="36" loadDisplayMode="scaleToFit" />
     <Poster id="channelLogo03" translation="[558,348]" width="36" height="36" loadDisplayMode="scaleToFit" />
@@ -97,7 +97,7 @@
     <Label id="previewTitle" translation="[1244,540]" text="Selecione um canal" width="612" height="36" />
     <Label id="previewHint" translation="[1244,578]" text="→ prévia   •   OK tela cheia   •   * favorito" width="612" height="28" />
 
-    <Rectangle translation="[1244,628]" width="612" height="378" color="0x0D1422FF" />
+    <RoundRect translation="[1244,628]" width="612" height="378" color="0x0D1422FF"  radius="20" borderColor="0xBEDCFF22" />
     <Label id="epgTitle" translation="[1272,650]" text="GUIA DE PROGRAMAÇÃO" width="556" height="26" />
     <Label id="epgNow" translation="[1272,690]" text="Carregando guia…" width="556" height="64" wrap="true" maxLines="2" />
     <Rectangle id="epgProgress" translation="[1272,766]" width="0" height="4" color="0x00D7FFFF" />

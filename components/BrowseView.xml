@@ -21,9 +21,9 @@
     <Label id="countLabel" translation="[64,118]" width="900" height="28" />
     <Label id="description" translation="[1044,118]" width="800" height="28" horizAlign="right" />
 
-    <Rectangle translation="[64,176]" width="400" height="830" color="0x0D1422FF" />
+    <RoundRect translation="[64,176]" width="400" height="830" color="0x0D1422FF"  radius="20" borderColor="0xBEDCFF22" />
     <Label id="categoriesTitle" translation="[92,196]" text="CATEGORIAS" width="300" height="26" />
-    <Rectangle id="categoryFocus" translation="[76,236]" width="376" height="46" color="0x147DFFFF" visible="false" />
+    <RoundRect id="categoryFocus" translation="[76,236]" width="376" height="46" color="0x147DFFFF" visible="false"  radius="10" />
     <Rectangle id="categoryMarker" translation="[76,236]" width="4" height="46" color="0x00D7FFFF" visible="false" />
     <Label id="category01" translation="[92,242]" width="290" height="40" vertAlign="center" />
     <Label id="categoryCount01" translation="[384,242]" width="56" height="40" horizAlign="right" vertAlign="center" />
@@ -56,8 +56,21 @@
     <Label id="categoryScroll" translation="[92,966]" width="348" height="28" horizAlign="center" />
 
     <Label id="eyebrow" translation="[504,186]" text="" width="900" height="26" />
-    <Rectangle id="gridFocus" width="212" height="312" color="0x00D7FFFF" visible="false" />
+    <RoundRect id="gridFocus" width="212" height="312" color="0xF4F8FFFF" visible="false"  radius="16" stroke="4" />
     <PosterGrid id="grid" translation="[504,226]" basePosterSize="[200,300]" itemSpacing="[28,36]" numColumns="6" numRows="2" drawFocusFeedback="false" posterDisplayMode="scaleToZoom" vertFocusAnimationStyle="floatingFocus" />
+    <!-- Cantos arredondados dos posteres (mascara na cor do fundo) -->
+    <RoundRect translation="[504,226]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[732,226]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[960,226]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[1188,226]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[1416,226]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[1644,226]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[504,562]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[732,562]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[960,562]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[1188,562]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[1416,562]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
+    <RoundRect translation="[1644,562]" width="200" height="300" color="0x070B14FF" radius="12" mask="true" />
     <Label id="selectedTitle" translation="[504,904]" width="900" height="44" />
     <Label id="selectedMeta" translation="[504,950]" width="900" height="30" />
     <Label id="filterLabel" translation="[1344,916]" width="500" height="30" horizAlign="right" />

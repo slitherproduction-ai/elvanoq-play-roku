@@ -77,10 +77,12 @@ sub buildTiles()
     for index = 0 to m.tileDefs.count() - 1
         definition = m.tileDefs[index]
         x = index * (m.tileWidth + m.tileGap)
-        background = group.createChild("Rectangle")
+        background = group.createChild("RoundRect")
         background.translation = [x, 0]
         background.width = m.tileWidth
         background.height = m.tileHeight
+        background.radius = 18
+        background.borderColor = "0xBEDCFF22"
         background.color = "0x0D1422FF"
         icon = group.createChild("Poster")
         icon.uri = definition.icon

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Retangulo com cantos arredondados (imagens 9-patch). Mesmos campos usados no Rectangle:
+     width, height e color ("0xRRGGBBAA"); radius em px; stroke > 0 desenha so o contorno;
+     mask = cantos na cor informada e centro vazado (arredonda posteres sobre fundo liso);
+     borderColor opcional desenha um contorno fino por cima do preenchimento. -->
+<component name="RoundRect" extends="Group">
+  <interface>
+    <field id="width" type="float" value="0" onChange="applyShape" />
+    <field id="height" type="float" value="0" onChange="applyShape" />
+    <field id="color" type="string" value="0xFFFFFFFF" onChange="applyColor" />
+    <field id="radius" type="integer" value="12" onChange="applyShape" />
+    <field id="stroke" type="integer" value="0" onChange="applyShape" />
+    <field id="mask" type="boolean" value="false" onChange="applyShape" />
+    <field id="borderColor" type="string" value="" onChange="applyShape" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/components/RoundRect.brs" />
+  <children>
+    <Poster id="shape" />
+    <Poster id="border" visible="false" />
+  </children>
+</component>
