@@ -9,6 +9,7 @@
     <field id="disconnectRequested" type="boolean" alwaysNotify="true" />
     <field id="deepLink" type="assocarray" alwaysNotify="true" />
     <function name="applyPlaylist" />
+    <function name="releaseMemory" />
     <function name="stopPlayback" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/AppShell.brs" />

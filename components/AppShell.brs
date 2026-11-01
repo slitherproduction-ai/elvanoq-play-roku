@@ -1115,3 +1115,13 @@ function deepLinkItem(contentId as String) as Object
     saved = { id: contentId, type: itemType, sid: sid, ext: ext, title: "" }
     return xtreamItemFromSaved(m.xtream, saved)
 end function
+
+' Aviso de pouca memoria da Roku: mantem so a categoria aberta por ultimo e solta o resto.
+sub releaseMemory()
+    while m.categoryCacheOrder.count() > 1
+        oldest = m.categoryCacheOrder.Shift()
+        m.categoryCache.Delete(oldest)
+    end while
+    m.searchItems = []
+    if m.lazy then rebuildCatalogPool()
+end sub

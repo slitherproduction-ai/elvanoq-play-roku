@@ -12,7 +12,6 @@ sub run()
     transfer = CreateObject("roUrlTransfer")
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
     transfer.AddHeader("X-Roku-Reserved-Dev-Id", "")
-    transfer.InitClientCertificates()
     transfer.SetMinimumTransferRate(1, 15)
     ' Sem isto a Roku descarta o corpo das respostas 4xx/5xx e a mensagem do Portal se perde
     transfer.RetainBodyOnError(true)

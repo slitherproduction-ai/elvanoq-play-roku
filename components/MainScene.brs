@@ -78,6 +78,7 @@ sub init()
     m.deviceCodeValue = formatDeviceCode(m.clientId)
     m.deviceCode.text = m.deviceCodeValue
     m.top.observeField("deepLink", "onDeepLink")
+    m.top.observeField("memoryWarning", "onMemoryWarning")
     ' Versao da Roku Store (manifest store_edition=true): gratuita, sem Portal nem licenca;
     ' a lista e conectada na propria TV (exigencia de certificacao da Roku).
     m.storeEdition = (CreateObject("roAppInfo").GetValue("store_edition") = "true")
@@ -96,14 +97,30 @@ sub init()
     requestPortal("roku-device-register")
     m.registerTimer.control = "start"
     m.licenseTimer.control = "start"
-    signalLaunch()
+    signalActivationDialog()
 end sub
 
 ' Avisa a Roku que a primeira tela esta pronta (certificacao 3.2: medir o tempo de abertura).
+' A tela de ativacao/login aparece antes do Inicio: a Roku pede AppDialogInitiate ao mostrar
+' e AppDialogComplete ao sair dela; AppLaunchComplete so quando o Inicio e exibido.
+sub signalActivationDialog()
+    if m.launchSignaled = true or m.dialogSignaled = true then return
+    m.dialogSignaled = true
+    m.top.signalBeacon("AppDialogInitiate")
+end sub
+
 sub signalLaunch()
     if m.launchSignaled = true then return
+    if m.dialogSignaled = true then
+        m.top.signalBeacon("AppDialogComplete")
+        m.dialogSignaled = false
+    end if
     m.launchSignaled = true
     m.top.signalBeacon("AppLaunchComplete")
+end sub
+
+sub onMemoryWarning()
+    if m.appShell <> invalid then m.appShell.callFunc("releaseMemory")
 end sub
 
 sub onDeepLink()
@@ -151,7 +168,7 @@ sub showStoreConnect(message as String, tone as String)
     m.status.text = message
     setStatusTone(tone)
     restoreActivationFocus()
-    signalLaunch()
+    signalActivationDialog()
 end sub
 
 function loadStorePlaylist() as Object
@@ -226,7 +243,6 @@ sub connectStorePlaylist(playlist as Object, isNew as Boolean)
     openAppShell()
     if m.appShell = invalid then return
     m.appShell.callFunc("applyPlaylist", { display_name: "Minha lista", playlist: playlist })
-    signalLaunch()
 end sub
 
 sub onStoreCatalogState()
@@ -285,7 +301,7 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
         return false
     end if
     if key = "OK" and m.inputDialog = invalid then
-        openServerCodeKeyboard()
+        if m.channelStore = invalid then startServerCodeLogin()
         return true
     end if
     return false
@@ -426,14 +442,51 @@ sub showActivationState(state as String, message as String)
 end sub
 
 sub onServerCodeButtonSelected()
-    if m.inputDialog <> invalid then return
-    openServerCodeKeyboard()
+    if m.inputDialog <> invalid or m.channelStore <> invalid then return
+    startServerCodeLogin()
 end sub
 
 sub restoreActivationFocus()
     ' The Scene owns the remote focus while activation is displayed.
     ' This keeps OK delivery independent of a transparent or native overlay.
     m.top.setFocus(true)
+end sub
+
+' Login (Roku 2.1/4.1): antes do primeiro login, pede o e-mail pela tela nativa da Roku
+' ("Request for Information"). E opcional: recusando, o login segue normalmente.
+sub startServerCodeLogin()
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    if section.Read("rfi_asked") = "1" then
+        openServerCodeKeyboard()
+        return
+    end if
+    section.Write("rfi_asked", "1")
+    section.Flush()
+    store = CreateObject("roSGNode", "ChannelStore")
+    info = CreateObject("roSGNode", "ContentNode")
+    info.addFields({ context: "signin" })
+    store.requestedUserData = "email"
+    store.requestedUserDataInfo = info
+    store.observeField("userData", "onUserDataResult")
+    m.top.appendChild(store)
+    m.channelStore = store
+    store.command = "getUserData"
+end sub
+
+sub onUserDataResult()
+    store = m.channelStore
+    m.channelStore = invalid
+    if store <> invalid then
+        data = store.userData
+        if data <> invalid and data.email <> invalid and data.email <> "" then
+            section = CreateObject("roRegistrySection", "ELVANOQPlay")
+            section.Write("contact_email", data.email)
+            section.Flush()
+        end if
+        m.top.removeChild(store)
+    end if
+    restoreActivationFocus()
+    openServerCodeKeyboard()
 end sub
 
 sub openServerCodeKeyboard()
@@ -659,6 +712,7 @@ end sub
 sub openAppShell()
     if m.appShell <> invalid then
         m.appShell.visible = true
+        signalLaunch()
         if m.top.dialog = invalid and not m.appShell.isInFocusChain() then m.appShell.setFocus(true)
         return
     end if

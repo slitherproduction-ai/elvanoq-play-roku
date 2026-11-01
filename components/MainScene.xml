@@ -2,6 +2,8 @@
 <component name="MainScene" extends="Scene">
   <interface>
     <field id="deepLink" type="assocarray" alwaysNotify="true" />
+    <field id="memoryWarning" type="boolean" alwaysNotify="true" />
+    <field id="memoryInfo" type="assocarray" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/MainScene.brs" />
   <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />

@@ -13,6 +13,17 @@ sub Main(args as Dynamic)
         scene.deepLink = { contentId: args.contentId, mediaType: args.mediaType }
     end if
 
+    ' Monitoramento de memoria exigido pela Roku: avisos do app e de memoria geral baixa.
+    memoryMonitor = CreateObject("roAppMemoryMonitor")
+    if memoryMonitor <> invalid then
+        memoryMonitor.SetMessagePort(port)
+        memoryMonitor.EnableMemoryWarningEvent(true)
+        scene.memoryInfo = memorySnapshot(memoryMonitor)
+    end if
+    deviceInfo = CreateObject("roDeviceInfo")
+    deviceInfo.SetMessagePort(port)
+    deviceInfo.EnableLowGeneralMemoryEvent(true)
+
     while true
         message = wait(0, port)
         messageType = type(message)
@@ -21,5 +32,17 @@ sub Main(args as Dynamic)
             info = message.GetInfo()
             if info <> invalid and info.contentId <> invalid and info.mediaType <> invalid then scene.deepLink = { contentId: info.contentId, mediaType: info.mediaType }
         end if
+        if messageType = "roAppMemoryNotificationEvent" then
+            if memoryMonitor <> invalid then scene.memoryInfo = memorySnapshot(memoryMonitor)
+            scene.memoryWarning = true
+        end if
+        if messageType = "roDeviceInfoEvent" then
+            info = message.GetInfo()
+            if info <> invalid and info.generalMemoryLevel <> invalid and info.generalMemoryLevel <> "normal" then scene.memoryWarning = true
+        end if
     end while
 end sub
+
+function memorySnapshot(monitor as Object) as Object
+    return { limitKb: monitor.GetChannelMemoryLimit(), availableKb: monitor.GetChannelAvailableMemory(), usedPercent: monitor.GetMemoryLimitPercent() }
+end function
