@@ -18,6 +18,8 @@
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
   <script type="text/brightscript" uri="pkg:/source/XtreamItems.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Catchup.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ListPrefs.brs" />
   <children>
     <Rectangle id="contentBackground" translation="[0,0]" width="1920" height="1080" color="0x070B14FF" />
     <Label id="sectionEyebrow" translation="[64,180]" text="ELVANOQ PLAY" width="900" height="36" />
@@ -30,10 +32,11 @@
     <BrowseView id="seriesView" kind="series" visible="false" />
     <SearchView id="searchView" visible="false" />
     <LibraryView id="libraryView" visible="false" />
-    <ParentalView id="parentalView" visible="false" />
+    <SettingsView id="settingsView" visible="false" />
     <Timer id="clockTimer" duration="20" repeat="true" />
     <Label id="clockTime" translation="[1506,44]" width="350" height="50" horizAlign="right" />
     <Label id="clockDate" translation="[1506,94]" width="350" height="32" horizAlign="right" />
+    <CatchupView id="catchupView" visible="false" />
     <DetailView id="detailView" visible="false" />
     <PlayerView id="playerView" visible="false" />
   </children>

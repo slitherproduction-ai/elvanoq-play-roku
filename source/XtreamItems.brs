@@ -21,6 +21,9 @@ function xtreamItem(credentials, itemType, liveExtension, categoryName, stream)
     item.stream_id = streamId
     if itemType = "live" then
         item.tvg_id = safeTrim(stream.epg_channel_id)
+        ' Rever programas (catch-up): so quando o servidor guarda o arquivo do canal.
+        item.tv_archive = safeTrim(stream.tv_archive)
+        item.tv_archive_duration = safeTrim(stream.tv_archive_duration)
         ' Mesmo formato de id do carregador M3U, para manter favoritos e bloqueios.
         if item.tvg_id <> "" then
             item.id = "live:" + item.tvg_id

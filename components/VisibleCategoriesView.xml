@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Categorias visiveis: ocultar categorias da lista ativa sem apagar nada. -->
+<component name="VisibleCategoriesView" extends="Group">
+  <interface>
+    <field id="categoryGroups" type="assocarray" onChange="onGroupsChanged" />
+    <field id="changed" type="boolean" alwaysNotify="true" />
+    <function name="handleKey" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/components/VisibleCategoriesView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ListPrefs.brs" />
+  <children>
+    <Rectangle width="1920" height="1080" color="0x070B14FF" />
+    <Poster uri="pkg:/images/elvanoq-login-tv-backdrop.jpg" width="1920" height="1080" />
+    <Rectangle width="1920" height="1080" color="0x070B14C7" />
+    <Label id="pageTitle" translation="[64,64]" text="Categorias visíveis" width="900" height="52" />
+    <Label id="pageSubtitle" translation="[64,118]" text="Ajustes   •   Ocultar não apaga nada da lista" width="1200" height="28" />
+    <RoundRect id="tabBg0" translation="[64,180]" width="220" height="56" color="0x111B2DFF" radius="28" />
+    <Label id="tabLabel0" translation="[64,180]" text="Ao vivo" width="220" height="56" horizAlign="center" vertAlign="center" />
+    <RoundRect id="tabBg1" translation="[300,180]" width="220" height="56" color="0x111B2DFF" radius="28" />
+    <Label id="tabLabel1" translation="[300,180]" text="Filmes" width="220" height="56" horizAlign="center" vertAlign="center" />
+    <RoundRect id="tabBg2" translation="[536,180]" width="220" height="56" color="0x111B2DFF" radius="28" />
+    <Label id="tabLabel2" translation="[536,180]" text="Séries" width="220" height="56" horizAlign="center" vertAlign="center" />
+    <Label id="hiddenCount" translation="[1216,195]" width="640" height="26" horizAlign="right" />
+    <RoundRect translation="[64,256]" width="1792" height="760" color="0x0D1422EB" radius="20" borderColor="0xBEDCFF22" />
+    <Label id="groupLabel" translation="[104,264]" text="CATEGORIAS DA LISTA" width="800" height="26" visible="false" />
+    <RoundRect id="rowFocus" translation="[88,296]" width="1744" height="50" color="0x147DFFFF" radius="12" visible="false" />
+    <Label id="catRow00" translation="[112,296]" width="1400" height="50" vertAlign="center" />
+    <RoundRect id="catBadge00" translation="[1628,303]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="catBadgeLabel00" translation="[1628,303]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="catRow01" translation="[112,354]" width="1400" height="50" vertAlign="center" />
+    <RoundRect id="catBadge01" translation="[1628,361]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="catBadgeLabel01" translation="[1628,361]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="catRow02" translation="[112,412]" width="1400" height="50" vertAlign="center" />
+    <RoundRect id="catBadge02" translation="[1628,419]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="catBadgeLabel02" translation="[1628,419]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="catRow03" translation="[112,470]" width="1400" height="50" vertAlign="center" />
+    <RoundRect id="catBadge03" translation="[1628,477]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="catBadgeLabel03" translation="[1628,477]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="catRow04" translation="[112,528]" width="1400" height="50" vertAlign="center" />
+    <RoundRect id="catBadge04" translation="[1628,535]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="catBadgeLabel04" translation="[1628,535]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="catRow05" translation="[112,586]" width="1400" height="50" vertAlign="center" />
+    <RoundRect id="catBadge05" translation="[1628,593]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="catBadgeLabel05" translation="[1628,593]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="catRow06" translation="[112,644]" width="1400" height="50" vertAlign="center" />
+    <RoundRect id="catBadge06" translation="[1628,651]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="catBadgeLabel06" translation="[1628,651]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="catRow07" translation="[112,702]" width="1400" height="50" vertAlign="center" />
+    <RoundRect id="catBadge07" translation="[1628,709]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="catBadgeLabel07" translation="[1628,709]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="catRow08" translation="[112,760]" width="1400" height="50" vertAlign="center" />
+    <RoundRect id="catBadge08" translation="[1628,767]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="catBadgeLabel08" translation="[1628,767]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="catRow09" translation="[112,818]" width="1400" height="50" vertAlign="center" />
+    <RoundRect id="catBadge09" translation="[1628,825]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="catBadgeLabel09" translation="[1628,825]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="catRow10" translation="[112,876]" width="1400" height="50" vertAlign="center" />
+    <RoundRect id="catBadge10" translation="[1628,883]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="catBadgeLabel10" translation="[1628,883]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="catRow11" translation="[112,934]" width="1400" height="50" vertAlign="center" />
+    <RoundRect id="catBadge11" translation="[1628,941]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="catBadgeLabel11" translation="[1628,941]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="emptyState" translation="[64,600]" width="1792" height="40" horizAlign="center" />
+    <Label id="footer" translation="[64,1030]" text="←/→ trocar aba   •   OK mostrar ou ocultar   •   Voltar" width="1792" height="30" horizAlign="center" />
+  </children>
+</component>

@@ -16,12 +16,15 @@
     <function name="setCategoryItems" />
     <function name="focusColumnName" />
     <function name="isAtTop" />
+    <function name="selectedChannel" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/LiveTVView.brs" />
   <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
   <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
   <script type="text/brightscript" uri="pkg:/source/StreamFormat.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ListPrefs.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Catchup.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <children>
     <Rectangle width="1920" height="1080" color="0x070B14FF" />
@@ -102,6 +105,8 @@
     <Label id="epgNow" translation="[1272,690]" text="Carregando guia…" width="556" height="64" wrap="true" maxLines="2" />
     <Rectangle id="epgProgress" translation="[1272,766]" width="0" height="4" color="0x00D7FFFF" />
     <Label id="epgNext" translation="[1272,788]" text="A seguir: —" width="556" height="60" wrap="true" maxLines="2" />
+    <RoundRect id="archiveBadge" translation="[1272,920]" width="556" height="56" color="0x147DFF33" radius="14" borderColor="0x00D7FF55" visible="false" />
+    <Label id="archiveHint" translation="[1272,920]" width="556" height="56" horizAlign="center" vertAlign="center" text="Replay ou Voltar rápido   •   Rever programas" visible="false" />
     <Label id="emptyState" translation="[562,600]" width="634" height="60" wrap="true" visible="false" />
   </children>
 </component>

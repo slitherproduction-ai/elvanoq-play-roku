@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Lista de programas ja exibidos de um canal com arquivo (rever). -->
+<component name="CatchupView" extends="Group">
+  <interface>
+    <field id="channel" type="assocarray" />
+    <field id="programmes" type="array" onChange="onProgrammesChanged" />
+    <field id="loading" type="boolean" value="false" onChange="onProgrammesChanged" />
+    <field id="message" type="string" value="" onChange="onProgrammesChanged" />
+    <field id="programmeSelected" type="assocarray" alwaysNotify="true" />
+    <function name="handleKey" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/components/CatchupView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Catchup.brs" />
+  <children>
+    <Rectangle width="1920" height="1080" color="0x02070DE0" />
+    <RoundRect translation="[400,140]" width="1120" height="800" color="0x0B121EFF" radius="28" borderColor="0xBEDCFF33" />
+    <Label id="eyebrow" translation="[436,176]" width="1048" height="26" text="REVER PROGRAMAS" />
+    <Label id="channelTitle" translation="[436,206]" width="1048" height="52" />
+    <Label id="windowLabel" translation="[436,260]" width="1048" height="30" />
+    <RoundRect id="rowFocus" translation="[424,312]" width="1072" height="50" color="0x147DFFFF" radius="12" visible="false" />
+    <Label id="row00" translation="[436,312]" width="1048" height="50" vertAlign="center" />
+    <Label id="row01" translation="[436,370]" width="1048" height="50" vertAlign="center" />
+    <Label id="row02" translation="[436,428]" width="1048" height="50" vertAlign="center" />
+    <Label id="row03" translation="[436,486]" width="1048" height="50" vertAlign="center" />
+    <Label id="row04" translation="[436,544]" width="1048" height="50" vertAlign="center" />
+    <Label id="row05" translation="[436,602]" width="1048" height="50" vertAlign="center" />
+    <Label id="row06" translation="[436,660]" width="1048" height="50" vertAlign="center" />
+    <Label id="row07" translation="[436,718]" width="1048" height="50" vertAlign="center" />
+    <Label id="row08" translation="[436,776]" width="1048" height="50" vertAlign="center" />
+    <Label id="row09" translation="[436,834]" width="1048" height="50" vertAlign="center" />
+    <Label id="emptyState" translation="[436,560]" width="1048" height="60" horizAlign="center" wrap="true" maxLines="2" />
+    <Label id="footer" translation="[436,888]" width="1048" height="28" text="OK   Assistir      •      Voltar   Fechar" />
+  </children>
+</component>

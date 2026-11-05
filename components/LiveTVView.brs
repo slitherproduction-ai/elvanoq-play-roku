@@ -6,6 +6,10 @@ sub init()
     m.previewHint = m.top.findNode("previewHint")
     m.epgNow = m.top.findNode("epgNow")
     m.epgNext = m.top.findNode("epgNext")
+    m.archiveBadge = m.top.findNode("archiveBadge")
+    m.archiveHint = m.top.findNode("archiveHint")
+    m.archiveHint.font = appFont(20, "semibold")
+    m.archiveHint.color = "0xF4F8FFFF"
     m.emptyState = m.top.findNode("emptyState")
     m.allChannels = []
     m.visibleChannels = []
@@ -229,6 +233,8 @@ sub renderGuide()
         m.previewTitle.text = ""
         m.epgNow.text = ""
         m.epgNext.text = ""
+        m.archiveBadge.visible = false
+        m.archiveHint.visible = false
         return
     end if
     m.emptyState.visible = false
@@ -338,6 +344,9 @@ sub updateSelection()
     favoriteHint = ""
     if isFavorite(selected.id) then favoriteHint = "  •  Favorito"
     m.previewHint.text = "→ prévia  •  OK tela cheia  •  * favorito" + favoriteHint
+    hasArchive = channelHasArchive(selected)
+    m.archiveBadge.visible = hasArchive
+    m.archiveHint.visible = hasArchive
     epgId = epgKeyFor(selected)
     if epgId <> "" and m.epg[epgId] <> invalid and m.epg[epgId].count() > 0 then
         m.epgNow.text = "Agora: " + programmeLabel(m.epg[epgId][0])
@@ -397,7 +406,7 @@ end sub
 sub onPreviewState()
     state = m.preview.state
     if state = "error" then
-        m.previewHint.text = "Prévia falhou: " + m.preview.errorMsg + " (" + safeTrim(str(m.preview.errorCode)) + ")"
+        m.previewHint.text = "Prévia falhou (código " + safeTrim(str(m.preview.errorCode)) + "). OK para tentar em tela cheia."
     else if state = "buffering" then
         m.previewHint.text = "Carregando prévia…"
     end if
@@ -422,9 +431,10 @@ sub playSelected()
         return
     end if
     content = CreateObject("roSGNode", "ContentNode")
-    content.url = selected.stream_url
+    previewUrl = preferredLiveUrl(selected.stream_url)
+    content.url = previewUrl
     content.title = selected.title
-    previewFormat = streamFormatForUrl(selected.stream_url)
+    previewFormat = streamFormatForUrl(previewUrl)
     if previewFormat <> "" then content.streamFormat = previewFormat
     content.live = true
     m.preview.content = content
@@ -513,3 +523,9 @@ sub updateEpgProgress(programme as Dynamic)
     if elapsed > total then elapsed = total
     bar.width = int(556 * elapsed / total)
 end sub
+
+' Canal em destaque (para o "rever programas" aberto pelo AppShell).
+function selectedChannel() as Object
+    if m.visibleChannels = invalid or m.visibleChannels.count() = 0 then return invalid
+    return m.visibleChannels[m.selectedIndex]
+end function
