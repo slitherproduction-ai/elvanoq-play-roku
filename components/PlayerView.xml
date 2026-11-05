@@ -14,6 +14,7 @@
     <field id="liveQueue" type="array" />
     <field id="liveIndex" type="integer" value="0" />
     <field id="liveGuide" type="assocarray" />
+    <field id="catchupUrls" type="array" />
     <field id="channelRequested" type="assocarray" alwaysNotify="true" />
     <field id="favoriteRequested" type="assocarray" alwaysNotify="true" />
     <field id="closeRequested" type="boolean" alwaysNotify="true" />
@@ -26,12 +27,15 @@
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
   <script type="text/brightscript" uri="pkg:/source/StreamFormat.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ListPrefs.brs" />
   <children>
     <Rectangle width="1920" height="1080" color="0x000000FF" />
     <Video id="video" width="1920" height="1080" enableUI="false" />
     <Timer id="osdTimer" duration="5" repeat="false" />
     <Timer id="nextEpisodeTimer" duration="6" repeat="false" />
     <Timer id="retryTimer" duration="2" repeat="false" />
+    <!-- Vigia de travamento: confere a cada 4 s se o video avanca -->
+    <Timer id="stallTimer" duration="4" repeat="true" />
 
     <!-- OSD: so degradês no topo e embaixo; o vídeo continua visível -->
     <Rectangle id="osdBackground" width="1920" height="1080" color="0x070B1433" />
@@ -62,6 +66,17 @@
     <Label id="controlAudio" translation="[592,958]" text="Áudio" width="160" height="56" horizAlign="center" vertAlign="center" />
     <Label id="controlSubtitles" translation="[768,958]" text="Legendas" width="160" height="56" horizAlign="center" vertAlign="center" />
     <Label id="controls" translation="[1256,972]" width="600" height="30" horizAlign="right" />
+
+    <!-- Erro de reproducao (travamento sem volta ou programa indisponivel para rever) -->
+    <Group id="errorPanel" visible="false">
+      <Rectangle width="1920" height="1080" color="0x02070DCC" />
+      <RoundRect translation="[540,340]" width="840" height="400" color="0x0B121EFF" radius="28" borderColor="0xBEDCFF33" />
+      <Label id="errorTitle" translation="[540,392]" width="840" height="54" horizAlign="center" />
+      <Label id="errorMessage" translation="[620,460]" width="680" height="96" horizAlign="center" wrap="true" maxLines="3" />
+      <RoundRect id="errorButton" translation="[800,600]" width="320" height="72" color="0xF4F8FFFF" radius="28" />
+      <Label id="errorButtonLabel" translation="[800,600]" width="320" height="72" horizAlign="center" vertAlign="center" />
+      <Label id="errorFooter" translation="[540,690]" width="840" height="28" horizAlign="center" text="Voltar   •   Sair do vídeo" />
+    </Group>
 
     <Rectangle id="trackPanel" width="1" height="1" color="0x00000000" visible="false" />
     <Label id="trackPanelTitle" width="1" height="1" visible="false" />

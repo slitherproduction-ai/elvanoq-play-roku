@@ -14,6 +14,23 @@ sub init()
     m.nextEpisodeTimer = m.top.findNode("nextEpisodeTimer")
     m.retryTimer = m.top.findNode("retryTimer")
     m.liveRetries = 0
+    m.stallTimer = m.top.findNode("stallTimer")
+    m.stallClock = CreateObject("roTimespan")
+    m.stallAttempts = 0
+    m.lastProgressPos = -1
+    m.lastGoodPos = 0
+    m.lastProgressAt = 0
+    m.pendingStallSeek = 0
+    m.catchupIndex = -1
+    m.catchupList = []
+    m.errorPanel = m.top.findNode("errorPanel")
+    m.errorRetryAllowed = false
+    errorStyles = [["errorTitle", 34, "bold", "0xF4F8FFFF"], ["errorMessage", 22, "regular", "0xB8C4D6FF"], ["errorButtonLabel", 24, "semibold", "0x070B14FF"], ["errorFooter", 18, "regular", "0x8894A8FF"]]
+    for each style in errorStyles
+        label = m.top.findNode(style[0])
+        label.font = appFont(style[1], style[2])
+        label.color = style[3]
+    end for
     m.nextEpisodePanel = m.top.findNode("nextEpisodePanel")
     m.nextEpisodeTitle = m.top.findNode("nextEpisodeTitle")
     m.nextEpisodeHint = m.top.findNode("nextEpisodeHint")
@@ -63,6 +80,7 @@ sub init()
     m.osdTimer.observeField("fire", "onOsdTimerFired")
     m.nextEpisodeTimer.observeField("fire", "onNextEpisodeTimerFired")
     m.retryTimer.observeField("fire", "onRetryTimer")
+    m.stallTimer.observeField("fire", "onStallTick")
     m.top.observeField("streamUrl", "onStreamChanged")
     m.top.observeField("contentTitle", "onTitleChanged")
     m.selectedControl = 1
@@ -90,6 +108,8 @@ sub onStreamChanged()
         m.qualityTried = {}
     end if
     m.retryTimer.control = "stop"
+    resetStallWatch()
+    hidePlayerError()
     if isParentallyBlockedItem(m.top.contentCategory, m.top.contentId) then
         m.video.control = "stop"
         m.hint.text = "Conteúdo protegido. Valide o PIN em Ajustes para assistir."
@@ -106,16 +126,31 @@ sub onStreamChanged()
             return
         end if
     end if
+    url = m.top.streamUrl
+    ' Rever programa: lista de formatos alternativos, tentados em ordem.
+    m.catchupIndex = -1
+    m.catchupList = []
+    if m.top.catchupUrls <> invalid and m.top.catchupUrls.count() > 0 then
+        ' Consome a lista: a proxima reproducao comum nao herda o "rever".
+        m.catchupList = m.top.catchupUrls
+        m.top.catchupUrls = []
+        m.catchupIndex = 0
+        url = m.catchupList[0]
+    else if isLivePlayback() then
+        ' Ao vivo: escolha manual (HLS/TS) ou o formato que ja abriu nesta lista.
+        url = preferredLiveUrl(url)
+    end if
     content = CreateObject("roSGNode", "ContentNode")
-    content.url = m.top.streamUrl
+    content.url = url
     content.title = m.top.contentTitle
-    streamFormat = streamFormatForUrl(m.top.streamUrl)
+    streamFormat = streamFormatForUrl(url)
     if streamFormat <> "" then content.streamFormat = streamFormat
     ' Ao vivo: comeca no ponto mais recente do HLS em vez de bufferizar a janela inteira.
     if isLivePlayback() then content.live = true
     m.currentContent = content
     m.video.content = content
     m.video.control = "play"
+    m.stallTimer.control = "start"
     if isLivePlayback() then
         m.hint.text = "↑/↓: trocar canal  •  *: favorito  •  Voltar: sair"
         renderLiveGuide()
@@ -152,7 +187,14 @@ function programmeText(programme as Dynamic) as String
 end function
 
 sub onVideoState()
-    if m.video.state = "error" then print "ELVANOQ video error code="; m.video.errorCode; " msg="; m.video.errorMsg; " retry="; m.liveRetries
+    if m.video.state = "error" then print "ELVANOQ video error code="; m.video.errorCode; " retry="; m.liveRetries
+    ' Rever programa: erro passa para o proximo formato; sem nenhum, avisa (nao cai para o ao vivo).
+    if m.catchupIndex >= 0 and m.video.state = "error" then
+        if tryNextCatchupUrl() then return
+        m.stallTimer.control = "stop"
+        showPlayerError("Rever indisponível", "Este programa não está disponível para rever.", false)
+        return
+    end if
     ' Formato nao suportado (-5): tenta uma vez o outro formato do Xtream (.m3u8 <-> .ts).
     if m.video.state = "error" and m.video.errorCode = -5 then
         ' TV sem H.265: tenta antes a versao HD/SD do mesmo canal.
@@ -163,15 +205,38 @@ sub onVideoState()
         showOsd()
         return
     end if
+    ' Filme/episodio que ja estava tocando e caiu por erro de rede: reabre no mesmo ponto (ate 3 vezes).
+    if not isLivePlayback() and m.video.state = "error" and m.lastGoodPos > 0 then
+        if m.stallAttempts < 3 then
+            m.stallAttempts = m.stallAttempts + 1
+            m.lastProgressAt = m.stallClock.TotalSeconds()
+            m.hint.text = "O sinal parou de chegar. Reconectando…"
+            showOsd()
+            ' Espera crescente (5, 10 e 15 s) para dar tempo de a internet voltar.
+            m.retryTimer.duration = 5 * m.stallAttempts
+            m.retryTimer.control = "start"
+        else
+            showStallError()
+        end if
+        return
+    end if
     if isLivePlayback() and (m.video.state = "error" or m.video.state = "finished") and m.liveRetries < 3 then
         m.liveRetries = m.liveRetries + 1
         m.hint.text = "Reconectando ao canal… (" + safeTrim(str(m.liveRetries)) + "/3)"
         showOsd()
+        ' Espera crescente (3, 6 e 9 s): uma queda curta de internet volta sozinha.
+        m.retryTimer.duration = 3 * m.liveRetries
         m.retryTimer.control = "start"
         return
     end if
     if m.video.state = "playing" then
         m.liveRetries = 0
+        if isLivePlayback() and m.currentContent <> invalid then rememberWorkingLiveFormat(m.currentContent.url)
+        ' Retomada depois de travamento: volta ao ponto em que o video parou.
+        if m.pendingStallSeek <> invalid and m.pendingStallSeek > 0 then
+            m.video.seek = m.pendingStallSeek
+            m.pendingStallSeek = 0
+        end if
         if m.qualityNotice <> invalid and m.qualityNotice <> "" then
             m.hint.text = m.qualityNotice
             m.qualityNotice = ""
@@ -207,7 +272,12 @@ sub onVideoState()
     end if
     if m.video.state = "paused" then m.controlLabels[1].text = "Retomar"
     if m.video.state = "error" then
-        m.hint.text = "Não foi possível reproduzir: " + m.video.errorMsg + " (" + safeTrim(str(m.video.errorCode)) + ")"
+        ' Ao vivo sem sucesso depois das 3 reconexoes: tela de erro com "Tentar".
+        if isLivePlayback() then
+            showStallError()
+            return
+        end if
+        m.hint.text = "Não foi possível reproduzir este conteúdo (código " + safeTrim(str(m.video.errorCode)) + ")."
         showOsd()
     end if
 end sub
@@ -230,6 +300,24 @@ end sub
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
+    if m.errorPanel.visible then
+        if key = "back" then
+            hidePlayerError()
+            stopPlayback()
+            m.top.closeRequested = true
+            return true
+        end if
+        if key = "OK" then
+            if m.errorRetryAllowed then
+                retryAfterStall()
+            else
+                hidePlayerError()
+                stopPlayback()
+                m.top.closeRequested = true
+            end if
+        end if
+        return true
+    end if
     if m.awaitingNextEpisode = true then
         if key = "OK" then
             requestNextEpisode()
@@ -257,7 +345,7 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     end if
     if key = "back" then
         persistProgress(false)
-        m.video.control = "stop"
+        stopPlayback()
         m.top.closeRequested = true
         return true
     end if
@@ -609,7 +697,11 @@ sub togglePlayPause()
 end sub
 
 sub onRetryTimer()
-    if not isLivePlayback() or m.currentContent = invalid then return
+    if m.currentContent = invalid then return
+    if not isLivePlayback() then
+        reopenCurrentContent()
+        return
+    end if
     m.video.control = "stop"
     m.video.content = m.currentContent
     m.video.control = "play"
@@ -617,12 +709,15 @@ end sub
 
 sub stopPlayback()
     m.retryTimer.control = "stop"
+    m.stallTimer.control = "stop"
     m.awaitingNextEpisode = false
     m.video.control = "stop"
 end sub
 
 function tryAlternateFormat() as Boolean
     if m.formatFallbackTried = true or m.currentContent = invalid then return false
+    ' Ao vivo com formato escolhido a mao (HLS ou TS): a escolha vence, sem trocar sozinho.
+    if isLivePlayback() and liveFormatPreference() <> "auto" then return false
     url = m.currentContent.url
     lower = lcase(url)
     alternate = ""
@@ -749,4 +844,126 @@ function playbackBadge() as String
     if isLivePlayback() then return "AO VIVO"
     if m.top.nextEpisode <> invalid then return "EPISÓDIO"
     return "REPRODUZINDO"
+end function
+
+' ---------- Retomada automatica quando o video trava ----------
+' A cada 4 s confere se a posicao avancou. Sem avanco por 12 s (ao vivo) ou 20 s
+' (filme/episodio) com o video carregando ou tocando, reabre o mesmo conteudo.
+' Pausa do usuario e o player escondido nao contam. No maximo 3 tentativas seguidas.
+
+sub resetStallWatch()
+    m.stallTimer.control = "stop"
+    m.stallAttempts = 0
+    m.lastProgressPos = -1
+    m.lastGoodPos = 0
+    m.lastProgressAt = m.stallClock.TotalSeconds()
+    m.pendingStallSeek = 0
+end sub
+
+sub onStallTick()
+    now = m.stallClock.TotalSeconds()
+    if m.top.visible <> true or m.currentContent = invalid or m.errorPanel.visible then
+        m.lastProgressAt = now
+        return
+    end if
+    state = m.video.state
+    if state <> "buffering" and state <> "playing" then
+        m.lastProgressAt = now
+        return
+    end if
+    position = 0
+    if m.video.position <> invalid then position = m.video.position
+    ' Primeira leitura depois de abrir/reabrir: so marca a referencia.
+    if m.lastProgressPos < 0 then
+        m.lastProgressPos = position
+        return
+    end if
+    if position > m.lastProgressPos + 0.5 then
+        m.lastProgressPos = position
+        m.lastGoodPos = position
+        m.lastProgressAt = now
+        if m.stallAttempts > 0 then m.stallAttempts = 0
+        return
+    end if
+    limit = 20
+    if isLivePlayback() then limit = 12
+    if now - m.lastProgressAt < limit then return
+    if m.stallAttempts >= 3 then
+        showStallError()
+        return
+    end if
+    m.stallAttempts = m.stallAttempts + 1
+    m.lastProgressAt = now
+    m.hint.text = "O sinal parou de chegar. Reconectando…"
+    showOsd()
+    reopenCurrentContent()
+end sub
+
+sub showStallError()
+    m.stallTimer.control = "stop"
+    m.retryTimer.control = "stop"
+    persistProgress(false)
+    m.video.control = "stop"
+    showPlayerError("O sinal não voltou", "Não foi possível retomar depois de 3 tentativas. Confira a internet e toque em Tentar.", true)
+end sub
+
+sub reopenCurrentContent()
+    if m.currentContent = invalid then return
+    ' Filme/episodio: volta ao ultimo ponto que avancou de fato.
+    if not isLivePlayback() and m.lastGoodPos > 0 then m.pendingStallSeek = m.lastGoodPos
+    m.lastProgressPos = -1
+    m.video.control = "stop"
+    m.video.content = m.currentContent
+    m.video.control = "play"
+end sub
+
+sub retryAfterStall()
+    hidePlayerError()
+    m.stallAttempts = 0
+    m.liveRetries = 0
+    m.lastProgressAt = m.stallClock.TotalSeconds()
+    m.hint.text = "Reconectando…"
+    showOsd()
+    reopenCurrentContent()
+    m.stallTimer.control = "start"
+end sub
+
+sub showPlayerError(title as String, message as String, canRetry as Boolean)
+    m.errorRetryAllowed = canRetry
+    m.top.findNode("errorTitle").text = title
+    m.top.findNode("errorMessage").text = message
+    if canRetry then
+        m.top.findNode("errorButtonLabel").text = "OK   •   Tentar"
+    else
+        m.top.findNode("errorButtonLabel").text = "OK   •   Voltar"
+    end if
+    m.errorPanel.visible = true
+end sub
+
+sub hidePlayerError()
+    m.errorPanel.visible = false
+end sub
+
+' ---------- Rever programas (catch-up) ----------
+
+function tryNextCatchupUrl() as Boolean
+    urls = m.catchupList
+    if urls = invalid or m.catchupIndex < 0 then return false
+    nextIndex = m.catchupIndex + 1
+    if nextIndex >= urls.count() then return false
+    m.catchupIndex = nextIndex
+    content = CreateObject("roSGNode", "ContentNode")
+    content.url = urls[nextIndex]
+    content.title = m.top.contentTitle
+    format = streamFormatForUrl(urls[nextIndex])
+    if format <> "" then content.streamFormat = format
+    m.currentContent = content
+    m.hint.text = "Tentando outro formato para rever…"
+    showOsd()
+    m.video.control = "stop"
+    m.video.content = content
+    m.video.control = "play"
+    resetStallWatch()
+    m.stallTimer.control = "start"
+    return true
 end function

@@ -13,8 +13,10 @@
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
   <children>
     <Rectangle width="1920" height="1080" color="0x070B14FF" />
-    <Label id="pageTitle" translation="[64,64]" text="Ajustes" width="900" height="52" />
-    <Label id="pageSubtitle" translation="[64,118]" text="Controle parental e restrições desta TV" width="900" height="28" />
+    <Poster uri="pkg:/images/elvanoq-login-tv-backdrop.jpg" width="1920" height="1080" />
+    <Rectangle width="1920" height="1080" color="0x070B14C7" />
+    <Label id="pageTitle" translation="[64,64]" text="Controle parental" width="900" height="52" />
+    <Label id="pageSubtitle" translation="[64,118]" text="Ajustes   •   Restrições desta TV" width="900" height="28" />
 
     <RoundRect translation="[64,180]" width="620" height="830" color="0x0D1422FF"  radius="20" borderColor="0xBEDCFF22" />
     <Label id="title" translation="[104,212]" text="Controle Parental" width="540" height="40" />
@@ -47,8 +49,47 @@
     <RoundRect id="keyBg11" translation="[456,730]" width="160" height="84" color="0x111B2DFF"  radius="14" />
     <Label id="keyLabel11" translation="[456,730]" text="Apagar" width="160" height="84" horizAlign="center" vertAlign="center" />
 
-    <RoundRect id="categoryPanel" translation="[704,180]" width="1152" height="830" color="0x0D1422FF"  radius="20" borderColor="0xBEDCFF22" />
-    <Label id="lockedCategories" translation="[744,212]" text="Digite o PIN para gerenciar categorias." width="1072" height="700" wrap="true" />
-    <Label id="scopeStatus" translation="[744,940]" width="1072" height="56" wrap="true" maxLines="2" />
+    <RoundRect id="categoryPanel" translation="[704,180]" width="1152" height="830" color="0x0D1422EB"  radius="20" borderColor="0xBEDCFF22" />
+    <Label id="listGroupLabel" translation="[744,208]" text="CATEGORIAS DA LISTA" width="600" height="26" />
+    <Label id="protectedCount" translation="[1216,208]" width="600" height="26" horizAlign="right" />
+    <RoundRect id="lockFocus" translation="[732,264]" width="1100" height="50" color="0x147DFFFF" radius="12" visible="false" />
+    <Label id="lockRow00" translation="[756,264]" width="800" height="50" vertAlign="center" />
+    <RoundRect id="lockBadge00" translation="[1620,271]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="lockBadgeLabel00" translation="[1620,271]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="lockRow01" translation="[756,322]" width="800" height="50" vertAlign="center" />
+    <RoundRect id="lockBadge01" translation="[1620,329]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="lockBadgeLabel01" translation="[1620,329]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="lockRow02" translation="[756,380]" width="800" height="50" vertAlign="center" />
+    <RoundRect id="lockBadge02" translation="[1620,387]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="lockBadgeLabel02" translation="[1620,387]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="lockRow03" translation="[756,438]" width="800" height="50" vertAlign="center" />
+    <RoundRect id="lockBadge03" translation="[1620,445]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="lockBadgeLabel03" translation="[1620,445]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="lockRow04" translation="[756,496]" width="800" height="50" vertAlign="center" />
+    <RoundRect id="lockBadge04" translation="[1620,503]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="lockBadgeLabel04" translation="[1620,503]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="lockRow05" translation="[756,554]" width="800" height="50" vertAlign="center" />
+    <RoundRect id="lockBadge05" translation="[1620,561]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="lockBadgeLabel05" translation="[1620,561]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="lockRow06" translation="[756,612]" width="800" height="50" vertAlign="center" />
+    <RoundRect id="lockBadge06" translation="[1620,619]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="lockBadgeLabel06" translation="[1620,619]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="lockRow07" translation="[756,670]" width="800" height="50" vertAlign="center" />
+    <RoundRect id="lockBadge07" translation="[1620,677]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="lockBadgeLabel07" translation="[1620,677]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="lockRow08" translation="[756,728]" width="800" height="50" vertAlign="center" />
+    <RoundRect id="lockBadge08" translation="[1620,735]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="lockBadgeLabel08" translation="[1620,735]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="lockRow09" translation="[756,786]" width="800" height="50" vertAlign="center" />
+    <RoundRect id="lockBadge09" translation="[1620,793]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="lockBadgeLabel09" translation="[1620,793]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="lockRow10" translation="[756,844]" width="800" height="50" vertAlign="center" />
+    <RoundRect id="lockBadge10" translation="[1620,851]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="lockBadgeLabel10" translation="[1620,851]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="lockRow11" translation="[756,902]" width="800" height="50" vertAlign="center" />
+    <RoundRect id="lockBadge11" translation="[1620,909]" width="196" height="36" color="0x2EE59D33" radius="18" visible="false" />
+    <Label id="lockBadgeLabel11" translation="[1620,909]" width="196" height="36" horizAlign="center" vertAlign="center" />
+    <Label id="lockedCategories" translation="[744,560]" text="Digite o PIN para gerenciar categorias." width="1072" height="80" horizAlign="center" wrap="true" maxLines="2" />
+    <Label id="scopeStatus" translation="[744,960]" width="1072" height="30" />
   </children>
 </component>

@@ -5,6 +5,8 @@
     <field id="streamUrl" type="string" />
     <field id="streamId" type="string" />
     <field id="epgKey" type="string" />
+    <field id="mode" type="string" value="" />
+    <field id="archiveDays" type="integer" value="0" />
     <field id="result" type="assocarray" alwaysNotify="true" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/EpgService.brs" />

@@ -8,6 +8,12 @@ sub run()
     result.entries = {}
     result.message = "Guia indisponível."
 
+    if m.top.mode = "archive" and m.top.streamId <> "" then
+        runArchiveEpg(result)
+        m.top.result = result
+        return
+    end if
+
     if m.top.streamId <> "" then
         runShortEpg(result)
         m.top.result = result
@@ -266,3 +272,62 @@ function pad2(number)
     if len(text) < 2 then text = "0" + text
     return text
 end function
+
+' Programas ja exibidos (rever): get_simple_data_table traz a grade do canal,
+' incluindo o passado. Mantem so o que terminou dentro da janela de arquivo.
+sub runArchiveEpg(result)
+    url = m.top.streamUrl
+    liveAt = instr(1, url, "/live/")
+    if liveAt = 0 then return
+    host = left(url, liveAt - 1)
+    parts = mid(url, liveAt + 6).Split("/")
+    if parts.count() < 3 then return
+    apiUrl = host + "/player_api.php?username=" + parts[0] + "&password=" + parts[1] + "&action=get_simple_data_table&stream_id=" + m.top.streamId
+
+    transfer = CreateObject("roUrlTransfer")
+    port = CreateObject("roMessagePort")
+    transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
+    transfer.SetMinimumTransferRate(1, 20)
+    transfer.SetUrl(apiUrl)
+    transfer.SetPort(port)
+    transfer.EnableEncodings(true)
+    if transfer.AsyncGetToString() <> true then return
+    event = wait(25000, port)
+    if event = invalid or type(event) <> "roUrlEvent" then
+        transfer.AsyncCancel()
+        return
+    end if
+    if event.GetResponseCode() < 200 or event.GetResponseCode() >= 300 then return
+    json = ParseJson(event.GetString())
+    if json = invalid or type(json) <> "roAssociativeArray" then return
+    listings = json.epg_listings
+    if listings = invalid or type(listings) <> "roArray" then return
+
+    nowSec = CreateObject("roDateTime").AsSeconds()
+    days = m.top.archiveDays
+    if days <= 0 then days = 1
+    oldest = nowSec - days * 86400
+    programmes = []
+    for each listing in listings
+        if type(listing) = "roAssociativeArray" then
+            startSec = safeTrim(listing.start_timestamp).ToInt()
+            stopSec = safeTrim(listing.stop_timestamp).ToInt()
+            if startSec > 0 and stopSec > startSec and stopSec <= nowSec and startSec >= oldest then
+                programme = {}
+                programme.title = decodeEpgText(safeTrim(listing.title))
+                programme.startSec = startSec
+                programme.stopSec = stopSec
+                if programme.title <> "" then programmes.push(programme)
+            end if
+        end if
+    end for
+    ' Mais recentes primeiro (a lista do servidor vem em ordem crescente).
+    ordered = []
+    for index = programmes.count() - 1 to 0 step -1
+        ordered.push(programmes[index])
+        if ordered.count() >= 120 then exit for
+    end for
+    result.programmes = ordered
+    result.ok = true
+    result.message = ""
+end sub

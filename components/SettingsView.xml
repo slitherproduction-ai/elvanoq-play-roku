@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Ajustes: menu com Controle parental, Categorias visiveis, Formato do ao vivo e Sobre. -->
+<component name="SettingsView" extends="Group">
+  <interface>
+    <field id="categories" type="array" onChange="onCategoriesChanged" />
+    <field id="items" type="array" onChange="onItemsChanged" />
+    <field id="categoryGroups" type="assocarray" onChange="onCategoryGroupsChanged" />
+    <field id="storeEdition" type="boolean" value="false" onChange="renderHub" />
+    <field id="hiddenChanged" type="boolean" alwaysNotify="true" />
+    <function name="handleKey" />
+    <function name="enterDigit" />
+    <function name="cancelPinEntry" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/components/SettingsView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ListPrefs.brs" />
+  <children>
+    <Group id="hub">
+    <Rectangle width="1920" height="1080" color="0x070B14FF" />
+    <Poster uri="pkg:/images/elvanoq-login-tv-backdrop.jpg" width="1920" height="1080" />
+    <Rectangle width="1920" height="1080" color="0x070B14C7" />
+      <Label id="pageTitle" translation="[64,64]" text="Ajustes" width="900" height="52" />
+      <Label id="pageSubtitle" translation="[64,118]" text="Preferências desta TV" width="1200" height="28" />
+      <RoundRect translation="[64,180]" width="760" height="830" color="0x0D1422EB" radius="20" borderColor="0xBEDCFF22" />
+      <Label id="groupLabel0" translation="[104,212]" text="PROTEÇÃO E LISTA" width="600" height="26" />
+      <RoundRect id="rowBg0" translation="[88,250]" width="712" height="76" color="0x111B2DFF" radius="14" />
+      <Label id="rowTitle0" translation="[116,250]" width="420" height="76" vertAlign="center" />
+      <RoundRect id="rowBadge0" translation="[548,270]" width="228" height="36" color="0x00D7FF33" radius="18" />
+      <Label id="rowBadgeLabel0" translation="[548,270]" width="228" height="36" horizAlign="center" vertAlign="center" />
+      <RoundRect id="rowBg1" translation="[88,338]" width="712" height="76" color="0x111B2DFF" radius="14" />
+      <Label id="rowTitle1" translation="[116,338]" width="420" height="76" vertAlign="center" />
+      <RoundRect id="rowBadge1" translation="[548,358]" width="228" height="36" color="0x00D7FF33" radius="18" />
+      <Label id="rowBadgeLabel1" translation="[548,358]" width="228" height="36" horizAlign="center" vertAlign="center" />
+      <Label id="groupLabel1" translation="[104,452]" text="REPRODUÇÃO" width="600" height="26" />
+      <RoundRect id="rowBg2" translation="[88,490]" width="712" height="76" color="0x111B2DFF" radius="14" />
+      <Label id="rowTitle2" translation="[116,490]" width="420" height="76" vertAlign="center" />
+      <RoundRect id="rowBadge2" translation="[548,510]" width="228" height="36" color="0x00D7FF33" radius="18" />
+      <Label id="rowBadgeLabel2" translation="[548,510]" width="228" height="36" horizAlign="center" vertAlign="center" />
+      <Label id="groupLabel2" translation="[104,604]" text="APLICATIVO" width="600" height="26" />
+      <RoundRect id="rowBg3" translation="[88,642]" width="712" height="76" color="0x111B2DFF" radius="14" />
+      <Label id="rowTitle3" translation="[116,642]" width="420" height="76" vertAlign="center" />
+      <RoundRect id="rowBadge3" translation="[548,662]" width="228" height="36" color="0x00D7FF33" radius="18" />
+      <Label id="rowBadgeLabel3" translation="[548,662]" width="228" height="36" horizAlign="center" vertAlign="center" />
+      <RoundRect translation="[844,180]" width="1012" height="830" color="0x0D1422EB" radius="20" borderColor="0xBEDCFF22" />
+      <Label id="detailEyebrow" translation="[884,212]" width="900" height="26" />
+      <Label id="detailTitle" translation="[884,250]" width="932" height="52" />
+      <Label id="detailBody" translation="[884,316]" width="932" height="120" wrap="true" maxLines="4" />
+      <Group id="aboutGroup" visible="false">
+        <Label id="historyLabel" translation="[884,430]" text="HISTÓRICO DE VERSÕES" width="600" height="26" />
+        <Label id="historyVersion0" translation="[884,470]" width="160" height="32" />
+        <Label id="historyText0" translation="[1044,470]" width="772" height="132" wrap="true" maxLines="4" />
+        <Label id="historyVersion1" translation="[884,620]" width="160" height="32" />
+        <Label id="historyText1" translation="[1044,620]" width="772" height="132" wrap="true" maxLines="4" />
+        <Label id="historyVersion2" translation="[884,770]" width="160" height="32" />
+        <Label id="historyText2" translation="[1044,770]" width="772" height="132" wrap="true" maxLines="4" />
+      </Group>
+      <Label id="detailHint" translation="[884,950]" width="932" height="30" />
+    </Group>
+    <ParentalView id="parentalPage" visible="false" />
+    <VisibleCategoriesView id="visiblePage" visible="false" />
+  </children>
+</component>

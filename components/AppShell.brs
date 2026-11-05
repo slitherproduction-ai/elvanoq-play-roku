@@ -11,7 +11,8 @@ sub init()
     m.seriesView = m.top.findNode("seriesView")
     m.searchView = m.top.findNode("searchView")
     m.libraryView = m.top.findNode("libraryView")
-    m.parentalView = m.top.findNode("parentalView")
+    m.settingsView = m.top.findNode("settingsView")
+    m.settingsView.observeField("hiddenChanged", "onHiddenCategoriesChanged")
     m.detailView = m.top.findNode("detailView")
     m.playerView = m.top.findNode("playerView")
     m.moviesView.observeField("selectedItem", "onBrowseItemSelected")
@@ -28,6 +29,8 @@ sub init()
     m.detailView.observeField("episodeRequested", "onEpisodeRequested")
     m.detailView.observeField("seasonRequested", "onSeasonRequested")
     m.playerView.observeField("closeRequested", "onPlayerClosed")
+    m.catchupView = m.top.findNode("catchupView")
+    m.catchupView.observeField("programmeSelected", "onCatchupProgrammeSelected")
     m.playerView.observeField("channelRequested", "onPlayerChannelRequested")
     m.playerView.observeField("favoriteRequested", "onPlayerFavoriteRequested")
     m.playerView.observeField("nextEpisodeRequested", "onNextEpisodeRequested")
@@ -72,6 +75,7 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
     if m.playerView.visible then return m.playerView.callFunc("handleKey", { key: key, press: press })
     if m.detailView.visible then return m.detailView.callFunc("handleKey", { key: key, press: press })
+    if m.catchupView.visible then return isTrue(m.catchupView.callFunc("handleKey", { key: key, press: press }))
     if handleContentKey(key, press) then return true
     if key = "back" then
         ' Dentro de uma secao, Voltar retorna ao Inicio no bloco de origem.
@@ -140,14 +144,11 @@ function handleContentKey(key as String, press as Boolean) as Boolean
         end if
         digit = pinDigitFromKey(key)
         if digit <> "" then
-            m.parentalView.callFunc("enterDigit", digit)
+            m.settingsView.callFunc("enterDigit", digit)
             return true
         end if
-        if key = "back" then
-            m.parentalView.callFunc("cancelPinEntry")
-            return false
-        end if
-        return isTrue(m.parentalView.callFunc("handleKey", { key: key, press: press }))
+        ' Voltar fecha a pagina aberta (Controle parental / Categorias visiveis); no menu, sai de Ajustes.
+        return isTrue(m.settingsView.callFunc("handleKey", { key: key, press: press }))
     end if
     if m.selectedIndex = 1 then
         if key = "down" then
@@ -173,6 +174,11 @@ function handleContentKey(key as String, press as Boolean) as Boolean
         end if
         if key = "options" then
             m.liveTVView.callFunc("toggleFavorite")
+            return true
+        end if
+        ' Rever programas: Replay ou, em controles sem essa tecla, Voltar rapido.
+        if key = "replay" or key = "rewind" then
+            openCatchupForSelected()
             return true
         end if
         if key = "back" then
@@ -459,6 +465,7 @@ sub onSearchResult(event as Object)
     if result = invalid then return
     items = []
     if result.items <> invalid then items = result.items
+    items = visibleItems(items)
     m.searchItems = items
     payload = { query: result.query, items: items }
     if result.ok <> true then payload.error = result.message
@@ -496,7 +503,7 @@ sub onBrowseSearchKeyboardSelected()
     m.browseSearchQuery = query
     m.browseSearchView.callFunc("setSearchResults", { query: query, loading: true, items: [] })
     if not m.lazy then
-        m.browseSearchView.callFunc("setSearchResults", { query: query, items: localTitleSearch(query, m.browseSearchKind) })
+        m.browseSearchView.callFunc("setSearchResults", { query: query, items: visibleItems(localTitleSearch(query, m.browseSearchKind)) })
         return
     end if
     if m.top.storeEdition then
@@ -558,7 +565,7 @@ sub onBrowseSearchResult(event as Object)
     result = service.result
     if result = invalid or m.browseSearchView = invalid then return
     items = []
-    if result.items <> invalid then items = result.items
+    if result.items <> invalid then items = visibleItems(result.items)
     if m.searchItems.count() > 500 then m.searchItems = []
     for each item in items
         m.searchItems.push(item)
@@ -592,19 +599,121 @@ function categoryNameMap(categories as Object) as Object
     return names
 end function
 
+'---------- Categorias visiveis ----------
+' Filtro montado uma vez (assocarray) e refeito so quando a lista ou a escolha muda.
+
+sub onHiddenCategoriesChanged()
+    m.hiddenFilter = invalid
+end sub
+
+function hiddenFilter() as Object
+    if m.hiddenFilter <> invalid then return m.hiddenFilter
+    filter = { any: false, names: {}, anyName: {} }
+    filter.names.SetModeCaseSensitive()
+    filter.anyName.SetModeCaseSensitive()
+    for each kind in ["live", "movies", "series"]
+        hidden = hiddenCategorySet(kind)
+        names = invalid
+        if m.lazy and m.categoryNames <> invalid then names = m.categoryNames[kind]
+        for each categoryId in hidden
+            name = categoryId
+            if m.lazy then
+                name = invalid
+                if names <> invalid then name = names[categoryId]
+            end if
+            if name <> invalid then
+                filter.names[kind + "|" + name] = true
+                filter.anyName[name] = true
+                filter.any = true
+            end if
+        end for
+    end for
+    m.hiddenFilter = filter
+    return filter
+end function
+
+function visibleItems(items as Dynamic) as Dynamic
+    if items = invalid then return items
+    filter = hiddenFilter()
+    if not filter.any then return items
+    visible = []
+    for each item in items
+        keep = true
+        if item <> invalid and item.category <> invalid and item.type <> invalid then
+            kind = item.type
+            if kind = "movie" then kind = "movies"
+            if filter.names.DoesExist(kind + "|" + item.category) then keep = false
+        end if
+        if keep then visible.push(item)
+    end for
+    return visible
+end function
+
+function visibleCategoryList(categories as Dynamic, kind as String) as Dynamic
+    if categories = invalid then return categories
+    hidden = hiddenCategorySet(kind)
+    if hidden.count() = 0 then return categories
+    visible = []
+    for each category in categories
+        if not hidden.DoesExist(category.id) then visible.push(category)
+    end for
+    return visible
+end function
+
+function visibleCategoryNames(names as Dynamic) as Dynamic
+    if names = invalid then return names
+    filter = hiddenFilter()
+    if not filter.any then return names
+    visible = []
+    for each name in names
+        if not filter.anyName.DoesExist(name) then visible.push(name)
+    end for
+    return visible
+end function
+
+' Listas para a tela Categorias visiveis: Xtream usa o id da categoria; M3U usa o nome.
+function categoryGroupsForSettings() as Object
+    if m.lazy then
+        return { live: safeList(m.liveCategories), movies: safeList(m.movieCategories), series: safeList(m.seriesCategories) }
+    end if
+    groups = { live: [], movies: [], series: [] }
+    seen = {}
+    seen.SetModeCaseSensitive()
+    if m.catalog = invalid then return groups
+    for each item in m.catalog
+        if item <> invalid and item.category <> invalid and item.type <> invalid and item.category <> "" then
+            kind = item.type
+            if kind = "movie" then kind = "movies"
+            key = kind + "|" + item.category
+            if groups[kind] <> invalid and not seen.DoesExist(key) then
+                seen[key] = true
+                groups[kind].push({ id: item.category, name: item.category })
+            end if
+        end if
+    end for
+    return groups
+end function
+
+function safeList(value as Dynamic) as Object
+    if type(value) = "roArray" then return value
+    return []
+end function
+
 sub pushSectionCatalog()
     if m.catalog = invalid then return
-    if m.selectedIndex = 0 then m.homeView.callFunc("setCatalog", { items: homeItems(), categories: m.categories })
+    ' Categorias ocultas (Ajustes > Categorias visiveis) saem das colunas, de "Todos" e das grades.
+    if m.selectedIndex = 0 then m.homeView.callFunc("setCatalog", { items: visibleItems(homeItems()), categories: visibleCategoryNames(m.categories) })
     if m.lazy then
-        if m.selectedIndex = 1 then m.liveTVView.callFunc("setCatalog", { lazy: true, liveCategories: m.liveCategories, favorites: savedCatalogItems("live"), items: [] })
-        if m.selectedIndex = 2 then m.moviesView.callFunc("setCatalog", { lazy: true, categories: m.movieCategories })
-        if m.selectedIndex = 3 then m.seriesView.callFunc("setCatalog", { lazy: true, categories: m.seriesCategories })
+        if m.selectedIndex = 1 then m.liveTVView.callFunc("setCatalog", { lazy: true, liveCategories: visibleCategoryList(m.liveCategories, "live"), favorites: visibleItems(savedCatalogItems("live")), items: [] })
+        if m.selectedIndex = 2 then m.moviesView.callFunc("setCatalog", { lazy: true, categories: visibleCategoryList(m.movieCategories, "movies") })
+        if m.selectedIndex = 3 then m.seriesView.callFunc("setCatalog", { lazy: true, categories: visibleCategoryList(m.seriesCategories, "series") })
         if m.selectedIndex = 4 then m.searchView.callFunc("setCatalog", { lazy: true, items: [] })
     else
-        if m.selectedIndex = 1 then m.liveTVView.callFunc("setCatalog", { items: m.catalog, categories: m.categories })
-        if m.selectedIndex = 2 then m.moviesView.callFunc("setCatalog", { items: m.catalog })
-        if m.selectedIndex = 3 then m.seriesView.callFunc("setCatalog", { items: m.catalog })
-        if m.selectedIndex = 4 then m.searchView.callFunc("setCatalog", { items: m.catalog })
+        if m.selectedIndex >= 1 and m.selectedIndex <= 4 then visible = visibleItems(m.catalog)
+        if m.selectedIndex = 1 then m.liveTVView.callFunc("setCatalog", { items: visible, categories: visibleCategoryNames(m.categories) })
+        if m.selectedIndex = 2 then m.moviesView.callFunc("setCatalog", { items: visible })
+        if m.selectedIndex = 3 then m.seriesView.callFunc("setCatalog", { items: visible })
+        if m.selectedIndex = 4 then m.searchView.callFunc("setCatalog", { items: visible })
     end if
 end sub
 
@@ -855,7 +964,7 @@ sub showSection()
     m.seriesView.visible = isSeries
     m.searchView.visible = isSearch
     m.libraryView.visible = m.selectedIndex = 5
-    m.parentalView.visible = isSettings
+    m.settingsView.visible = isSettings
     if not isLive then m.liveTVView.callFunc("stopPreview")
     m.sectionEyebrow.visible = false
     m.sectionTitle.visible = false
@@ -876,8 +985,11 @@ sub showSection()
     m.sectionHint.text = section.hint
     pushSectionCatalog()
     if m.selectedIndex = 5 then m.libraryView.callFunc("refresh")
-    if isSettings and m.categories <> invalid then m.parentalView.categories = m.categories
-    if isSettings and m.catalog <> invalid then m.parentalView.items = m.catalog
+    if isSettings then
+        if m.categories <> invalid then m.settingsView.categories = m.categories
+        if m.catalog <> invalid then m.settingsView.items = m.catalog
+        m.settingsView.categoryGroups = categoryGroupsForSettings()
+    end if
 end sub
 
 function libraryDescription() as String
@@ -936,6 +1048,7 @@ sub onCatalogResult()
     if result.ok <> true then return
     m.categories = result.categories
     m.lazy = (result.lazy = true)
+    m.hiddenFilter = invalid
     m.categoryCache = {}
     m.categoryCacheOrder = []
     m.searchItems = []
@@ -999,6 +1112,17 @@ sub savePlaylistMetadata(payload as Object)
     if payload.server_code <> invalid then metadata.server_code = payload.server_code
     if payload.playlist <> invalid and type(payload.playlist) = "roAssociativeArray" then
         if payload.playlist.source_type <> invalid then metadata.source_type = payload.playlist.source_type
+        ' Endereco do servidor (sem usuario/senha): separa as preferencias por lista.
+        address = ""
+        if type(payload.playlist.credentials) = "roAssociativeArray" and payload.playlist.credentials.host <> invalid then address = payload.playlist.credentials.host
+        if address = "" and payload.playlist.url <> invalid then address = payload.playlist.url
+        scheme = instr(1, address, "://")
+        if scheme > 0 then address = mid(address, scheme + 3)
+        slash = instr(1, address, "/")
+        if slash > 0 then address = left(address, slash - 1)
+        at = instr(1, address, "@")
+        if at > 0 then address = mid(address, at + 1)
+        if address <> "" then metadata.scope = lcase(address)
     end if
     section = CreateObject("roRegistrySection", "ELVANOQPlay")
     section.Write("playlist_metadata", FormatJson(metadata))
@@ -1032,8 +1156,7 @@ end function
 
 sub onStoreEditionChanged()
     if not m.top.storeEdition then return
-    subtitle = m.parentalView.findNode("pageSubtitle")
-    if subtitle <> invalid then subtitle.text = "Controle parental   •   Tecla Replay: desconectar a lista desta TV"
+    m.settingsView.storeEdition = true
 end sub
 
 sub openDisconnectDialog()
@@ -1124,4 +1247,63 @@ sub releaseMemory()
     end while
     m.searchItems = []
     if m.lazy then rebuildCatalogPool()
+end sub
+
+' ---------- Rever programas (catch-up) ----------
+
+sub openCatchupForSelected()
+    channel = m.liveTVView.callFunc("selectedChannel")
+    if channel = invalid or type(channel) <> "roAssociativeArray" or not channelHasArchive(channel) then return
+    m.liveTVView.callFunc("stopPreview")
+    m.catchupView.channel = channel
+    m.catchupView.programmes = []
+    m.catchupView.message = ""
+    m.catchupView.loading = true
+    m.catchupView.visible = true
+    service = CreateObject("roSGNode", "EpgService")
+    service.mode = "archive"
+    service.streamUrl = channel.stream_url
+    service.streamId = safeTrim(channel.stream_id)
+    service.archiveDays = channelArchiveDays(channel)
+    service.observeField("result", "onCatchupEpgResult")
+    m.catchupService = service
+    service.control = "RUN"
+end sub
+
+sub onCatchupEpgResult(event as Object)
+    service = event.getRoSGNode()
+    if m.catchupService = invalid or not service.isSameNode(m.catchupService) then return
+    result = service.result
+    m.catchupService = invalid
+    programmes = []
+    if result <> invalid and result.ok = true and type(result.programmes) = "roArray" then programmes = result.programmes
+    if result = invalid or result.ok <> true then m.catchupView.message = "Não foi possível carregar a programação deste canal."
+    m.catchupView.programmes = programmes
+    m.catchupView.loading = false
+end sub
+
+sub onCatchupProgrammeSelected()
+    programme = m.catchupView.programmeSelected
+    channel = m.catchupView.channel
+    if programme = invalid or channel = invalid then return
+    urls = catchupUrlsFor(channel, programme)
+    if urls.count() = 0 then return
+    m.catchupView.visible = false
+    clearEpisodeQueue()
+    m.playerView.liveQueue = []
+    m.playerView.liveIndex = 0
+    m.playerView.liveGuide = invalid
+    m.playerView.contentTitle = channel.title + "  •  " + programme.title
+    m.playerView.contentId = channel.id
+    m.playerView.contentItem = invalid
+    m.playerView.contentCategory = channel.category
+    m.playerView.resumePosition = 0
+    m.playerView.persistEnabled = false
+    m.playerView.nextEpisode = invalid
+    m.playerView.skipIntroEnd = 0
+    m.playerView.catchupUrls = urls
+    ' Zera antes para o mesmo programa poder ser aberto de novo.
+    m.playerView.streamUrl = ""
+    m.playerView.streamUrl = urls[0]
+    m.playerView.visible = true
 end sub

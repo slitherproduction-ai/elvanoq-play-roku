@@ -39,7 +39,29 @@ sub init()
     m.status.color = "0x8894A8FF"
     m.lockedCategories = m.top.findNode("lockedCategories")
     m.lockedCategories.font = appFont(24, "regular")
-    m.lockedCategories.color = "0xF4F8FFFF"
+    m.lockedCategories.color = "0xB8C4D6FF"
+    m.visibleLockRows = 12
+    m.lockRows = []
+    m.lockBadges = []
+    m.lockBadgeLabels = []
+    for index = 0 to m.visibleLockRows - 1
+        suffix = index.ToStr()
+        if index < 10 then suffix = "0" + suffix
+        row = m.top.findNode("lockRow" + suffix)
+        row.font = appFont(22, "regular")
+        m.lockRows.push(row)
+        m.lockBadges.push(m.top.findNode("lockBadge" + suffix))
+        badgeLabel = m.top.findNode("lockBadgeLabel" + suffix)
+        badgeLabel.font = appFont(18, "bold")
+        m.lockBadgeLabels.push(badgeLabel)
+    end for
+    m.lockFocus = m.top.findNode("lockFocus")
+    m.listGroupLabel = m.top.findNode("listGroupLabel")
+    m.listGroupLabel.font = appFont(18, "bold")
+    m.listGroupLabel.color = "0x8894A8FF"
+    m.protectedCount = m.top.findNode("protectedCount")
+    m.protectedCount.font = appFont(18, "bold")
+    m.protectedCount.color = "0x00D7FFFF"
     m.scopeStatus = m.top.findNode("scopeStatus")
     m.scopeStatus.font = appFont(20, "regular")
     m.scopeStatus.color = "0x8894A8FF"
@@ -113,8 +135,7 @@ function handleKey(event as Object) as Boolean
         renderLocks()
         return true
     end if
-    selectable = m.categories
-    if m.mode = "items" then selectable = m.items
+    selectable = lockEntries()
     if event.key = "down" and m.selectedCategory < selectable.count() - 1 then
         m.selectedCategory = m.selectedCategory + 1
         renderLocks()
@@ -126,10 +147,19 @@ function handleKey(event as Object) as Boolean
         return true
     end if
     if event.key = "OK" and selectable.count() > 0 then
-        if m.mode = "categories" then
-            toggleCategoryLock(m.categories[m.selectedCategory])
+        entry = selectable[m.selectedCategory]
+        if entry.kind = "adult" then
+            setAdultProtection(not adultProtectionEnabled())
+            if adultProtectionEnabled() then
+                m.status.text = "Proteção automática de conteúdo adulto ligada."
+            else
+                m.status.text = "Proteção automática desligada: as categorias adultas foram liberadas."
+            end if
+            renderLocks()
+        else if entry.kind = "category" then
+            toggleCategoryLock(entry.name)
         else
-            toggleItemLock(m.items[m.selectedCategory])
+            toggleItemLock(entry.item)
         end if
         return true
     end if
@@ -298,42 +328,117 @@ end function
 
 sub renderLocks()
     if m.keyBackgrounds <> invalid then updateKeyFocus()
-    if not parentalSessionUnlocked() then
+    if m.lockRows = invalid then return
+    unlocked = parentalSessionUnlocked()
+    entries = lockEntries()
+    if m.mode = "items" then
+        m.listGroupLabel.text = "CANAIS E TÍTULOS"
+    else
+        m.listGroupLabel.text = "CATEGORIAS DA LISTA"
+    end if
+    m.protectedCount.text = protectedCategoryCount().ToStr() + " categorias protegidas"
+    if not unlocked then
+        clearLockRows()
         m.lockedCategories.text = "Digite o PIN para gerenciar categorias."
+        m.scopeStatus.text = "Bloqueios são separados por lista ativa."
         return
     end if
-    entries = m.categories
-    if m.mode = "items" then entries = m.items
-    if entries = invalid or entries.count() = 0 then
+    if entries.count() = 0 then
+        clearLockRows()
         m.lockedCategories.text = "Nenhum item recebido da lista atual."
         return
     end if
-    locks = currentLocks()
-    if m.mode = "items" then locks = currentItemLocks()
-    output = "CATEGORIAS DA LISTA" + chr(10) + chr(10)
-    if m.mode = "items" then output = "CANAIS E TÍTULOS" + chr(10) + chr(10)
+    m.lockedCategories.text = ""
+    if m.selectedCategory > entries.count() - 1 then m.selectedCategory = entries.count() - 1
     firstIndex = 0
-    if m.selectedCategory > 15 then firstIndex = m.selectedCategory - 15
-    lastIndex = firstIndex + 15
-    if lastIndex > entries.count() - 1 then lastIndex = entries.count() - 1
-    for index = firstIndex to lastIndex
-        entry = entries[index]
-        label = entry
-        entryId = entry
-        if m.mode = "items" then
-            label = entry.title
-            entryId = entry.id
+    if m.selectedCategory > m.visibleLockRows - 1 then firstIndex = m.selectedCategory - m.visibleLockRows + 1
+    categoryLocks = currentLocks()
+    itemLocks = currentItemLocks()
+    for row = 0 to m.visibleLockRows - 1
+        index = firstIndex + row
+        label = m.lockRows[row]
+        if index < entries.count() then
+            entry = entries[index]
+            badge = lockBadgeFor(entry, categoryLocks, itemLocks)
+            label.text = entry.label
+            if index = m.selectedCategory then label.color = "0xFFFFFFFF" else label.color = "0xC9D3E3FF"
+            setLockBadge(row, badge)
+            if index = m.selectedCategory then
+                m.lockBadges[row].color = "0xFFFFFF33"
+                m.lockBadgeLabels[row].color = "0xFFFFFFFF"
+            end if
+        else
+            label.text = ""
+            setLockBadge(row, invalid)
         end if
-        marker = "[  ]"
-        if isCategoryLocked(entryId, locks) then marker = "[X]"
-        prefix = "  "
-        if index = m.selectedCategory then prefix = "> "
-        output = output + prefix + marker + "  " + label
-        if index < lastIndex then output = output + chr(10)
     end for
-    m.lockedCategories.text = output
-    m.scopeStatus.text = "←/→ alternar modo  •  ↑/↓ selecionar  •  OK bloquear/desbloquear  •  * alterar PIN"
+    m.lockFocus.visible = true
+    m.lockFocus.translation = [732, 264 + (m.selectedCategory - firstIndex) * 58]
+    m.scopeStatus.text = "←/→ categorias ou títulos   •   OK alterar   •   * alterar PIN"
 end sub
+
+' Linhas da lista: no modo categorias, a primeira e a chave "Proteger conteudo adulto".
+function lockEntries() as Object
+    entries = []
+    if m.mode = "items" then
+        if m.items <> invalid then
+            for each item in m.items
+                if item <> invalid and item.title <> invalid then entries.push({ kind: "item", label: item.title, item: item })
+            end for
+        end if
+        return entries
+    end if
+    entries.push({ kind: "adult", label: "Proteger conteúdo adulto" })
+    if m.categories <> invalid then
+        for each category in m.categories
+            entries.push({ kind: "category", label: category, name: category })
+        end for
+    end if
+    return entries
+end function
+
+function lockBadgeFor(entry as Object, categoryLocks as Object, itemLocks as Object) as Object
+    if entry.kind = "adult" then
+        if adultProtectionEnabled() then return { text: "Ligada", tone: "on" }
+        return { text: "Desligada", tone: "off" }
+    end if
+    if entry.kind = "item" then
+        if isCategoryLocked(entry.item.id, itemLocks) then return { text: "Bloqueado", tone: "blocked" }
+        return { text: "Livre", tone: "free" }
+    end if
+    state = parentalCategoryState(entry.name, categoryLocks)
+    if state = "blocked" then return { text: "Bloqueada", tone: "blocked" }
+    if state = "auto" then return { text: "Automática", tone: "auto" }
+    return { text: "Livre", tone: "free" }
+end function
+
+sub setLockBadge(row as Integer, badge as Dynamic)
+    background = m.lockBadges[row]
+    label = m.lockBadgeLabels[row]
+    if badge = invalid then
+        background.visible = false
+        label.text = ""
+        return
+    end if
+    tones = { blocked: ["0xFF5C7240", "0xFF9AA8FF"], auto: ["0xFFB54740", "0xFFD08AFF"], free: ["0x2EE59D33", "0x7DF2C2FF"], on: ["0x00D7FF33", "0x7FE9FFFF"], off: ["0x8894A833", "0xC9D3E3FF"] }
+    colors = tones[badge.tone]
+    background.color = colors[0]
+    background.visible = true
+    label.color = colors[1]
+    label.text = badge.text
+end sub
+
+sub clearLockRows()
+    for row = 0 to m.visibleLockRows - 1
+        m.lockRows[row].text = ""
+        setLockBadge(row, invalid)
+    end for
+    m.lockFocus.visible = false
+end sub
+
+function protectedCategoryCount() as Integer
+    return protectedCategoryTotal(m.categories)
+end function
 
 function currentLocks() as Object
     section = CreateObject("roRegistrySection", "ELVANOQPlay")
@@ -358,16 +463,20 @@ end function
 
 sub toggleCategoryLock(category as String)
     locks = currentLocks()
+    state = parentalCategoryState(category, locks)
+    name = lcase(category)
     updated = []
-    removed = false
     for each locked in locks
-        if lcase(locked) = lcase(category) then
-            removed = true
-        else
-            updated.push(locked)
-        end if
+        lowered = lcase(locked)
+        if lowered <> name and lowered <> "!" + name then updated.push(locked)
     end for
-    if removed then
+    ' Adulta automatica: OK libera (grava a excecao "!Nome"); de novo, volta a regra automatica.
+    if state = "auto" then
+        updated.push("!" + category)
+        m.status.text = "Liberada da proteção automática: " + category
+    else if state = "released" then
+        m.status.text = "Protegida automaticamente de novo: " + category
+    else if state = "blocked" then
         m.status.text = "Categoria desbloqueada: " + category
     else
         updated.push(category)

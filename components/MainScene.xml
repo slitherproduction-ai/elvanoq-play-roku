@@ -79,7 +79,7 @@
       <Label id="expiredFooter" translation="[300,852]" width="1320" height="28" horizAlign="center" text="Voltar   •   Sair do aplicativo" />
     </Group>
     <Label id="homeStatus" translation="[225,510]" width="1470" height="75" horizAlign="center" visible="false" />
-    <Label id="appVersion" translation="[1460,1010]" text="v1.0.1" width="364" height="30" horizAlign="right" />
+    <Label id="appVersion" translation="[1460,1010]" text="v1.1.0" width="364" height="30" horizAlign="right" />
     <Timer id="registerTimer" repeat="false" duration="3" />
     <Timer id="licenseTimer" repeat="true" duration="60" />
     <Timer id="portalWatchdog" repeat="false" duration="20" />
