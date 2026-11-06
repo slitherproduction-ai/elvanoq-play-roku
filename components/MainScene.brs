@@ -363,7 +363,7 @@ end sub
 sub openActivationHelp()
     dialog = CreateObject("roSGNode", "StandardMessageDialog")
     dialog.title = "Como ativar esta TV"
-    dialog.message = ["Código desta TV: " + m.deviceCodeValue, "1. No celular ou computador, abra elvanoqplay.app", "2. Ou aponte a câmera do celular para o QR code da tela", "3. Informe o código desta TV e cadastre a sua lista", "4. A TV ativa sozinha em alguns segundos", "Tem o código do seu servidor? Use \"Entrar com código do servidor\"."]
+    dialog.message = ["Código desta TV: " + m.deviceCodeValue, "1. No celular ou computador, abra elvanoqplay.app", "2. Ou aponte a câmera do celular para o QR code da tela", "3. Informe o código desta TV e cadastre a sua lista", "4. A TV ativa sozinha em alguns segundos", "Tem o código do seu servidor? Use ""Entrar com código do servidor""."]
     dialog.buttons = ["Entendi"]
     dialog.observeField("buttonSelected", "closeActivationHelp")
     dialog.observeField("wasClosed", "closeActivationHelp")

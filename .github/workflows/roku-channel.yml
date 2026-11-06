@@ -76,7 +76,11 @@ jobs:
       - name: Compile BrightScript sources
         run: |
           npm install --no-save --ignore-scripts brighterscript@0.73.3
-          npx bsc --rootDir . --files "manifest,source/**/*.brs,components/**/*.brs,components/**/*.xml" --createPackage false --copyToStaging false
+          # Cada padrao em um argumento: uma lista separada por virgula nao casa com nenhum arquivo
+          # e o bsc terminava sem compilar nada.
+          npx bsc --rootDir . --files manifest "source/**/*.brs" "components/**/*.brs" "components/**/*.xml" "images/**/*" "fonts/**/*" --createPackage false --copyToStaging false
+          # BrightScript escapa aspas dobrando (""), nunca com barra invertida.
+          ! grep -RnF '\"' components source --include='*.brs'
       - name: Validate activation contract
         run: |
           grep -q 'GetChannelClientId()' components/MainScene.brs
