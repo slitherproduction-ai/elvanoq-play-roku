@@ -116,12 +116,14 @@ sub onStreamChanged()
     ' quando ha "Pular abertura"; filmes a cada 5 s e ao vivo a cada 30 s.
     ' A retomada automatica le a posicao direto no timer de 4 s.
     if m.top.skipIntroEnd > 0 then
-        m.video.notificationInterval = 1
+        m.positionInterval = 1
     else if isLivePlayback() then
-        m.video.notificationInterval = 30
+        m.positionInterval = 30
     else
-        m.video.notificationInterval = 5
+        m.positionInterval = 5
     end if
+    ' Com os controles na tela, a barra anda a cada segundo.
+    if m.controls.visible then m.video.notificationInterval = 1 else m.video.notificationInterval = m.positionInterval
     if isParentallyBlockedItem(m.top.contentCategory, m.top.contentId) then
         m.video.control = "stop"
         m.hint.text = "Conteúdo protegido. Valide o PIN em Ajustes para assistir."
@@ -486,6 +488,7 @@ sub showOsd()
     m.timelineProgress.visible = showTimeline
     m.timeLabel.visible = showTimeline
     if showTimeline then updateTimeline()
+    m.video.notificationInterval = 1
     m.controlFocus.visible = true
     m.controls.visible = true
     m.topShade.visible = true
@@ -514,6 +517,7 @@ end sub
 
 sub hideOsd()
     m.osdTimer.control = "stop"
+    if m.positionInterval <> invalid then m.video.notificationInterval = m.positionInterval
     m.osdBackground.visible = false
     m.title.visible = false
     m.hint.visible = false

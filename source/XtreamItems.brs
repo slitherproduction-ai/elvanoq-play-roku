@@ -60,8 +60,8 @@ function xtreamSeriesItem(credentials, categoryName, stream)
     item.featured = ""
     item.type = "series"
     item.stream_url = ""
-    item.api_url = credentials.host + "/player_api.php?username=" + credentials.userEscaped + "&password=" + credentials.passEscaped
-    item.series_base = credentials.host + "/series/" + credentials.userEscaped + "/" + credentials.passEscaped + "/"
+    ' Os links da API e dos episodios sao montados ao abrir a serie (AppShell), a partir
+    ' das credenciais da lista: nao repetir esses textos em cada um dos milhares de itens.
     ' Sinopse curta e imagem larga para o destaque do Inicio.
     item.plot = left(safeTrim(stream.plot), 320)
     item.backdrop = ""

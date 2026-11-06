@@ -273,8 +273,15 @@ end sub
 
 sub loadSeriesInfo(item as Object)
     service = CreateObject("roSGNode", "SeriesService")
-    service.apiUrl = item.api_url
-    service.seriesBase = item.series_base
+    apiUrl = item.api_url
+    seriesBase = item.series_base
+    if m.xtream <> invalid then
+        apiUrl = m.xtream.host + "/player_api.php?username=" + m.xtream.userEscaped + "&password=" + m.xtream.passEscaped
+        seriesBase = m.xtream.host + "/series/" + m.xtream.userEscaped + "/" + m.xtream.passEscaped + "/"
+    end if
+    if apiUrl = invalid or seriesBase = invalid then return
+    service.apiUrl = apiUrl
+    service.seriesBase = seriesBase
     service.seriesId = safeTrim(item.series_id)
     service.observeField("result", "onSeriesInfoResult")
     m.seriesService = service
