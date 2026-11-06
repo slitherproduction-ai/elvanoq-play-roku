@@ -19,6 +19,7 @@ sub init()
     m.stallAttempts = 0
     m.lastProgressPos = -1
     m.lastGoodPos = 0
+    m.stallArmed = false
     m.lastProgressAt = 0
     m.pendingStallSeek = 0
     m.catchupIndex = -1
@@ -110,6 +111,16 @@ sub onStreamChanged()
     m.retryTimer.control = "stop"
     resetStallWatch()
     hidePlayerError()
+    ' Menos trabalho por segundo (Android 2.17.25): a posicao so precisa de 1 s
+    ' quando ha "Pular abertura"; filmes a cada 5 s e ao vivo a cada 30 s.
+    ' A retomada automatica le a posicao direto no timer de 4 s.
+    if m.top.skipIntroEnd > 0 then
+        m.video.notificationInterval = 1
+    else if isLivePlayback() then
+        m.video.notificationInterval = 30
+    else
+        m.video.notificationInterval = 5
+    end if
     if isParentallyBlockedItem(m.top.contentCategory, m.top.contentId) then
         m.video.control = "stop"
         m.hint.text = "Conteúdo protegido. Valide o PIN em Ajustes para assistir."
@@ -283,7 +294,8 @@ sub onVideoState()
 end sub
 
 sub onPositionChanged()
-    updateTimeline()
+    ' Com os controles ocultos, nao redesenha a barra de tempo.
+    if m.controls.visible then updateTimeline()
     updateSkipIntroHint()
     if m.video.position <> invalid and m.video.position - m.lastPersistedSecond >= 30 then persistProgress(false)
 end sub
@@ -460,6 +472,7 @@ sub showOsd()
     m.top.findNode("timelineTrack").visible = showTimeline
     m.timelineProgress.visible = showTimeline
     m.timeLabel.visible = showTimeline
+    if showTimeline then updateTimeline()
     m.controlFocus.visible = true
     m.controls.visible = true
     m.topShade.visible = true
@@ -856,6 +869,7 @@ sub resetStallWatch()
     m.stallAttempts = 0
     m.lastProgressPos = -1
     m.lastGoodPos = 0
+    m.stallArmed = false
     m.lastProgressAt = m.stallClock.TotalSeconds()
     m.pendingStallSeek = 0
 end sub
@@ -882,11 +896,18 @@ sub onStallTick()
         m.lastProgressPos = position
         m.lastGoodPos = position
         m.lastProgressAt = now
+        m.stallArmed = true
         if m.stallAttempts > 0 then m.stallAttempts = 0
         return
     end if
-    limit = 20
-    if isLivePlayback() then limit = 12
+    ' So arma depois que o video comecou a andar (Android 2.17.25): um servidor
+    ' lento na abertura nao e reiniciado em ciclo. Limites 20 s ao vivo / 30 s VOD.
+    if m.stallArmed <> true then
+        m.lastProgressAt = now
+        return
+    end if
+    limit = 30
+    if isLivePlayback() then limit = 20
     if now - m.lastProgressAt < limit then return
     if m.stallAttempts >= 3 then
         showStallError()

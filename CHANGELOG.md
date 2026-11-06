@@ -1,5 +1,15 @@
 # Changelog — ELVANOQ Play Roku
 
+## 1.1.1 (build 3)
+
+- **Nova tela de ativação** no padrão do login do Android 2.17.23 (a mesma da LG 1.1.1). Tem logo com slogan, fundo novo, relógio, os três passos e o código da TV em destaque. O botão branco "Entrar com código do servidor" ganhou dois atalhos: "Verificar ativação" (consulta o Portal na hora) e "Como ativar" (aviso padrão da Roku com os passos). O QR do Portal ficou maior (módulos de 8 px, centralizado) e o rodapé mostra o status e a versão. Setas escolhem o botão; OK continua abrindo o teclado do código do servidor.
+- Sem chave do aparelho na tela; o Portal vincula pelo código da TV.
+- Versão exibida no app vem de `version_name` no manifest.
+- **Desempenho do player** (mesmas correções do Android 2.17.25, para aparelhos fracos):
+  - A retomada automática só é armada depois que o vídeo começa a andar, com limites de 20 s no ao vivo e 30 s em filmes e episódios. Um servidor lento na abertura não é mais reiniciado em ciclo.
+  - Menos trabalho por segundo: a posição do vídeo é notificada a cada 30 s no ao vivo e 5 s em filmes (1 s só quando há "Pular abertura"), e a barra de tempo só é redesenhada com os controles visíveis. O progresso continua salvo a cada 30 s.
+  - Não portado: o limite de buffer do Android (o Roku não expõe tamanho de buffer; o sistema já gerencia). A prévia do ao vivo já era parada (`control = "stop"`, que libera o decodificador) ao abrir o player, o rever e ao sair da aba.
+
 ## 1.1.0 (build 2) — atualização de dezembro
 
 - **Retomada automática quando o vídeo trava.** A cada 4 s o player confere se a posição avançou. Sem avanço por 12 s no ao vivo ou 20 s em filme/episódio (carregando ou tocando), o mesmo conteúdo é reaberto; filme e episódio voltam ao último ponto. No máximo 3 tentativas seguidas, com o aviso "O sinal parou de chegar. Reconectando…"; depois disso, tela de erro com "Tentar". O contador zera quando o vídeo volta a avançar e o timer para ao sair do player. Quedas por erro de rede também esperam mais entre as tentativas (ao vivo 3/6/9 s, filme 5/10/15 s).
