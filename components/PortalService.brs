@@ -1,8 +1,8 @@
 sub init()
-    m.top.functionName = "run"
+    m.top.functionName = "runTask"
 end sub
 
-sub run()
+sub runTask()
     result = { action: m.top.action, ok: false, state: "error", message: "Não foi possível consultar o Portal.", httpStatus: 0 }
     if m.top.rokuClientId = "" or m.top.deviceCode = "" or m.top.deviceKey = "" or m.top.action = "" then
         result.message = "Dados de ativação indisponíveis neste momento."

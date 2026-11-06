@@ -1,8 +1,8 @@
 sub init()
-    m.top.functionName = "run"
+    m.top.functionName = "runTask"
 end sub
 
-sub run()
+sub runTask()
     result = { ok: false, found: false, message: "Metadados indisponíveis." }
     if m.top.rokuClientId = "" or m.top.deviceCode = "" or m.top.deviceKey = "" then
         m.top.result = result

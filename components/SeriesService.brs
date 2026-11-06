@@ -1,9 +1,9 @@
 'Temporadas e episodios de uma serie Xtream (get_series_info).
 sub init()
-    m.top.functionName = "run"
+    m.top.functionName = "runTask"
 end sub
 
-sub run()
+sub runTask()
     result = {}
     result.ok = false
     result.seriesId = m.top.seriesId

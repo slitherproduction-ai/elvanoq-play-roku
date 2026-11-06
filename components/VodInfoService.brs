@@ -1,9 +1,9 @@
 ' Imagem larga (backdrop) e sinopse de um filme Xtream, para o destaque do Inicio.
 sub init()
-    m.top.functionName = "run"
+    m.top.functionName = "runTask"
 end sub
 
-sub run()
+sub runTask()
     result = {}
     result.itemId = m.top.itemId
     result.backdrop = ""

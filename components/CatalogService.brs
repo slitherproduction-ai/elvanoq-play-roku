@@ -1,10 +1,10 @@
 ' Compatibility-first M3U loader. Keep this component free of typed signatures
 ' and inline multi-field literals so it also compiles on older Roku firmware.
 sub init()
-    m.top.functionName = "run"
+    m.top.functionName = "runTask"
 end sub
 
-sub run()
+sub runTask()
     result = {}
     result.ok = false
     result.message = "Catálogo indisponível."
