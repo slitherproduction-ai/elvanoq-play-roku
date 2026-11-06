@@ -12,18 +12,19 @@
     <function name="handleKey" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/DetailView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ImageSize.brs" />
   <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
   <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
   <children>
     <Rectangle width="1920" height="1080" color="0x070B14FF" />
-    <Poster id="backdrop" width="1920" height="1080" loadDisplayMode="scaleToZoom" opacity="0.55" />
+    <Poster id="backdrop" width="1920" height="1080" loadWidth="1280" loadHeight="720" loadDisplayMode="scaleToZoom" opacity="0.55" />
     <Poster uri="pkg:/images/hero_shade_left.png" width="1920" height="1080" />
     <Poster uri="pkg:/images/hero_shade_bottom.png" width="1920" height="1080" />
     <Poster uri="pkg:/images/hero_shade_top.png" width="1920" height="220" />
     <RoundRect translation="[1484,134]" width="372" height="552" color="0x111B2DFF"  radius="20" />
-    <Poster id="poster" translation="[1490,140]" width="360" height="540" loadDisplayMode="scaleToZoom" />
+    <Poster id="poster" translation="[1490,140]" width="360" height="540" loadWidth="360" loadHeight="540" loadDisplayMode="scaleToZoom" />
     <Label id="eyebrow" translation="[64,140]" text="DETALHES" width="700" height="30" />
     <Label id="title" translation="[64,180]" width="1200" height="84" />
     <Label id="meta" translation="[64,268]" width="1200" height="34" />

@@ -8,6 +8,9 @@
 - **Desempenho do player** (mesmas correções do Android 2.17.25, para aparelhos fracos):
   - A retomada automática só é armada depois que o vídeo começa a andar, com limites de 20 s no ao vivo e 30 s em filmes e episódios. Um servidor lento na abertura não é mais reiniciado em ciclo.
   - Menos trabalho por segundo: a posição do vídeo é notificada a cada 30 s no ao vivo e 5 s em filmes (1 s só quando há "Pular abertura"), e a barra de tempo só é redesenhada com os controles visíveis. O progresso continua salvo a cada 30 s.
+- **Resposta mais rápida** (testes no aparelho em 06/11):
+  - Filme ou episódio retomado começa direto no ponto salvo (`PlayStart`), sem abrir do início e pular depois, o que bufferizava duas vezes. Vale também para a reconexão automática e para a troca de formato.
+  - Imagens no tamanho da tela: capas do TMDB nas grades pedidas em `w342` (antes podiam vir em `original`), destaque do Início em `w1280`, pôster dos detalhes em `w500` em vez de `w780`, e todas decodificadas no tamanho exibido (`loadWidth`/`loadHeight`), inclusive os logos dos canais. Some o aviso "texture larger than the UI resolution" e cai o uso de memória.
   - Não portado: o limite de buffer do Android (o Roku não expõe tamanho de buffer; o sistema já gerencia). A prévia do ao vivo já era parada (`control = "stop"`, que libera o decodificador) ao abrir o player, o rever e ao sair da aba.
 
 ## 1.1.0 (build 2) — atualização de dezembro

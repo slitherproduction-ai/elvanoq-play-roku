@@ -262,7 +262,7 @@ sub renderHero(candidate as Object)
     if hero.backdrop <> invalid and safeTrim(hero.backdrop) <> "" then art = safeTrim(hero.backdrop)
     if art = "" and m.heroArtCache[hero.id] <> invalid then art = m.heroArtCache[hero.id]
     if art = "" and hero.logo <> invalid then art = hero.logo
-    m.heroArt.uri = art
+    m.heroArt.uri = sizedImageUrl(art, "w1280")
     ' Filmes Xtream nao trazem imagem larga na lista: busca no get_vod_info.
     if hero.type = "movies" and m.heroArtCache[hero.id] = invalid then requestVodInfo(hero)
     updateActionCopy()
@@ -285,7 +285,7 @@ sub onVodInfo(event as Object)
     m.heroArtCache[result.itemId] = ""
     if result.backdrop <> invalid and result.backdrop <> "" then m.heroArtCache[result.itemId] = result.backdrop
     if m.hero = invalid or m.hero.id <> result.itemId then return
-    if result.backdrop <> invalid and result.backdrop <> "" then m.heroArt.uri = result.backdrop
+    if result.backdrop <> invalid and result.backdrop <> "" then m.heroArt.uri = sizedImageUrl(result.backdrop, "w1280")
     if result.plot <> invalid and result.plot <> "" then m.heroDescription.text = result.plot
 end sub
 
@@ -476,7 +476,7 @@ function buildContentWindow(items as Object, maximum as Integer, offset as Integ
         item = items[index]
         child = CreateObject("roSGNode", "ContentNode")
         child.title = item.title
-        if item.logo <> invalid then child.hdPosterUrl = item.logo
+        if item.logo <> invalid then child.hdPosterUrl = sizedImageUrl(item.logo, "w342")
         content.appendChild(child)
     end for
     return content

@@ -20,6 +20,7 @@ sub init()
     m.lastProgressPos = -1
     m.lastGoodPos = 0
     m.stallArmed = false
+    m.resumeNotice = false
     m.lastProgressAt = 0
     m.pendingStallSeek = 0
     m.catchupIndex = -1
@@ -158,6 +159,14 @@ sub onStreamChanged()
     if streamFormat <> "" then content.streamFormat = streamFormat
     ' Ao vivo: comeca no ponto mais recente do HLS em vez de bufferizar a janela inteira.
     if isLivePlayback() then content.live = true
+    ' Retomar filme/episodio: comeca direto no ponto (PlayStart) em vez de abrir
+    ' do inicio e depois pular, o que bufferizava duas vezes.
+    m.resumeNotice = false
+    if m.shouldRestorePosition and not isLivePlayback() then
+        content.PlayStart = m.top.resumePosition
+        m.shouldRestorePosition = false
+        m.resumeNotice = true
+    end if
     m.currentContent = content
     m.video.content = content
     m.video.control = "play"
@@ -257,6 +266,10 @@ sub onVideoState()
         if m.shouldRestorePosition then
             m.video.seek = m.top.resumePosition
             m.shouldRestorePosition = false
+            m.hint.text = "Retomando de onde você parou."
+        end if
+        if m.resumeNotice = true then
+            m.resumeNotice = false
             m.hint.text = "Retomando de onde você parou."
         end if
         refreshTrackStatus()
@@ -749,6 +762,8 @@ function tryAlternateFormat() as Boolean
     content.title = m.currentContent.title
     content.streamFormat = alternateFormat
     content.live = m.currentContent.live
+    ' Mantem o ponto de inicio ao trocar de formato.
+    if m.currentContent.PlayStart <> invalid and m.currentContent.PlayStart > 0 then content.PlayStart = m.currentContent.PlayStart
     m.currentContent = content
     m.hint.text = "Tentando outro formato de vídeo…"
     showOsd()
@@ -931,7 +946,7 @@ end sub
 sub reopenCurrentContent()
     if m.currentContent = invalid then return
     ' Filme/episodio: volta ao ultimo ponto que avancou de fato.
-    if not isLivePlayback() and m.lastGoodPos > 0 then m.pendingStallSeek = m.lastGoodPos
+    if not isLivePlayback() and m.lastGoodPos > 0 then m.currentContent.PlayStart = m.lastGoodPos
     m.lastProgressPos = -1
     m.video.control = "stop"
     m.video.content = m.currentContent
