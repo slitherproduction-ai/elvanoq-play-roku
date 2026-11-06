@@ -22,40 +22,55 @@ sub init()
     m.clockTime = m.top.findNode("clockTime")
     m.clockDate = m.top.findNode("clockDate")
     m.clockTimer = m.top.findNode("clockTimer")
-    m.eyebrow.font = appFont(18, "bold")
+    ' Padrao do login Android 2.17.23 (o mesmo da LG 1.1.1).
+    m.eyebrow.font = appFont(19, "bold")
     m.eyebrow.color = "0x00D7FFFF"
-    m.headline.font = appFont(64, "bold")
+    m.headline.font = appFont(66, "bold")
     m.headline.color = "0xF4F8FFFF"
-    m.description.font = appFont(24, "regular")
+    m.description.font = appFont(27, "regular")
     m.description.color = "0xB8C4D6FF"
     for i = 1 to 3
         n = m.top.findNode("stepNumber" + i.ToStr())
-        n.font = appFont(20, "bold")
+        n.font = appFont(22, "bold")
         n.color = "0xFFFFFFFF"
         t = m.top.findNode("stepText" + i.ToStr())
-        t.font = appFont(24, "medium")
-        t.color = "0xF4F8FFFF"
+        t.font = appFont(25, "regular")
+        t.color = "0xE4EAF4FF"
     end for
-    m.deviceCode.font = appFont(44, "bold")
+    m.deviceCode.font = appFont(42, "bold")
     m.deviceCode.color = "0xFFFFFFFF"
-    m.portalCaption.font = appFont(18, "bold")
-    m.portalCaption.color = "0x8894A8FF"
+    m.portalCaption.font = appFont(19, "bold")
+    m.portalCaption.color = "0x8E9AAEFF"
+    codeLabel = m.top.findNode("codeLabel")
+    codeLabel.font = appFont(18, "bold")
+    codeLabel.color = "0x8E9AAEFF"
     qrCaption = m.top.findNode("qrCaption")
-    qrCaption.font = appFont(18, "regular")
+    qrCaption.font = appFont(21, "semibold")
     qrCaption.color = "0xB8C4D6FF"
-    m.portal.font = appFont(22, "semibold")
+    m.portal.font = appFont(26, "bold")
     m.portal.color = "0x00D7FFFF"
-    m.serverCodeButtonText.font = appFont(22, "semibold")
-    m.serverCodeButtonText.color = "0xF4F8FFFF"
-    m.status.font = appFont(22, "medium")
-    m.status.color = "0xF4F8FFFF"
+    m.serverCodeButtonText.font = appFont(29, "bold")
+    m.serverCodeButtonText.color = "0x070B14FF"
+    m.checkButton = m.top.findNode("checkButton")
+    m.helpButton = m.top.findNode("helpButton")
+    for each id in ["checkButtonText", "helpButtonText"]
+        label = m.top.findNode(id)
+        label.font = appFont(24, "semibold")
+        label.color = "0xF4F8FFFF"
+    end for
+    m.actionIndex = 0
+    layoutActivationActions()
+    m.status.font = appFont(22, "regular")
+    m.status.color = "0xB8C4D6FF"
     m.homeStatus.font = appFont(40, "bold")
-    m.clockTime.font = appFont(40, "semibold")
+    m.clockTime.font = appFont(46, "semibold")
     m.clockTime.color = "0xF4F8FFFF"
-    m.clockDate.font = appFont(20, "regular")
+    m.clockDate.font = appFont(22, "regular")
     m.clockDate.color = "0x8894A8FF"
-    m.appVersion.font = appFont(16, "regular")
-    m.appVersion.color = "0x8894A899"
+    m.appVersion.font = appFont(19, "regular")
+    m.appVersion.color = "0x8E9AAEFF"
+    appInfo = CreateObject("roAppInfo")
+    m.appVersion.text = "ELVANOQ · Roku · Versão " + appInfo.GetValue("major_version") + "." + appInfo.GetValue("minor_version") + ".0"
     m.expiredOverlay = m.top.findNode("expiredOverlay")
     ' Lista (e nao AA): chaves de AA literal viram minusculas e o findNode diferencia maiusculas.
     styles = [["expiredTitle", 44, "bold", "0xF4F8FFFF"], ["expiredMessage", 24, "regular", "0xB8C4D6FF"], ["expiredCaption", 18, "bold", "0x8894A8FF"], ["expiredCode", 44, "bold", "0xFFFFFFFF"], ["expiredInfo", 20, "regular", "0x8894A8FF"], ["expiredButton", 24, "semibold", "0x070B14FF"], ["expiredFooter", 18, "regular", "0x8894A8FF"]]
@@ -146,7 +161,7 @@ end sub
 
 sub showStoreConnect(message as String, tone as String)
     setActivationVisible(true)
-    for each id in ["portalCaption", "codeBorder", "codeCard", "deviceCode", "qrGroup", "portal"]
+    for each id in ["portalCaption", "codeBorder", "codeCard", "codeLabel", "deviceCode", "qrGroup", "portal"]
         m.top.findNode(id).visible = false
     end for
     m.eyebrow.text = "PRIMEIRO ACESSO"
@@ -155,16 +170,23 @@ sub showStoreConnect(message as String, tone as String)
     m.top.findNode("stepText1").text = "Tenha em mãos o servidor, usuário e senha do seu provedor"
     m.top.findNode("stepText2").text = "Aperte OK e informe os dados com o controle remoto"
     m.top.findNode("stepText3").text = "Pronto: canais, filmes e séries aparecem na sua TV"
-    m.serverCodeButton.translation = [96, 640]
-    m.top.findNode("serverCodeInner").translation = [98, 642]
-    m.serverCodeButtonText.translation = [98, 642]
-    m.top.findNode("statusDot").translation = [96, 762]
-    m.status.translation = [130, 750]
+    m.storeLayout = true
+    for each id in ["checkButton", "checkIcon", "checkButtonText", "helpButton", "helpIcon", "helpButtonText"]
+        m.top.findNode(id).visible = false
+    end for
+    m.actionIndex = 0
+    m.top.findNode("stepsGroup").translation = [112, 408]
+    m.serverCodeButton.translation = [112, 600]
+    m.serverCodeButtonText.translation = [112, 600]
+    m.top.findNode("statusDot").translation = [112, 733]
+    m.status.translation = [140, 720]
+    layoutActivationActions()
     if m.retryPlaylist <> invalid then
-        m.serverCodeButtonText.text = "OK   •   Tentar de novo        *   Outra lista"
+        m.serverCodeButtonText.text = "Tentar de novo   •   *  Outra lista"
     else
-        m.serverCodeButtonText.text = "OK   •   Conectar minha lista"
+        m.serverCodeButtonText.text = "Conectar minha lista"
     end if
+    layoutActivationActions()
     m.status.text = message
     setStatusTone(tone)
     restoreActivationFocus()
@@ -301,11 +323,102 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
         return false
     end if
     if key = "OK" and m.inputDialog = invalid then
-        if m.channelStore = invalid then startServerCodeLogin()
+        if m.channelStore = invalid then runActivationAction()
+        return true
+    end if
+    if key = "up" or key = "down" or key = "left" or key = "right" then
+        moveActivationFocus(key)
         return true
     end if
     return false
 end function
+
+' ---------- Acoes da ativacao: botao principal + "Verificar ativacao" + "Como ativar" ----------
+
+sub moveActivationFocus(key as String)
+    index = m.actionIndex
+    if key = "down" and index = 0 then index = 1
+    if key = "up" and index > 0 then index = 0
+    if key = "right" and index = 1 then index = 2
+    if key = "left" and index = 2 then index = 1
+    if index = m.actionIndex then return
+    m.actionIndex = index
+    layoutActivationActions()
+end sub
+
+sub runActivationAction()
+    if m.actionIndex = 1 then
+        m.status.text = "Verificando a ativação…"
+        setStatusTone("connecting")
+        requestPortal("roku-device-register")
+    else if m.actionIndex = 2 then
+        openActivationHelp()
+    else
+        startServerCodeLogin()
+    end if
+end sub
+
+sub openActivationHelp()
+    dialog = CreateObject("roSGNode", "StandardMessageDialog")
+    dialog.title = "Como ativar esta TV"
+    dialog.message = ["Código desta TV: " + m.deviceCodeValue, "1. No celular ou computador, abra elvanoqplay.app", "2. Ou aponte a câmera do celular para o QR code da tela", "3. Informe o código desta TV e cadastre a sua lista", "4. A TV ativa sozinha em alguns segundos", "Tem o código do seu servidor? Use \"Entrar com código do servidor\"."]
+    dialog.buttons = ["Entendi"]
+    dialog.observeField("buttonSelected", "closeActivationHelp")
+    dialog.observeField("wasClosed", "closeActivationHelp")
+    m.helpDialog = dialog
+    m.top.dialog = dialog
+end sub
+
+sub closeActivationHelp()
+    if m.helpDialog = invalid then return
+    m.helpDialog = invalid
+    m.top.dialog = invalid
+    restoreActivationFocus()
+end sub
+
+' Icone + texto centralizados juntos em cada botao; o foco e o anel ciano.
+' Larguras medidas com a fonte Inter nos tamanhos usados.
+sub layoutActivationActions()
+    primary = m.serverCodeButton.translation
+    textWidth = 428
+    if m.serverCodeButtonText.text <> "Entrar com código do servidor" then textWidth = len(m.serverCodeButtonText.text) * 16
+    startX = primary[0] + int((930 - (33 + 18 + textWidth)) / 2)
+    m.top.findNode("serverCodeIcon").translation = [startX, primary[1] + 30]
+    m.serverCodeButtonText.translation = [startX + 51, primary[1]]
+    m.serverCodeButtonText.width = textWidth + 40
+    m.serverCodeButtonText.horizAlign = "left"
+    inner = m.top.findNode("serverCodeInner")
+    if m.actionIndex = 0 then
+        m.serverCodeButton.color = "0x00D7FFFF"
+        inner.translation = [primary[0] + 4, primary[1] + 4]
+        inner.width = 922
+        inner.height = 85
+    else
+        m.serverCodeButton.color = "0xF4F8FFFF"
+        inner.translation = primary
+        inner.width = 930
+        inner.height = 93
+    end if
+    layoutShortcut("check", 112, 204, m.actionIndex = 1)
+    layoutShortcut("help", 583, 140, m.actionIndex = 2)
+end sub
+
+sub layoutShortcut(prefix as String, x as Integer, textWidth as Integer, focused as Boolean)
+    button = m.top.findNode(prefix + "Button")
+    startX = x + int((459 - (28 + 15 + textWidth)) / 2)
+    m.top.findNode(prefix + "Icon").translation = [startX, 911]
+    label = m.top.findNode(prefix + "ButtonText")
+    label.translation = [startX + 43, 885]
+    label.width = textWidth + 30
+    label.horizAlign = "left"
+    if focused then
+        button.color = "0xFFFFFF24"
+        button.borderColor = "0x00D7FFFF"
+    else
+        button.color = "0x0D1422B8"
+        button.borderColor = "0xBEDCFF29"
+    end if
+end sub
 
 sub clearParentalSession()
     section = CreateObject("roRegistrySection", "ELVANOQPlay")
@@ -436,7 +549,7 @@ sub showActivationState(state as String, message as String)
             setStatusTone("error")
         end if
     else
-        m.status.text = "Aguardando ativação. Vincule este Roku em elvanoqplay.app."
+        m.status.text = "Aguardando ativação. Vincule esta TV em elvanoqplay.app."
         setStatusTone("waiting")
     end if
 end sub
@@ -629,7 +742,7 @@ function normalizeServerCode(value as String) as String
 end function
 
 sub setActivationVisible(isVisible as Boolean)
-    ids = ["background", "ambientBottom", "loginShade", "loginShadeBottom", "brandMark", "clockTime", "clockDate", "eyebrow", "headline", "description", "stepsGroup", "portalCaption", "codeBorder", "codeCard", "deviceCode", "qrGroup", "portal", "serverCodeButton", "serverCodeInner", "serverCodeButtonText", "serverCodeAction", "statusDot", "status", "appVersion"]
+    ids = ["background", "ambientBottom", "loginShade", "loginShadeBottom", "brandMark", "clockTime", "clockDate", "eyebrow", "headline", "description", "stepsGroup", "portalCaption", "codeBorder", "codeCard", "deviceCode", "qrGroup", "portal", "serverCodeButton", "serverCodeInner", "serverCodeIcon", "serverCodeButtonText", "serverCodeAction", "codeLabel", "checkButton", "checkIcon", "checkButtonText", "helpButton", "helpIcon", "helpButtonText", "statusDot", "status", "appVersion"]
     for each id in ids
         node = m.top.findNode(id)
         if node <> invalid then node.visible = isVisible
@@ -650,7 +763,11 @@ sub renderActivationQr()
     matrix = qrMatrix(url)
     if matrix = invalid then return
     holder = m.top.findNode("qrModules")
-    moduleSize = 6
+    ' Modulos de 8 px centralizados no cartao branco de 294 px.
+    moduleSize = 8
+    if matrix.count() * moduleSize > 264 then moduleSize = int(264 / matrix.count())
+    offset = int((294 - matrix.count() * moduleSize) / 2)
+    holder.translation = [offset, offset]
     for r = 0 to matrix.count() - 1
         row = matrix[r]
         c = 0
