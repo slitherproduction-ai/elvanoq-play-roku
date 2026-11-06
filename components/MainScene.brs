@@ -70,7 +70,9 @@ sub init()
     m.appVersion.font = appFont(19, "regular")
     m.appVersion.color = "0x8E9AAEFF"
     appInfo = CreateObject("roAppInfo")
-    m.appVersion.text = "ELVANOQ · Roku · Versão " + appInfo.GetValue("major_version") + "." + appInfo.GetValue("minor_version") + ".0"
+    versionName = appInfo.GetValue("version_name")
+    if versionName = "" then versionName = appInfo.GetValue("major_version") + "." + appInfo.GetValue("minor_version") + ".0"
+    m.appVersion.text = "ELVANOQ · Roku · Versão " + versionName
     m.expiredOverlay = m.top.findNode("expiredOverlay")
     ' Lista (e nao AA): chaves de AA literal viram minusculas e o findNode diferencia maiusculas.
     styles = [["expiredTitle", 44, "bold", "0xF4F8FFFF"], ["expiredMessage", 24, "regular", "0xB8C4D6FF"], ["expiredCaption", 18, "bold", "0x8894A8FF"], ["expiredCode", 44, "bold", "0xFFFFFFFF"], ["expiredInfo", 20, "regular", "0x8894A8FF"], ["expiredButton", 24, "semibold", "0x070B14FF"], ["expiredFooter", 18, "regular", "0x8894A8FF"]]

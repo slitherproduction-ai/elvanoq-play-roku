@@ -70,15 +70,17 @@ end sub
 ' Historico exibido em Sobre (o mesmo do CHANGELOG.md).
 function appHistory() as Object
     return [
+        ["1.1.1", "Nova tela de ativação no padrão do app Android: código da TV em destaque, QR maior e atalhos Verificar ativação e Como ativar."],
         ["1.1.0", "Retomada automática quando o vídeo trava, formato do ao vivo lembrado por lista, rever programas, proteção automática de conteúdo adulto, categorias visíveis e novo visual de Ajustes."],
-        ["1.0.1", "Ajustes para a Roku Store: deep links, memória baixa, ativação com teclado e caixas de diálogo padrão da Roku."],
-        ["1.0.0", "Primeira versão: ativação pelo Portal, TV ao vivo com guia, filmes, séries, busca, Minha Lista e controle parental."]
+        ["1.0.1", "Ajustes para a Roku Store: deep links, memória baixa, ativação com teclado e caixas de diálogo padrão da Roku."]
     ]
 end function
 
 ' Nome da versao (1.1.0) e numero de build lidos do manifest.
 function appVersionText() as String
     info = CreateObject("roAppInfo")
+    name = info.GetValue("version_name")
+    if name <> "" then return name
     return info.GetValue("major_version") + "." + info.GetValue("minor_version") + ".0"
 end function
 
