@@ -1,6 +1,8 @@
 # Changelog — ELVANOQ Play Roku
 
-## 1.1.1 (build 3)
+## 1.1.3 (build 3)
+
+A Roku Store mostra a versão como major.minor.build (1.1.3). Os itens abaixo foram desenvolvidos como "1.1.1" e saem como 1.1.3.
 
 - **Nova tela de ativação** no padrão do login do Android 2.17.23 (a mesma da LG 1.1.1). Tem logo com slogan, fundo novo, relógio, os três passos e o código da TV em destaque. O botão branco "Entrar com código do servidor" ganhou dois atalhos: "Verificar ativação" (consulta o Portal na hora) e "Como ativar" (aviso padrão da Roku com os passos). O QR do Portal ficou maior (módulos de 8 px, centralizado) e o rodapé mostra o status e a versão. Setas escolhem o botão; OK continua abrindo o teclado do código do servidor.
 - Sem chave do aparelho na tela; o Portal vincula pelo código da TV.
