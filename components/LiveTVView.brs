@@ -684,7 +684,7 @@ sub renderSearchBoxes()
     end if
 end sub
 
-sub styleSearchBox(box as Object, label as Object, query as String, placeholder as String, focused as Boolean)
+sub styleSearchBox(field as Object, label as Object, query as String, placeholder as String, focused as Boolean)
     if query <> "" then
         label.text = query
         label.color = "0xF4F8FFFF"
@@ -693,12 +693,12 @@ sub styleSearchBox(box as Object, label as Object, query as String, placeholder 
         label.color = "0x63728AFF"
     end if
     if focused then
-        box.color = "0x147DFF33"
-        box.borderColor = "0x00D7FFFF"
+        field.color = "0x147DFF33"
+        field.borderColor = "0x00D7FFFF"
         if query = "" then label.color = "0xC9D3E3FF"
     else
-        box.color = "0x070B14FF"
-        box.borderColor = "0xBEDCFF29"
+        field.color = "0x070B14FF"
+        field.borderColor = "0xBEDCFF29"
     end if
 end sub
 
