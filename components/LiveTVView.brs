@@ -31,7 +31,23 @@ sub init()
     m.channelLabels = []
     m.channelLogos = []
     m.favHearts = []
-    m.rows = 14
+    m.rows = 13
+    ' Busca nas duas colunas (como no Android): o campo fica acima da primeira linha.
+    m.categoryQuery = ""
+    m.channelQuery = ""
+    m.searchFocus = false
+    m.allCategories = []
+    m.allCategoryIds = []
+    m.categoryChannels = []
+    m.categorySearchBox = m.top.findNode("categorySearchBox")
+    m.channelSearchBox = m.top.findNode("channelSearchBox")
+    m.categorySearchText = m.top.findNode("categorySearchText")
+    m.channelSearchText = m.top.findNode("channelSearchText")
+    m.categorySearchText.font = appFont(22, "regular")
+    m.channelSearchText.font = appFont(22, "regular")
+    m.channelCount = m.top.findNode("channelCount")
+    m.channelCount.font = appFont(18, "regular")
+    m.channelCount.color = "0x8894A8FF"
     for index = 1 to m.rows
         suffix = safeTrim(str(index))
         if len(suffix) < 2 then suffix = "0" + suffix
@@ -95,12 +111,17 @@ sub setCatalog(payload as Object)
     for each item in payload.items
         if item.type = invalid or item.type = "live" then m.allChannels.push(item)
     end for
-    m.categories = ["Todas", "Favoritos"]
+    m.allCategories = ["Todas", "Favoritos"]
+    m.allCategoryIds = ["", ""]
     if payload.categories <> invalid then
         for each category in payload.categories
-            if category <> invalid and category <> "" then m.categories.push(category)
+            if category <> invalid and category <> "" then
+                m.allCategories.push(category)
+                m.allCategoryIds.push(category)
+            end if
         end for
     end if
+    rebuildCategoryList()
     m.selectedCategoryIndex = 0
     m.categoryOffset = 0
     m.selectedIndex = 0
@@ -123,12 +144,13 @@ sub setLazyCatalog(payload as Object)
     end if
     m.lazy = true
     m.lazySignature = signature
-    m.categories = ["Favoritos"]
-    m.categoryIds = [""]
+    m.allCategories = ["Favoritos"]
+    m.allCategoryIds = [""]
     for each category in categories
-        m.categories.push(category.name)
-        m.categoryIds.push(category.id)
+        m.allCategories.push(category.name)
+        m.allCategoryIds.push(category.id)
     end for
+    rebuildCategoryList()
     m.selectedCategoryIndex = 0
     if m.favoriteChannels.count() = 0 and m.categories.count() > 1 then m.selectedCategoryIndex = 1
     m.categoryOffset = 0
@@ -150,8 +172,9 @@ end sub
 sub setCategoryItems(payload as Object)
     if not m.lazy or payload = invalid or payload.id = invalid then return
     if m.selectedCategoryIndex = 0 or payload.id <> m.categoryIds[m.selectedCategoryIndex] then return
-    m.visibleChannels = []
-    if payload.items <> invalid then m.visibleChannels = payload.items
+    m.categoryChannels = []
+    if payload.items <> invalid then m.categoryChannels = payload.items
+    filterChannels()
     m.loadError = ""
     if payload.error <> invalid then m.loadError = payload.error
     m.selectedIndex = 0
@@ -162,14 +185,14 @@ end sub
 
 sub applyCategory()
     if m.lazy then
-        m.visibleChannels = []
+        m.categoryChannels = []
         m.selectedIndex = 0
         m.channelOffset = 0
         m.loadError = ""
         if m.selectedCategoryIndex = 0 then
             m.isLoading = false
             for each channel in m.favoriteChannels
-                if isFavorite(channel.id) then m.visibleChannels.push(channel)
+                if isFavorite(channel.id) then m.categoryChannels.push(channel)
             end for
         else
             m.isLoading = true
@@ -177,24 +200,27 @@ sub applyCategory()
             m.requestTimer.control = "stop"
             m.requestTimer.control = "start"
         end if
+        filterChannels()
         renderGuide()
         return
     end if
-    m.visibleChannels = []
+    m.categoryChannels = []
     selectedCategory = m.categories[m.selectedCategoryIndex]
     for each channel in m.allChannels
         if selectedCategory = "Todas" or channel.category = selectedCategory then
-            m.visibleChannels.push(channel)
+            m.categoryChannels.push(channel)
         else if selectedCategory = "Favoritos" and isFavorite(channel.id) then
-            m.visibleChannels.push(channel)
+            m.categoryChannels.push(channel)
         end if
     end for
+    filterChannels()
     m.selectedIndex = 0
     m.channelOffset = 0
     renderGuide()
 end sub
 
 sub renderGuide()
+    renderSearchBoxes()
     for index = 0 to m.categoryLabels.count() - 1
         categoryIndex = m.categoryOffset + index
         if categoryIndex < m.categories.count() then
@@ -204,6 +230,9 @@ sub renderGuide()
             else
                 m.categoryLabels[index].color = "0x8894A8FF"
             end if
+        else if m.categoryQuery <> "" and categoryIndex = m.categories.count() and categoryIndex <= specialCategoryCount() then
+            m.categoryLabels[index].text = "Nenhuma categoria encontrada"
+            m.categoryLabels[index].color = "0x63728AFF"
         else
             m.categoryLabels[index].text = ""
         end if
@@ -214,6 +243,10 @@ sub renderGuide()
             m.emptyState.text = "Carregando canais…"
         else if m.lazy and m.loadError <> invalid and m.loadError <> "" then
             m.emptyState.text = m.loadError
+        else if m.channelQuery <> "" and m.categoryChannels.count() > 0 then
+            m.emptyState.text = "Nenhum canal encontrado para """ + m.channelQuery + """ nesta categoria."
+        else if m.categories.count() = 0 then
+            m.emptyState.text = "Nenhuma categoria encontrada para """ + m.categoryQuery + """."
         else if m.categories[m.selectedCategoryIndex] = "Favoritos" then
             m.emptyState.text = "Nenhum favorito ainda. Aperte * em um canal para favoritar."
         else
@@ -264,6 +297,19 @@ sub renderGuide()
 end sub
 
 sub moveChannel(delta as Integer)
+    ' Campo de busca: para baixo volta a lista; para cima, a partir da primeira linha, sobe ao campo.
+    if m.searchFocus then
+        if delta > 0 then
+            m.searchFocus = false
+            updateFocus()
+        end if
+        return
+    end if
+    if delta < 0 and isFirstRow() then
+        m.searchFocus = true
+        updateFocus()
+        return
+    end if
     if m.focusColumn = "categories" then
         moveCategory(delta)
         return
@@ -285,6 +331,7 @@ sub moveChannel(delta as Integer)
 end sub
 
 sub moveCategory(delta as Integer)
+    if m.categories.count() = 0 then return
     nextIndex = m.selectedCategoryIndex + delta
     if nextIndex < 0 then nextIndex = 0
     if nextIndex > m.categories.count() - 1 then nextIndex = m.categories.count() - 1
@@ -308,12 +355,18 @@ end sub
 sub activateRight()
     if m.focusColumn = "categories" then
         moveFocus("channels")
-    else
+    else if not m.searchFocus then
         playSelected()
     end if
 end sub
 
 sub confirmSelection()
+    if m.searchFocus then
+        text = m.channelQuery
+        if m.focusColumn = "categories" then text = m.categoryQuery
+        m.top.searchRequested = { column: m.focusColumn, text: text }
+        return
+    end if
     if m.focusColumn = "categories" then
         moveFocus("channels")
     else
@@ -322,17 +375,18 @@ sub confirmSelection()
 end sub
 
 sub updateFocus()
-    m.categoryFocus.visible = m.focusColumn = "categories"
-    m.channelFocus.visible = m.focusColumn = "channels"
+    renderSearchBoxes()
+    m.categoryFocus.visible = m.focusColumn = "categories" and not m.searchFocus and m.categories.count() > 0
+    m.channelFocus.visible = m.focusColumn = "channels" and not m.searchFocus and m.visibleChannels.count() > 0
     visibleCategoryIndex = m.selectedCategoryIndex - m.categoryOffset
     if visibleCategoryIndex < 0 then visibleCategoryIndex = 0
     if visibleCategoryIndex > m.rows - 1 then visibleCategoryIndex = m.rows - 1
-    m.categoryFocus.translation = [76, 236 + (visibleCategoryIndex * 52)]
+    m.categoryFocus.translation = [76, 300 + (visibleCategoryIndex * 52)]
     if m.visibleChannels.count() > 0 then
         visibleIndex = m.selectedIndex - m.channelOffset
         if visibleIndex < 0 then visibleIndex = 0
         if visibleIndex > m.rows - 1 then visibleIndex = m.rows - 1
-        m.channelFocus.translation = [546, 236 + (visibleIndex * 52)]
+        m.channelFocus.translation = [546, 300 + (visibleIndex * 52)]
     end if
 end sub
 
@@ -454,7 +508,7 @@ sub openSelected()
 end sub
 
 sub toggleFavorite()
-    if m.visibleChannels.count() = 0 then return
+    if m.searchFocus or m.visibleChannels.count() = 0 then return
     m.localState = loadLocalState()
     selected = m.visibleChannels[m.selectedIndex]
     if isFavorite(selected.id) then
@@ -507,10 +561,146 @@ function focusColumnName() as String
     return m.focusColumn
 end function
 
+' No campo de busca, "para cima" sai da TV ao Vivo (menu de secoes).
 function isAtTop() as Boolean
+    return m.searchFocus = true
+end function
+
+function isFirstRow() as Boolean
     if m.focusColumn = "categories" then return m.selectedCategoryIndex = invalid or m.selectedCategoryIndex <= 0
     return m.selectedIndex = invalid or m.selectedIndex <= 0
 end function
+
+' ---------- Busca de categorias e canais ----------
+
+' Texto digitado no teclado da Roku (vazio limpa o filtro).
+sub setSearchText(payload as Object)
+    if payload = invalid or payload.column = invalid then return
+    text = ""
+    if payload.text <> invalid then text = safeTrim(payload.text)
+    if payload.column = "categories" then
+        if text = m.categoryQuery then return
+        m.categoryQuery = text
+        currentName = ""
+        if m.categories.count() > 0 and m.selectedCategoryIndex < m.categories.count() then currentName = m.categories[m.selectedCategoryIndex]
+        rebuildCategoryList()
+        ' Mantem a categoria aberta se ela continua na lista; senao abre a primeira encontrada.
+        index = -1
+        for position = 0 to m.categories.count() - 1
+            if m.categories[position] = currentName then index = position
+        end for
+        m.categoryOffset = 0
+        if index >= 0 then
+            m.selectedCategoryIndex = index
+            if index >= m.rows then m.categoryOffset = index - (m.rows - 1)
+            renderGuide()
+        else if m.categories.count() > 0 then
+            m.selectedCategoryIndex = firstMatchIndex()
+            if m.selectedCategoryIndex >= m.rows then m.categoryOffset = m.selectedCategoryIndex - (m.rows - 1)
+            stopPreview()
+            applyCategory()
+        else
+            m.selectedCategoryIndex = 0
+            m.categoryChannels = []
+            m.visibleChannels = []
+            renderGuide()
+        end if
+    else
+        if text = m.channelQuery then return
+        m.channelQuery = text
+        filterChannels()
+        m.selectedIndex = 0
+        m.channelOffset = 0
+        renderGuide()
+    end if
+end sub
+
+' Monta a coluna de categorias a partir da lista completa e do filtro
+' (Todas/Favoritos ficam sempre no topo).
+sub rebuildCategoryList()
+    m.categories = []
+    m.categoryIds = []
+    needle = lcase(m.categoryQuery)
+    for position = 0 to m.allCategories.count() - 1
+        name = m.allCategories[position]
+        special = name = "Todas" or name = "Favoritos"
+        if needle = "" or special or instr(1, lcase(name), needle) > 0 then
+            m.categories.push(name)
+            m.categoryIds.push(m.allCategoryIds[position])
+        end if
+    end for
+end sub
+
+function specialCategoryCount() as Integer
+    total = 0
+    for each name in m.categories
+        if name = "Todas" or name = "Favoritos" then total = total + 1
+    end for
+    return total
+end function
+
+function firstMatchIndex() as Integer
+    if m.categoryQuery = "" then return 0
+    for position = 0 to m.categories.count() - 1
+        name = m.categories[position]
+        if name <> "Todas" and name <> "Favoritos" then return position
+    end for
+    return 0
+end function
+
+' Canais da categoria aberta filtrados pelo nome ou pelo programa atual.
+sub filterChannels()
+    if m.channelQuery = "" then
+        m.visibleChannels = m.categoryChannels
+        return
+    end if
+    needle = lcase(m.channelQuery)
+    found = []
+    for each channel in m.categoryChannels
+        matched = channel.title <> invalid and instr(1, lcase(channel.title), needle) > 0
+        if not matched then
+            key = epgKeyFor(channel)
+            if key <> "" and m.epg[key] <> invalid and m.epg[key].count() > 0 then
+                now = m.epg[key][0]
+                if now.title <> invalid and instr(1, lcase(now.title), needle) > 0 then matched = true
+            end if
+        end if
+        if matched then found.push(channel)
+    end for
+    m.visibleChannels = found
+end sub
+
+sub renderSearchBoxes()
+    if m.categorySearchBox = invalid then return
+    styleSearchBox(m.categorySearchBox, m.categorySearchText, m.categoryQuery, "Pesquisar categoria", m.searchFocus and m.focusColumn = "categories")
+    styleSearchBox(m.channelSearchBox, m.channelSearchText, m.channelQuery, "Pesquisar canais", m.searchFocus and m.focusColumn = "channels")
+    total = m.visibleChannels.count()
+    if m.channelQuery <> "" then
+        m.channelCount.text = total.ToStr() + " de " + m.categoryChannels.count().ToStr()
+    else if total > 0 then
+        m.channelCount.text = total.ToStr() + " canais"
+    else
+        m.channelCount.text = ""
+    end if
+end sub
+
+sub styleSearchBox(box as Object, label as Object, query as String, placeholder as String, focused as Boolean)
+    if query <> "" then
+        label.text = query
+        label.color = "0xF4F8FFFF"
+    else
+        label.text = placeholder
+        label.color = "0x63728AFF"
+    end if
+    if focused then
+        box.color = "0x147DFF33"
+        box.borderColor = "0x00D7FFFF"
+        if query = "" then label.color = "0xC9D3E3FF"
+    else
+        box.color = "0x070B14FF"
+        box.borderColor = "0xBEDCFF29"
+    end if
+end sub
 
 ' Barra de progresso do programa atual (largura total 640).
 sub updateEpgProgress(programme as Dynamic)
