@@ -716,6 +716,26 @@ sub updateEpgProgress(programme as Dynamic)
     bar.width = int(556 * elapsed / total)
 end sub
 
+' Volta do player: seleciona o canal que estava tocando e retoma a previa nele.
+sub returnToChannel(payload as Object)
+    if payload = invalid or payload.id = invalid then return
+    if m.visibleChannels = invalid then return
+    for index = 0 to m.visibleChannels.count() - 1
+        if m.visibleChannels[index].id = payload.id then
+            m.selectedIndex = index
+            if index < m.channelOffset or index >= m.channelOffset + m.rows then
+                m.channelOffset = index - int(m.rows / 2)
+                if m.channelOffset < 0 then m.channelOffset = 0
+            end if
+            m.searchFocus = false
+            m.focusColumn = "channels"
+            renderGuide()
+            playSelected()
+            return
+        end if
+    end for
+end sub
+
 ' Canal em destaque (para o "rever programas" aberto pelo AppShell).
 function selectedChannel() as Object
     if m.visibleChannels = invalid or m.visibleChannels.count() = 0 then return invalid

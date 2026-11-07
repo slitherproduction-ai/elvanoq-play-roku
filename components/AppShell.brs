@@ -980,12 +980,18 @@ end function
 
 sub onPlayerClosed()
     if m.playerView.closeRequested <> true then return
+    ' Android 2.17.29: ao sair do ao vivo, a lista volta com o canal que estava
+    ' tocando selecionado (inclusive depois de canal +/-) e a previa continua nele.
+    liveItem = invalid
+    queue = m.playerView.liveQueue
+    if queue <> invalid and queue.count() > 0 and m.playerView.liveIndex < queue.count() then liveItem = queue[m.playerView.liveIndex]
     clearEpisodeQueue()
     m.playerView.visible = false
     ' Zera a URL: sem isso, reabrir o mesmo canal/titulo nao dispara onStreamChanged
     m.playerView.streamUrl = ""
     m.playerView.closeRequested = false
     m.top.setFocus(true)
+    if liveItem <> invalid and m.selectedIndex = 1 then m.liveTVView.callFunc("returnToChannel", { id: liveItem.id })
 end sub
 
 sub stopPlayback()

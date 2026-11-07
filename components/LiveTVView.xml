@@ -19,6 +19,7 @@
     <function name="isAtTop" />
     <function name="selectedChannel" />
     <function name="setSearchText" />
+    <function name="returnToChannel" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/LiveTVView.brs" />
   <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
