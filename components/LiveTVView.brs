@@ -496,8 +496,10 @@ function isFavorite(itemId as String) as Boolean
     return false
 end function
 
+' Para e descarrega a fonte: muitos Roku decodificam um video por vez.
 sub stopPreview()
     m.preview.control = "stop"
+    m.preview.content = invalid
 end sub
 
 function focusColumnName() as String

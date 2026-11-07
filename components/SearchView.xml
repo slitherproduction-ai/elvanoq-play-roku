@@ -10,6 +10,7 @@
     <function name="setFocusVisible" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/SearchView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ImageSize.brs" />
   <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
   <script type="text/brightscript" uri="pkg:/source/FocusFrame.brs" />
   <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />

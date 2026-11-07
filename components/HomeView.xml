@@ -11,6 +11,7 @@
     <function name="focusTile" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/HomeView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ImageSize.brs" />
   <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
   <script type="text/brightscript" uri="pkg:/source/FocusFrame.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
@@ -22,7 +23,7 @@
     <!-- Pagina rolavel: ao descer ate a fileira, o Inicio sobe com animacao -->
     <Group id="page">
       <!-- Destaque em tela larga: arte + degradês (paleta do app Android) -->
-      <Poster id="heroArt" width="1920" height="640" loadDisplayMode="scaleToZoom" />
+      <Poster id="heroArt" width="1920" height="640" loadWidth="1280" loadHeight="427" loadDisplayMode="scaleToZoom" />
       <Poster id="heroShadeLeft" uri="pkg:/images/hero_shade_left.png" width="1920" height="640" />
       <Poster id="heroShadeBottom" uri="pkg:/images/hero_shade_bottom.png" width="1920" height="640" />
       <Poster id="heroShadeTop" uri="pkg:/images/hero_shade_top.png" width="1920" height="220" />

@@ -20,6 +20,7 @@ sub init()
     m.lastProgressPos = -1
     m.lastGoodPos = 0
     m.stallArmed = false
+    m.resumeNotice = false
     m.lastProgressAt = 0
     m.pendingStallSeek = 0
     m.catchupIndex = -1
@@ -115,12 +116,14 @@ sub onStreamChanged()
     ' quando ha "Pular abertura"; filmes a cada 5 s e ao vivo a cada 30 s.
     ' A retomada automatica le a posicao direto no timer de 4 s.
     if m.top.skipIntroEnd > 0 then
-        m.video.notificationInterval = 1
+        m.positionInterval = 1
     else if isLivePlayback() then
-        m.video.notificationInterval = 30
+        m.positionInterval = 30
     else
-        m.video.notificationInterval = 5
+        m.positionInterval = 5
     end if
+    ' Com os controles na tela, a barra anda a cada segundo.
+    if m.controls.visible then m.video.notificationInterval = 1 else m.video.notificationInterval = m.positionInterval
     if isParentallyBlockedItem(m.top.contentCategory, m.top.contentId) then
         m.video.control = "stop"
         m.hint.text = "Conteúdo protegido. Valide o PIN em Ajustes para assistir."
@@ -158,6 +161,14 @@ sub onStreamChanged()
     if streamFormat <> "" then content.streamFormat = streamFormat
     ' Ao vivo: comeca no ponto mais recente do HLS em vez de bufferizar a janela inteira.
     if isLivePlayback() then content.live = true
+    ' Retomar filme/episodio: comeca direto no ponto (PlayStart) em vez de abrir
+    ' do inicio e depois pular, o que bufferizava duas vezes.
+    m.resumeNotice = false
+    if m.shouldRestorePosition and not isLivePlayback() then
+        content.PlayStart = m.top.resumePosition
+        m.shouldRestorePosition = false
+        m.resumeNotice = true
+    end if
     m.currentContent = content
     m.video.content = content
     m.video.control = "play"
@@ -257,6 +268,10 @@ sub onVideoState()
         if m.shouldRestorePosition then
             m.video.seek = m.top.resumePosition
             m.shouldRestorePosition = false
+            m.hint.text = "Retomando de onde você parou."
+        end if
+        if m.resumeNotice = true then
+            m.resumeNotice = false
             m.hint.text = "Retomando de onde você parou."
         end if
         refreshTrackStatus()
@@ -473,6 +488,7 @@ sub showOsd()
     m.timelineProgress.visible = showTimeline
     m.timeLabel.visible = showTimeline
     if showTimeline then updateTimeline()
+    m.video.notificationInterval = 1
     m.controlFocus.visible = true
     m.controls.visible = true
     m.topShade.visible = true
@@ -501,6 +517,7 @@ end sub
 
 sub hideOsd()
     m.osdTimer.control = "stop"
+    if m.positionInterval <> invalid then m.video.notificationInterval = m.positionInterval
     m.osdBackground.visible = false
     m.title.visible = false
     m.hint.visible = false
@@ -749,6 +766,8 @@ function tryAlternateFormat() as Boolean
     content.title = m.currentContent.title
     content.streamFormat = alternateFormat
     content.live = m.currentContent.live
+    ' Mantem o ponto de inicio ao trocar de formato.
+    if m.currentContent.PlayStart <> invalid and m.currentContent.PlayStart > 0 then content.PlayStart = m.currentContent.PlayStart
     m.currentContent = content
     m.hint.text = "Tentando outro formato de vídeo…"
     showOsd()
@@ -931,7 +950,7 @@ end sub
 sub reopenCurrentContent()
     if m.currentContent = invalid then return
     ' Filme/episodio: volta ao ultimo ponto que avancou de fato.
-    if not isLivePlayback() and m.lastGoodPos > 0 then m.pendingStallSeek = m.lastGoodPos
+    if not isLivePlayback() and m.lastGoodPos > 0 then m.currentContent.PlayStart = m.lastGoodPos
     m.lastProgressPos = -1
     m.video.control = "stop"
     m.video.content = m.currentContent

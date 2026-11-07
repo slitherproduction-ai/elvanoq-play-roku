@@ -259,6 +259,7 @@ function xtreamCategoryList(credentials, action)
             if categoryId <> "" then list.push({ id: categoryId, name: categoryName })
         end if
     end for
+    categories = invalid
     return list
 end function
 
@@ -285,6 +286,8 @@ function fetchXtreamCategory(credentials, kind, categoryId, categoryName, limit)
         item = xtreamItem(credentials, kind, liveExtension, categoryName, stream)
         if item <> invalid then items.push(item)
     end for
+    ' Solta a resposta bruta (pode ter dezenas de milhares de objetos) antes de devolver.
+    streams = invalid
     return items
 end function
 

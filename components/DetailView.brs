@@ -115,7 +115,7 @@ sub onMetadataChanged()
         m.meta.text = safeTrim(details.release_date) + "   •   Avaliação " + safeTrim(str(details.vote_average))
     end if
     if details.genres <> invalid and details.genres.count() > 0 then m.genreLabel.text = genreSummary(details.genres)
-    if details.poster_path <> invalid and details.poster_path <> "" then m.poster.uri = "https://image.tmdb.org/t/p/w780" + details.poster_path
+    if details.poster_path <> invalid and details.poster_path <> "" then m.poster.uri = "https://image.tmdb.org/t/p/w500" + details.poster_path
     if details.backdrop_path <> invalid and details.backdrop_path <> "" then m.backdrop.uri = "https://image.tmdb.org/t/p/w1280" + details.backdrop_path
     if details.seasons <> invalid and details.seasons.count() > 0 and not isXtreamSeries() then
         m.seasons = details.seasons
