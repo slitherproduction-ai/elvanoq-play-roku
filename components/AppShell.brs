@@ -38,6 +38,7 @@ sub init()
     m.moviesView.observeField("categoryRequested", "onBrowseCategoryRequested")
     m.seriesView.observeField("categoryRequested", "onBrowseCategoryRequested")
     m.liveTVView.observeField("categoryRequested", "onLiveCategoryRequested")
+    m.liveTVView.observeField("searchRequested", "onLiveSearchRequested")
     m.searchView.observeField("searchRequested", "onSearchRequested")
     m.moviesView.observeField("searchRequested", "onBrowseSearchRequested")
     m.seriesView.observeField("searchRequested", "onBrowseSearchRequested")
@@ -212,6 +213,51 @@ sub onHomeItemSelected()
     else
         openCatalogItem(item)
     end if
+end sub
+
+'---------- Busca de categorias e canais na TV ao Vivo ----------
+
+sub onLiveSearchRequested()
+    request = m.liveTVView.searchRequested
+    if request = invalid then return
+    m.liveSearchColumn = request.column
+    dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
+    if request.column = "categories" then
+        dialog.title = "Pesquisar categoria"
+        dialog.message = "Parte do nome da categoria"
+    else
+        dialog.title = "Pesquisar canais"
+        dialog.message = "Nome do canal ou do programa"
+    end if
+    if request.text <> invalid then dialog.text = request.text
+    dialog.buttons = ["Pesquisar", "Limpar", "Cancelar"]
+    dialog.observeField("buttonSelected", "onLiveSearchKeyboardSelected")
+    dialog.observeField("wasClosed", "onLiveSearchKeyboardClosed")
+    m.liveSearchKeyboard = dialog
+    m.top.getScene().dialog = dialog
+end sub
+
+sub onLiveSearchKeyboardSelected()
+    if m.liveSearchKeyboard = invalid then return
+    button = m.liveSearchKeyboard.buttonSelected
+    text = safeTrim(m.liveSearchKeyboard.text)
+    closeLiveSearchKeyboard()
+    if button = 0 then
+        m.liveTVView.callFunc("setSearchText", { column: m.liveSearchColumn, text: text })
+    else if button = 1 then
+        m.liveTVView.callFunc("setSearchText", { column: m.liveSearchColumn, text: "" })
+    end if
+end sub
+
+sub onLiveSearchKeyboardClosed()
+    closeLiveSearchKeyboard()
+end sub
+
+sub closeLiveSearchKeyboard()
+    if m.liveSearchKeyboard = invalid then return
+    m.liveSearchKeyboard = invalid
+    m.top.getScene().dialog = invalid
+    m.top.setFocus(true)
 end sub
 
 sub openSearchKeyboard()
