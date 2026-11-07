@@ -370,6 +370,12 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
         showOsd()
         return true
     end if
+    ' Android 2.17.30: com os controles na tela, Voltar primeiro fecha os controles;
+    ' com a tela limpa, Voltar sai do player (ao vivo, volta direto a lista de canais).
+    if key = "back" and m.controls.visible then
+        hideOsd()
+        return true
+    end if
     if key = "back" then
         persistProgress(false)
         stopPlayback()
