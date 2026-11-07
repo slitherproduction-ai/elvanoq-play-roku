@@ -8,6 +8,7 @@
 - **Desempenho do player** (mesmas correções do Android 2.17.25, para aparelhos fracos):
   - A retomada automática só é armada depois que o vídeo começa a andar, com limites de 20 s no ao vivo e 30 s em filmes e episódios. Um servidor lento na abertura não é mais reiniciado em ciclo.
   - Menos trabalho por segundo: a posição do vídeo é notificada a cada 30 s no ao vivo e 5 s em filmes (1 s só quando há "Pular abertura"), e a barra de tempo só é redesenhada com os controles visíveis. O progresso continua salvo a cada 30 s.
+- **Correção: ao vivo reabrindo sozinho** (tela preta e volta). O campo `position` do Video só é atualizado no `notificationInterval`. Com 30 s no ao vivo, a posição parecia parada e a retomada automática (20 s) reabria o canal que estava tocando normalmente. Agora o intervalo é de 4 s (1 s com "Pular abertura"), bem abaixo dos limites de 20/30 s.
 - **Fluidez em aparelhos simples** (prompt 1.1.0 revisado, paridade com o Android 2.17.21 a 2.17.28):
   - A prévia do guia agora é parada e descarregada (`control = "stop"` e `content = invalid`) ao abrir o player, o rever ou sair da aba.
   - Listas grandes: a resposta bruta de `get_live_streams`, `get_vod_streams`, `get_series` e das categorias é solta logo depois de montar os itens. Os links da API e dos episódios de série deixaram de ser repetidos em cada item; são montados ao abrir a série.

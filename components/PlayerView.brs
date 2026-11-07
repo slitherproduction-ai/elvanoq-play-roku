@@ -112,15 +112,15 @@ sub onStreamChanged()
     m.retryTimer.control = "stop"
     resetStallWatch()
     hidePlayerError()
-    ' Menos trabalho por segundo (Android 2.17.25): a posicao so precisa de 1 s
-    ' quando ha "Pular abertura"; filmes a cada 5 s e ao vivo a cada 30 s.
-    ' A retomada automatica le a posicao direto no timer de 4 s.
+    ' Menos trabalho por segundo (Android 2.17.25): 1 s so com "Pular abertura",
+    ' senao a cada 4 s. ATENCAO: o campo position do Video so muda nesse
+    ' intervalo, e a retomada automatica (20 s ao vivo / 30 s VOD) depende dele.
+    ' Com 30 s no ao vivo a posicao ficava parada e o canal era reaberto a toa
+    ' (tela preta e volta). O intervalo tem de ficar bem abaixo dos limites.
     if m.top.skipIntroEnd > 0 then
         m.positionInterval = 1
-    else if isLivePlayback() then
-        m.positionInterval = 30
     else
-        m.positionInterval = 5
+        m.positionInterval = 4
     end if
     ' Com os controles na tela, a barra anda a cada segundo.
     if m.controls.visible then m.video.notificationInterval = 1 else m.video.notificationInterval = m.positionInterval
@@ -911,7 +911,11 @@ sub onStallTick()
         m.lastProgressPos = position
         return
     end if
-    if position > m.lastProgressPos + 0.5 then
+    ' Ao vivo a posicao pode recuar quando o servidor reposiciona a janela HLS:
+    ' qualquer mudanca conta como "andou".
+    moved = position > m.lastProgressPos + 0.5
+    if isLivePlayback() and abs(position - m.lastProgressPos) > 0.5 then moved = true
+    if moved then
         m.lastProgressPos = position
         m.lastGoodPos = position
         m.lastProgressAt = now
