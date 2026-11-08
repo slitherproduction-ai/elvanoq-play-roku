@@ -461,6 +461,7 @@ sub onCategoryResult(event as Object)
     if result.kind = "live" then view = m.liveTVView
     if view = invalid then return
     payload = { kind: result.kind, id: result.categoryId, items: items }
+    if result.total <> invalid then payload.total = result.total
     if result.ok <> true then payload.error = "Não foi possível carregar esta categoria. Tente novamente."
     view.callFunc("setCategoryItems", payload)
 end sub
@@ -474,13 +475,33 @@ sub touchCategoryCache(key as String)
     m.categoryCacheOrder = order
 end sub
 
-' Guarda as ultimas categorias abertas, sem passar de ~12 mil itens na memoria.
+' Guarda as ultimas categorias abertas. O teto de itens segue a memoria que a Roku
+' da ao app: ~6 mil em modelos de entrada (Express), 12 mil nos medios e 25 mil nos
+' mais fortes (Ultra, TVs com mais memoria).
+function categoryCacheItemLimit() as Integer
+    if m.cacheItemLimit <> invalid then return m.cacheItemLimit
+    m.cacheItemLimit = 12000
+    monitor = CreateObject("roAppMemoryMonitor")
+    if monitor <> invalid then
+        limitKb = monitor.GetChannelMemoryLimit()
+        if limitKb <> invalid and limitKb > 0 then
+            if limitKb < 160000 then
+                m.cacheItemLimit = 6000
+            else if limitKb >= 400000 then
+                m.cacheItemLimit = 25000
+            end if
+        end if
+    end if
+    return m.cacheItemLimit
+end function
+
 sub trimCategoryCache()
+    itemLimit = categoryCacheItemLimit()
     total = 0
     for each key in m.categoryCacheOrder
         total = total + m.categoryCache[key].count()
     end for
-    while m.categoryCacheOrder.count() > 1 and (m.categoryCacheOrder.count() > 10 or total > 12000)
+    while m.categoryCacheOrder.count() > 1 and (m.categoryCacheOrder.count() > 10 or total > itemLimit)
         oldest = m.categoryCacheOrder.Shift()
         total = total - m.categoryCache[oldest].count()
         m.categoryCache.Delete(oldest)

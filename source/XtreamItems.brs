@@ -24,16 +24,15 @@ function xtreamItem(credentials, itemType, liveExtension, categoryName, stream)
         ' Rever programas (catch-up): so quando o servidor guarda o arquivo do canal.
         item.tv_archive = safeTrim(stream.tv_archive)
         item.tv_archive_duration = safeTrim(stream.tv_archive_duration)
-        ' Mesmo formato de id do carregador M3U, para manter favoritos e bloqueios.
-        if item.tvg_id <> "" then
-            item.id = "live:" + item.tvg_id
-        else
-            item.id = "live:" + categoryName + ":" + title
-        end if
+        ' Id pelo stream_id (igual a LG e ao Samsung). Antes era o tvg_id ou o titulo:
+        ' as versoes HD/FHD/SD de um canal costumam ter o mesmo tvg_id e dividiam o
+        ' favorito; renomear a categoria no painel perdia o favorito.
+        item.id = "xtream:" + streamId
         item.stream_url = base + "live/" + credentials.userEscaped + "/" + credentials.passEscaped + "/" + streamId + "." + liveExtension
     else
         item.tvg_id = ""
-        item.id = "live:" + categoryName + ":" + title
+        ' Filme pelo stream_id: dois filmes com o mesmo nome nao dividem mais o progresso.
+        item.id = "movie:" + streamId
         extension = lcase(safeTrim(stream.container_extension))
         if extension = "" then extension = "mp4"
         item.stream_url = base + "movie/" + credentials.userEscaped + "/" + credentials.passEscaped + "/" + streamId + "." + extension
