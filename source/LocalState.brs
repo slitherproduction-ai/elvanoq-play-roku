@@ -18,10 +18,10 @@ function loadLocalState() as Object
     if state.watch_later = invalid then state.watch_later = []
     if state.continue_watching = invalid then state.continue_watching = []
     if state.history = invalid then state.history = []
-    state.favorites = sanitizeLocalItems(state.favorites)
-    state.watch_later = sanitizeLocalItems(state.watch_later)
-    state.continue_watching = sanitizeLocalItems(state.continue_watching)
-    state.history = sanitizeLocalItems(state.history)
+    state.favorites = migrateLocalItemIds(sanitizeLocalItems(state.favorites))
+    state.watch_later = migrateLocalItemIds(sanitizeLocalItems(state.watch_later))
+    state.continue_watching = migrateLocalItemIds(sanitizeLocalItems(state.continue_watching))
+    state.history = migrateLocalItemIds(sanitizeLocalItems(state.history))
     if state.parental = invalid then state.parental = { enabled: false, locked_categories: [] }
     return state
 end function
@@ -80,6 +80,29 @@ function upsertLocalItem(items as Object, item as Object) as Object
     end for
     if not replaced then nextItems.push(safeItem)
     return nextItems
+end function
+
+' 1.1.4: canais e filmes Xtream passam a ter id pelo stream_id ("xtream:<id>" e
+' "movie:<id>"). Itens salvos antes (id pelo tvg_id ou pelo titulo) sao convertidos
+' na leitura pelo sid guardado; listas M3U (sem sid) ficam como estavam.
+function migrateLocalItemIds(items as Object) as Object
+    migrated = []
+    seen = {}
+    seen.SetModeCaseSensitive()
+    for each item in items
+        if item.sid <> invalid and item.type <> invalid then
+            sid = safeTrim(item.sid)
+            if sid <> "" then
+                if item.type = "live" and left(item.id, 7) <> "xtream:" then item.id = "xtream:" + sid
+                if (item.type = "movies" or item.type = "movie") and left(item.id, 6) <> "movie:" then item.id = "movie:" + sid
+            end if
+        end if
+        if not seen.DoesExist(item.id) then
+            seen[item.id] = true
+            migrated.push(item)
+        end if
+    end for
+    return migrated
 end function
 
 function sanitizeLocalItems(items as Object) as Object

@@ -1,5 +1,14 @@
 # Changelog — ELVANOQ Play Roku
 
+## 1.1.4 (build 4)
+
+Correções e desempenho da auditoria técnica de 08/11/2026.
+
+- **Ids estáveis (Xtream):** canais passam a ser `xtream:<stream_id>` e filmes `movie:<stream_id>`, como na LG e no Samsung. Antes o canal usava o `tvg_id` (as versões HD/FHD/SD do mesmo canal dividiam favorito e bloqueio) e o filme usava categoria + título (filmes com o mesmo nome dividiam o progresso; renomear a categoria no painel perdia o favorito). Favoritos, Minha Lista, Continuar assistindo e histórico salvos são convertidos na primeira leitura pelo `sid` guardado (`migrateLocalItemIds`, `source/LocalState.brs`). Listas M3U não mudam. O deep link `movie:<stream_id>` passa a achar o filme direto.
+- **Categoria acima do limite:** quando o servidor tem mais de 5.000 títulos numa categoria, a grade mostra "5000 de N títulos (use a busca para os demais)" em vez de cortar sem aviso.
+- **Cache de categorias pela memória da Roku:** ~6 mil itens em modelos de entrada, 12 mil nos médios (como antes) e 25 mil nos mais fortes, pelo `GetChannelMemoryLimit()`.
+- **Busca:** o arquivo é lido em blocos que terminam num byte ASCII, sem cortar letras acentuadas ao meio (itens com "ç", "ã" etc. na borda do bloco sumiam da busca).
+
 ## 1.1.3 (build 3)
 
 A Roku Store mostra a versão como major.minor.build (1.1.3). Os itens abaixo foram desenvolvidos como "1.1.1" e saem como 1.1.3.

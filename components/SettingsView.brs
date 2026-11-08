@@ -70,6 +70,7 @@ end sub
 ' Historico exibido em Sobre (o mesmo do CHANGELOG.md).
 function appHistory() as Object
     return [
+        ["1.1.4", "Favoritos e Continuar assistindo não se misturam mais entre versões HD/FHD do mesmo canal, aviso quando a categoria tem mais títulos que o carregado e busca mais confiável com acentos."],
         ["1.1.3", "Nova tela de ativação, busca de canais e categorias na TV ao Vivo, novo Voltar no player e app mais leve em aparelhos simples."],
         ["1.1.0", "Retomada automática quando o vídeo trava, formato do ao vivo lembrado por lista, rever programas, proteção automática de conteúdo adulto, categorias visíveis e novo visual de Ajustes."],
         ["1.0.1", "Ajustes para a Roku Store: deep links, memória baixa, ativação com teclado e caixas de diálogo padrão da Roku."]

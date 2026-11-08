@@ -266,19 +266,21 @@ end function
 sub seedXtreamCategory(credentials, kind, categories, items, limit)
     if categories.count() = 0 then return
     first = categories[0]
-    loaded = fetchXtreamCategory(credentials, kind, first.id, first.name, limit)
+    loaded = fetchXtreamCategory(credentials, kind, first.id, first.name, limit, {})
     for each item in loaded
         items.push(item)
     end for
 end sub
 
-function fetchXtreamCategory(credentials, kind, categoryId, categoryName, limit)
+function fetchXtreamCategory(credentials, kind, categoryId, categoryName, limit, meta)
     items = []
     action = "get_vod_streams"
     if kind = "live" then action = "get_live_streams"
     if kind = "series" then action = "get_series"
     streams = xtreamApi(credentials, action, categoryId)
     if streams = invalid or type(streams) <> "roArray" then return items
+    ' Total do servidor: a tela avisa quando a categoria passa do limite carregado.
+    if meta <> invalid then meta.total = streams.count()
     liveExtension = "ts"
     if credentials.liveExtension <> invalid then liveExtension = credentials.liveExtension
     for each stream in streams
@@ -294,8 +296,11 @@ end function
 sub loadXtreamCategoryItems(credentials, kind, categoryId, categoryName, result)
     result.kind = kind
     result.categoryId = categoryId
-    items = fetchXtreamCategory(credentials, kind, categoryId, categoryName, 5000)
+    meta = {}
+    items = fetchXtreamCategory(credentials, kind, categoryId, categoryName, 5000, meta)
     result.items = items
+    result.total = items.count()
+    if meta.total <> invalid then result.total = meta.total
     result.ok = true
     result.message = ""
 end sub
@@ -400,6 +405,18 @@ sub scanSearchFile(path, matcher, kind, credentials, names, results, limit)
         length = chunkSize
         if position + length > size then length = size - position
         if not bytes.ReadFile(path, position, length) then exit while
+        ' O bloco nao pode terminar no meio de um caractere acentuado (UTF-8 de 2-4
+        ' bytes): corta no ultimo byte ASCII e le o resto no proximo bloco.
+        if position + length < size then
+            cut = bytes.Count() - 1
+            while cut > 0 and bytes[cut] >= 128
+                cut = cut - 1
+            end while
+            if cut > 0 and cut < bytes.Count() - 1 then
+                length = cut + 1
+                if not bytes.ReadFile(path, position, length) then exit while
+            end if
+        end if
         position = position + length
         text = carry + bytes.ToAsciiString()
         parts = text.Split("},{")
