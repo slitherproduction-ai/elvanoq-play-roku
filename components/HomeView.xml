@@ -47,9 +47,9 @@
       <Group id="tiles" translation="[64,662]" />
 
       <!-- Fileira de conteúdo -->
-      <Label id="continueTitle" translation="[64,842]" text="Continuar assistindo" width="900" height="40" />
-      <Label id="continueHint" translation="[1056,846]" text="" width="800" height="32" horizAlign="right" />
-      <RoundRect id="continueFocus" width="208" height="306" color="0xF4F8FFFF" visible="false"  radius="16" stroke="4" />
+      <Label id="continueTitle" translation="[64,842]" text="Novidades para você" width="900" height="40" />
+      <Label id="continueHint" translation="[1056,846]" text="Filmes e séries adicionados recentemente" width="800" height="32" horizAlign="right" />
+      <RoundRect id="continueFocus" width="208" height="306" color="0x00D7FFFF" visible="false"  radius="16" stroke="4" />
       <PosterGrid id="continueGrid" translation="[64,892]" basePosterSize="[196,294]" itemSpacing="[24,0]" numColumns="8" numRows="1" drawFocusFeedback="false" posterDisplayMode="scaleToZoom" />
       <!-- Cantos arredondados dos posteres (mascara na cor do fundo) -->
       <RoundRect translation="[64,892]" width="196" height="294" color="0x070B14FF" radius="12" mask="true" />
@@ -60,6 +60,23 @@
       <RoundRect translation="[1164,892]" width="196" height="294" color="0x070B14FF" radius="12" mask="true" />
       <RoundRect translation="[1384,892]" width="196" height="294" color="0x070B14FF" radius="12" mask="true" />
       <RoundRect translation="[1604,892]" width="196" height="294" color="0x070B14FF" radius="12" mask="true" />
+      <Group id="resumeGroup" translation="[0,384]" visible="false">
+      <!-- Fileira de conteúdo -->
+      <Label id="resumeTitle" translation="[64,842]" text="Continuar assistindo" width="900" height="40" />
+      <Label id="resumeHint" translation="[1056,846]" text="Retome de onde parou" width="800" height="32" horizAlign="right" />
+      <RoundRect id="resumeFocus" width="208" height="306" color="0x00D7FFFF" visible="false"  radius="16" stroke="4" />
+      <PosterGrid id="resumeGrid" translation="[64,892]" basePosterSize="[196,294]" itemSpacing="[24,0]" numColumns="8" numRows="1" drawFocusFeedback="false" posterDisplayMode="scaleToZoom" />
+      <!-- Cantos arredondados dos posteres (mascara na cor do fundo) -->
+      <RoundRect translation="[64,892]" width="196" height="294" color="0x070B14FF" radius="12" mask="true" />
+      <RoundRect translation="[284,892]" width="196" height="294" color="0x070B14FF" radius="12" mask="true" />
+      <RoundRect translation="[504,892]" width="196" height="294" color="0x070B14FF" radius="12" mask="true" />
+      <RoundRect translation="[724,892]" width="196" height="294" color="0x070B14FF" radius="12" mask="true" />
+      <RoundRect translation="[944,892]" width="196" height="294" color="0x070B14FF" radius="12" mask="true" />
+      <RoundRect translation="[1164,892]" width="196" height="294" color="0x070B14FF" radius="12" mask="true" />
+      <RoundRect translation="[1384,892]" width="196" height="294" color="0x070B14FF" radius="12" mask="true" />
+      <RoundRect translation="[1604,892]" width="196" height="294" color="0x070B14FF" radius="12" mask="true" />
+      <Group id="resumeBars" />
+      </Group>
       <Label id="emptyState" translation="[64,900]" width="1500" height="52" visible="false" />
     </Group>
     <Animation id="scrollAnimation" duration="0.28" easeFunction="outCubic" repeat="false">
@@ -67,3 +84,4 @@
     </Animation>
   </children>
 </component>
+

@@ -776,7 +776,7 @@ end function
 sub pushSectionCatalog()
     if m.catalog = invalid then return
     ' Categorias ocultas (Ajustes > Categorias visiveis) saem das colunas, de "Todos" e das grades.
-    if m.selectedIndex = 0 then m.homeView.callFunc("setCatalog", { items: visibleItems(homeItems()), categories: visibleCategoryNames(m.categories) })
+    if m.selectedIndex = 0 then m.homeView.callFunc("setCatalog", { items: visibleItems(homeItems()), categories: visibleCategoryNames(m.categories), xtream: m.xtream })
     if m.lazy then
         if m.selectedIndex = 1 then m.liveTVView.callFunc("setCatalog", { lazy: true, liveCategories: visibleCategoryList(m.liveCategories, "live"), favorites: visibleItems(savedCatalogItems("live")), items: [] })
         if m.selectedIndex = 2 then m.moviesView.callFunc("setCatalog", { lazy: true, categories: visibleCategoryList(m.movieCategories, "movies") })
@@ -1011,6 +1011,7 @@ sub onPlayerClosed()
     ' Zera a URL: sem isso, reabrir o mesmo canal/titulo nao dispara onStreamChanged
     m.playerView.streamUrl = ""
     m.playerView.closeRequested = false
+    if m.selectedIndex = 0 then m.homeView.callFunc("setActive", true)
     m.top.setFocus(true)
     if liveItem <> invalid and m.selectedIndex = 1 then m.liveTVView.callFunc("returnToChannel", { id: liveItem.id })
 end sub
@@ -1387,3 +1388,4 @@ sub onCatchupProgrammeSelected()
     m.playerView.streamUrl = urls[0]
     m.playerView.visible = true
 end sub
+

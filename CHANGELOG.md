@@ -1,3 +1,7 @@
+# 1.1.5 — 2026-11-09
+
+- Tela inicial com duas fileiras: Novidades para você e Continuar assistindo.
+
 # Changelog — ELVANOQ Play Roku
 
 ## 1.1.4 (build 4)
@@ -51,3 +55,4 @@ A Roku Store mostra a versão como major.minor.build (1.1.3). Os itens abaixo fo
 ## 1.0.0
 
 - Primeira versão: ativação pelo Portal, TV ao vivo com guia, filmes, séries, busca, Minha Lista e controle parental.
+
