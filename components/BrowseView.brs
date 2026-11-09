@@ -19,7 +19,6 @@ sub init()
     m.categories = []
     m.allItems = []
     m.selectedItems = []
-    m.serverTotal = invalid
     m.selectedTitle = m.top.findNode("selectedTitle")
     m.selectedMeta = m.top.findNode("selectedMeta")
     m.selectedTitle.font = appFont(26, "semibold")
@@ -155,7 +154,6 @@ sub setLazyCatalog(categories as Object)
     end for
     m.allItems = []
     m.selectedItems = []
-    m.serverTotal = invalid
     m.categoryIndex = 0
     if m.categories.count() > 1 then m.categoryIndex = 1
     m.categoryOffset = 0
@@ -190,8 +188,6 @@ sub setCategoryItems(payload as Object)
     if items = invalid then items = []
     category = m.categories[m.categoryIndex]
     if payload.error = invalid then category.total = items.count()
-    m.serverTotal = items.count()
-    if payload.total <> invalid and payload.total > items.count() then m.serverTotal = payload.total
     m.selectedItems = items
     m.page = 0
     m.selectedGridIndex = 0
@@ -226,7 +222,6 @@ sub showSearchState()
     renderCategories()
     if m.searchQuery = invalid or m.searchQuery = "" then
         m.selectedItems = []
-        m.serverTotal = invalid
         m.eyebrow.text = "BUSCA"
         m.grid.content = CreateObject("roSGNode", "ContentNode")
         m.top.findNode("gridFocus").visible = false
@@ -245,7 +240,6 @@ end sub
 
 sub showSearchResults()
     m.selectedItems = m.searchResults
-    m.serverTotal = invalid
     m.page = 0
     m.selectedGridIndex = 0
     label = "RESULTADOS PARA " + chr(34) + ucase(m.searchQuery) + chr(34)
@@ -304,7 +298,6 @@ sub applyCategory()
     if m.lazy then
         category = m.categories[m.categoryIndex]
         m.selectedItems = []
-        m.serverTotal = invalid
         m.page = 0
         m.selectedGridIndex = 0
         m.eyebrow.text = ucase(category.name)
@@ -324,7 +317,6 @@ sub applyCategory()
     category = m.categories[m.categoryIndex]
     if category.key = "" then
         m.selectedItems = m.allItems
-        m.serverTotal = invalid
     else
         filtered = []
         for each item in m.allItems
@@ -334,7 +326,6 @@ sub applyCategory()
             if lcase(name) = category.key then filtered.push(item)
         end for
         m.selectedItems = filtered
-        m.serverTotal = invalid
     end if
     m.page = 0
     m.selectedGridIndex = 0
@@ -423,10 +414,7 @@ sub renderPage()
     m.grid.jumpToItem = m.selectedGridIndex
     updateGridFocus()
     totalPages = int((m.selectedItems.count() + m.pageSize - 1) / m.pageSize)
-    countText = m.selectedItems.count().ToStr() + " títulos"
-    ' Categoria maior que o limite carregado: mostra quantos o servidor tem.
-    if m.serverTotal <> invalid and m.serverTotal > m.selectedItems.count() then countText = m.selectedItems.count().ToStr() + " de " + m.serverTotal.ToStr() + " títulos (use a busca para os demais)"
-    m.filterLabel.text = countText + "   •   Página " + (m.page + 1).ToStr() + " de " + totalPages.ToStr()
+    m.filterLabel.text = m.selectedItems.count().ToStr() + " títulos   •   Página " + (m.page + 1).ToStr() + " de " + totalPages.ToStr()
 end sub
 
 sub onItemSelected()
