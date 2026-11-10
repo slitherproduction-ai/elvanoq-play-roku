@@ -12,6 +12,7 @@ sub init()
     m.searchView = m.top.findNode("searchView")
     m.libraryView = m.top.findNode("libraryView")
     m.settingsView = m.top.findNode("settingsView")
+    m.settingsView.observeField("accountRequested", "openDisconnectDialog")
     m.settingsView.observeField("hiddenChanged", "onHiddenCategoriesChanged")
     m.detailView = m.top.findNode("detailView")
     m.playerView = m.top.findNode("playerView")
@@ -1221,9 +1222,9 @@ end sub
 
 sub openDisconnectDialog()
     dialog = CreateObject("roSGNode", "StandardMessageDialog")
-    dialog.title = "Desconectar lista"
+    dialog.title = "Conta"
     dialog.message = ["Os dados de acesso da lista serão apagados desta TV. Favoritos e progresso continuam salvos."]
-    dialog.buttons = ["Desconectar", "Cancelar"]
+    dialog.buttons = ["Excluir login", "Cancelar"]
     dialog.observeField("buttonSelected", "onDisconnectDialogSelected")
     m.disconnectDialog = dialog
     m.top.getScene().dialog = dialog

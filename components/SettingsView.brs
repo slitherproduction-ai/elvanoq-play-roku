@@ -1,7 +1,7 @@
 ' Ajustes: menu principal e paginas (Controle parental e Categorias visiveis).
 
 sub init()
-    m.rowKeys = ["parental", "visible", "format", "about"]
+    m.rowKeys = ["parental", "visible", "format", "about", "account"]
     m.selected = 0
     m.page = ""
     m.parentalPage = m.top.findNode("parentalPage")
@@ -124,10 +124,10 @@ sub renderHub()
     else
         subtitle.text = "Preferências desta TV"
     end if
-    titles = ["Controle parental", "Categorias visíveis", "Formato do ao vivo", "Sobre"]
+    titles = ["Controle parental", "Categorias visíveis", "Formato do ao vivo", "Sobre", "Conta"]
     protectedTotal = protectedCategoryTotal(m.top.categories)
     hiddenTotal = hiddenCategoryTotal()
-    badges = [protectedTotal.ToStr() + " protegidas", hiddenTotal.ToStr() + " ocultas", liveFormatLabel(liveFormatPreference()), "v" + appVersionText()]
+    badges = [protectedTotal.ToStr() + " protegidas", hiddenTotal.ToStr() + " ocultas", liveFormatLabel(liveFormatPreference()), "v" + appVersionText(), "Excluir login"]
     for index = 0 to m.rowKeys.count() - 1
         focused = index = m.selected
         m.rowTitles[index].text = titles[index]
@@ -164,6 +164,11 @@ sub renderDetail(key as String, protectedTotal as Integer, hiddenTotal as Intege
         m.detailTitle.text = "Formato do ao vivo"
         m.detailBody.text = "Automático começa pelo formato que funcionou nesta lista. HLS (.m3u8) ou TS (.ts) fixam o formato dos canais. Atual: " + liveFormatLabel(liveFormatPreference()) + "."
         m.detailHint.text = "OK alternar Automático, HLS e TS"
+    else if key = "account" then
+        m.detailEyebrow.text = "CONTA"
+        m.detailTitle.text = "Conta"
+        m.detailBody.text = "Exclua os dados de acesso desta TV e volte para a tela de login."
+        m.detailHint.text = "OK excluir login"
     else
         m.detailEyebrow.text = "APLICATIVO"
         m.detailTitle.text = "ELVANOQ Play para Roku"
@@ -213,6 +218,10 @@ function handleKey(event as Object) as Boolean
 end function
 
 sub activateRow(key as String)
+    if key = "account" then
+        m.top.accountRequested = true
+        return
+    end if
     if key = "parental" then
         openPage("parental")
     else if key = "visible" then

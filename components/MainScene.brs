@@ -109,6 +109,10 @@ sub init()
         return
     end if
     renderActivationQr()
+    if CreateObject("roRegistrySection", "ELVANOQPlay").Read("login_removed") = "true" then
+        m.status.text = "Login excluído. Entre novamente para continuar."
+        return
+    end if
     m.status.text = "Conectando ao Portal para ativação…"
     setStatusTone("connecting")
     requestPortal("roku-device-register")
@@ -204,6 +208,9 @@ function loadStorePlaylist() as Object
 end function
 
 sub saveStorePlaylist(playlist as Object)
+    loginSection = CreateObject("roRegistrySection", "ELVANOQPlay")
+    loginSection.Delete("login_removed")
+    loginSection.Flush()
     section = CreateObject("roRegistrySection", "ELVANOQPlay")
     section.Write("store_playlist", FormatJson(playlist))
     section.Flush()
@@ -287,9 +294,31 @@ end sub
 sub onStoreDisconnect()
     if m.appShell = invalid or m.appShell.disconnectRequested <> true then return
     clearStorePlaylist()
+    clearParentalSession()
+    cancelPendingPortalRequest()
+    m.licenseTimer.control = "stop"
+    m.registerTimer.control = "stop"
     m.storePlaylist = invalid
     m.retryPlaylist = invalid
-    returnToStoreConnect("Lista desconectada. Conecte uma nova lista quando quiser.", "waiting")
+    m.manualUsername = ""
+    m.resolvedHost = ""
+    m.serverCodeInput = ""
+    m.playlistSynced = false
+    m.appShell.callFunc("stopPlayback")
+    m.top.removeChild(m.appShell)
+    m.appShell = invalid
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    section.Delete("playlist_metadata")
+    section.Write("login_removed", "true")
+    section.Flush()
+    if m.storeEdition then
+        showStoreConnect("Login excluído. Conecte uma nova lista.", "waiting")
+    else
+        setActivationVisible(true)
+        m.status.text = "Login excluído. Entre novamente para continuar."
+        setStatusTone("waiting")
+        restoreActivationFocus()
+    end if
 end sub
 
 sub returnToStoreConnect(message as String, tone as String)
@@ -349,6 +378,11 @@ sub moveActivationFocus(key as String)
 end sub
 
 sub runActivationAction()
+    if m.actionIndex <> 2 then
+        section = CreateObject("roRegistrySection", "ELVANOQPlay")
+        section.Delete("login_removed")
+        section.Flush()
+    end if
     if m.actionIndex = 1 then
         m.status.text = "Verificando a ativação…"
         setStatusTone("connecting")

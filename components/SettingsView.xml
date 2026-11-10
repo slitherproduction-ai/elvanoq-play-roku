@@ -6,6 +6,7 @@
     <field id="items" type="array" onChange="onItemsChanged" />
     <field id="categoryGroups" type="assocarray" onChange="onCategoryGroupsChanged" />
     <field id="storeEdition" type="boolean" value="false" onChange="renderHub" />
+    <field id="accountRequested" type="boolean" alwaysNotify="true" />
     <field id="hiddenChanged" type="boolean" alwaysNotify="true" />
     <function name="handleKey" />
     <function name="enterDigit" />
@@ -43,6 +44,10 @@
       <Label id="rowTitle3" translation="[116,642]" width="420" height="76" vertAlign="center" />
       <RoundRect id="rowBadge3" translation="[548,662]" width="228" height="36" color="0x00D7FF33" radius="18" />
       <Label id="rowBadgeLabel3" translation="[548,662]" width="228" height="36" horizAlign="center" vertAlign="center" />
+      <RoundRect id="rowBg4" translation="[88,730]" width="712" height="76" color="0x111B2DFF" radius="14" />
+      <Label id="rowTitle4" translation="[116,730]" width="420" height="76" vertAlign="center" />
+      <RoundRect id="rowBadge4" translation="[548,750]" width="228" height="36" color="0x00D7FF33" radius="18" />
+      <Label id="rowBadgeLabel4" translation="[548,750]" width="228" height="36" horizAlign="center" vertAlign="center" />
       <RoundRect translation="[844,180]" width="1012" height="830" color="0x0D1422EB" radius="20" borderColor="0xBEDCFF22" />
       <Label id="detailEyebrow" translation="[884,212]" width="900" height="26" />
       <Label id="detailTitle" translation="[884,250]" width="932" height="52" />
