@@ -1,8 +1,10 @@
-# 1.1.5 — 2026-11-09
-
-- Tela inicial com duas fileiras: Novidades para você e Continuar assistindo.
-
 # Changelog — ELVANOQ Play Roku
+
+## 1.1.5 (build 5)
+
+- **Início com duas fileiras:** "Novidades para você" e "Continuar assistindo".
+- **Ajustes > Conta:** exclui os dados de acesso desta TV (lista e login) e volta para a tela de entrada, com o aviso "Login excluído. Entre novamente para continuar."
+- O revert #11 (09/11) desfez duas mudanças da 1.1.4: o aviso "N de M títulos" nas categorias com mais de 5.000 itens e o limite do cache de categorias pela memória da Roku. Os ids estáveis e a busca com acentos continuam.
 
 ## 1.1.4 (build 4)
 
