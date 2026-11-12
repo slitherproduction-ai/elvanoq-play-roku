@@ -70,6 +70,7 @@ end sub
 ' Historico exibido em Sobre (o mesmo do CHANGELOG.md).
 function appHistory() as Object
     return [
+        ["1.1.6", "Avance e volte filmes com as setas na barra de tempo, mais rápido ao apertar seguido, e capas no tamanho certo para cada Roku."],
         ["1.1.5", "Tela inicial com duas fileiras: Novidades para você e Continuar assistindo."],
         ["1.1.4", "Favoritos e Continuar assistindo não se misturam mais entre versões HD/FHD do mesmo canal, aviso quando a categoria tem mais títulos que o carregado e busca mais confiável com acentos."],
         ["1.1.3", "Nova tela de ativação, busca de canais e categorias na TV ao Vivo, novo Voltar no player e app mais leve em aparelhos simples."],

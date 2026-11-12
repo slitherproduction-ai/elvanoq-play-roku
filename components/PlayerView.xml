@@ -36,6 +36,8 @@
     <Timer id="retryTimer" duration="2" repeat="false" />
     <!-- Vigia de travamento: confere a cada 4 s se o video avanca -->
     <Timer id="stallTimer" duration="4" repeat="true" />
+    <!-- Barra de tempo: aplica o salto acumulado 0,6 s depois do ultimo toque -->
+    <Timer id="seekTimer" duration="0.6" repeat="false" />
 
     <!-- OSD: so degradês no topo e embaixo; o vídeo continua visível -->
     <Rectangle id="osdBackground" width="1920" height="1080" color="0x070B1433" />
@@ -56,6 +58,7 @@
 
     <Rectangle id="timelineTrack" translation="[64,898]" width="1792" height="6" color="0xF4F8FF40" />
     <Rectangle id="timelineProgress" translation="[64,898]" width="0" height="6" color="0x00D7FFFF" />
+    <RoundRect id="timelineKnob" translation="[52,889]" width="24" height="24" color="0xF4F8FFFF" radius="12" visible="false" />
     <Label id="timeLabel" translation="[64,914]" width="700" height="30" />
     <Label id="trackStatus" translation="[856,914]" width="1000" height="30" horizAlign="right" />
 

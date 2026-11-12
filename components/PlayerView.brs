@@ -83,6 +83,16 @@ sub init()
     m.nextEpisodeTimer.observeField("fire", "onNextEpisodeTimerFired")
     m.retryTimer.observeField("fire", "onRetryTimer")
     m.stallTimer.observeField("fire", "onStallTick")
+    ' Barra de tempo com foco (Android 2.17.48)
+    m.timelineTrack = m.top.findNode("timelineTrack")
+    m.timelineKnob = m.top.findNode("timelineKnob")
+    m.seekTimer = m.top.findNode("seekTimer")
+    m.seekTimer.observeField("fire", "onSeekTimerFired")
+    m.seekClock = CreateObject("roTimespan")
+    m.seekFocus = false
+    m.seekTarget = -1
+    m.seekPresses = 0
+    m.seekDirection = 0
     m.top.observeField("streamUrl", "onStreamChanged")
     m.top.observeField("contentTitle", "onTitleChanged")
     m.selectedControl = 1
@@ -110,6 +120,9 @@ sub onStreamChanged()
         m.qualityTried = {}
     end if
     m.retryTimer.control = "stop"
+    m.seekTimer.control = "stop"
+    m.seekTarget = -1
+    m.seekFocus = false
     resetStallWatch()
     hidePlayerError()
     ' Menos trabalho por segundo (Android 2.17.25): 1 s so com "Pular abertura",
@@ -360,14 +373,15 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
         togglePlayPause()
         return true
     end if
-    if key = "rev" or key = "replay" then
-        seekBy(-10)
-        showOsd()
-        return true
-    end if
-    if key = "fwd" then
-        seekBy(10)
-        showOsd()
+    if key = "rev" or key = "replay" or key = "fwd" then
+        direction = 1
+        if key <> "fwd" then direction = -1
+        if hasTimeline() then
+            stepTimeline(direction)
+        else
+            seekBy(direction * 10)
+            showOsd()
+        end if
         return true
     end if
     ' Android 2.17.30: com os controles na tela, Voltar primeiro fecha os controles;
@@ -380,6 +394,30 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
         persistProgress(false)
         stopPlayback()
         m.top.closeRequested = true
+        return true
+    end if
+    ' Barra de tempo (Android 2.17.48): em filmes e episodios, com a tela limpa
+    ' ou com o foco na barra, ◀/▶ voltam e avancam direto, com aceleracao.
+    if (key = "left" or key = "right") and hasTimeline() and (m.seekFocus or not m.controls.visible) then
+        direction = 1
+        if key = "left" then direction = -1
+        stepTimeline(direction)
+        return true
+    end if
+    if key = "up" and hasTimeline() and m.controls.visible and not m.seekFocus then
+        setTimelineFocus(true)
+        showOsd()
+        return true
+    end if
+    if key = "down" and m.seekFocus then
+        commitTimelineSeek()
+        setTimelineFocus(false)
+        showOsd()
+        return true
+    end if
+    if key = "OK" and m.seekFocus and m.controls.visible then
+        if m.seekTarget >= 0 then commitTimelineSeek() else togglePlayPause()
+        showOsd()
         return true
     end if
     if key = "left" then
@@ -493,9 +531,12 @@ sub showOsd()
     m.top.findNode("timelineTrack").visible = showTimeline
     m.timelineProgress.visible = showTimeline
     m.timeLabel.visible = showTimeline
+    if not showTimeline then m.seekFocus = false
     if showTimeline then updateTimeline()
     m.video.notificationInterval = 1
-    m.controlFocus.visible = true
+    m.controlFocus.visible = not m.seekFocus
+    m.timelineKnob.visible = m.seekFocus
+    refreshControlsHint()
     m.controls.visible = true
     m.topShade.visible = true
     m.bottomShade.visible = true
@@ -523,6 +564,9 @@ end sub
 
 sub hideOsd()
     m.osdTimer.control = "stop"
+    commitTimelineSeek()
+    setTimelineFocus(false)
+    m.timelineKnob.visible = false
     if m.positionInterval <> invalid then m.video.notificationInterval = m.positionInterval
     m.osdBackground.visible = false
     m.title.visible = false
@@ -673,11 +717,91 @@ sub updateTimeline()
         m.timeLabel.text = "Transmissão ao vivo"
         return
     end if
-    percentage = m.video.position / m.video.duration
+    position = m.video.position
+    ' Salto ainda nao aplicado: a barra mostra o ponto de destino.
+    if m.seekTarget >= 0 then position = m.seekTarget
+    percentage = position / m.video.duration
     if percentage < 0 then percentage = 0
     if percentage > 1 then percentage = 1
     m.timelineProgress.width = int(1792 * percentage)
-    m.timeLabel.text = formatTime(m.video.position) + " / " + formatTime(m.video.duration)
+    m.timelineKnob.translation = [52 + int(1792 * percentage), 889]
+    m.timeLabel.text = formatTime(position) + " / " + formatTime(m.video.duration)
+end sub
+
+' ---- Barra de tempo com foco (Android 2.17.48) -------------------------------
+' Passo de 10 s; apertando seguido (ate 0,7 s entre toques) vira x3 a partir do
+' 4o toque e x6 a partir do 7o. Os toques se acumulam num destino e o salto e
+' aplicado uma vez, 0,6 s depois do ultimo toque (um seek por toque faria o
+' Roku bufferizar a cada passo).
+function hasTimeline() as Boolean
+    if isLivePlayback() then return false
+    if m.errorPanel.visible then return false
+    return m.video.duration <> invalid and m.video.duration > 0 and m.video.position <> invalid
+end function
+
+function timelineStepSeconds(presses as Integer) as Integer
+    multiplier = 1
+    if presses >= 7 then
+        multiplier = 6
+    else if presses >= 4 then
+        multiplier = 3
+    end if
+    return 10 * multiplier
+end function
+
+sub stepTimeline(direction as Integer)
+    elapsed = m.seekClock.TotalMilliseconds()
+    ' Trocar de direcao recomeca no passo menor (para corrigir o ponto com precisao).
+    if m.seekPresses > 0 and elapsed <= 700 and direction = m.seekDirection then m.seekPresses = m.seekPresses + 1 else m.seekPresses = 1
+    m.seekDirection = direction
+    m.seekClock.Mark()
+    if m.seekTarget < 0 then m.seekTarget = m.video.position
+    target = m.seekTarget + direction * timelineStepSeconds(m.seekPresses)
+    limit = m.video.duration - 1
+    if target > limit then target = limit
+    if target < 0 then target = 0
+    m.seekTarget = target
+    setTimelineFocus(true)
+    showOsd()
+    m.seekTimer.control = "stop"
+    m.seekTimer.control = "start"
+end sub
+
+sub onSeekTimerFired()
+    commitTimelineSeek()
+end sub
+
+sub commitTimelineSeek()
+    m.seekTimer.control = "stop"
+    if m.seekTarget < 0 then return
+    target = m.seekTarget
+    m.seekTarget = -1
+    m.video.seek = target
+    if m.controls.visible then updateTimeline()
+end sub
+
+sub setTimelineFocus(focused as Boolean)
+    m.seekFocus = focused
+    m.controlFocus.visible = m.controls.visible and not focused
+    m.timelineKnob.visible = m.controls.visible and focused
+    if focused then
+        m.timelineTrack.height = 10
+        m.timelineProgress.height = 10
+    else
+        m.timelineTrack.height = 6
+        m.timelineProgress.height = 6
+    end if
+    refreshControlsHint()
+end sub
+
+sub refreshControlsHint()
+    if m.seekFocus then
+        m.controls.text = "←/→ voltar e avançar   •   Baixo: botões"
+    else if not isLivePlayback() then
+        m.controls.text = "←/→ selecionar   •   Cima: barra de tempo   •   OK confirmar"
+    else
+        m.controls.text = "←/→ selecionar   •   OK confirmar"
+    end if
 end sub
 
 function formatTime(value as Dynamic) as String

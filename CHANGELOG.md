@@ -1,5 +1,12 @@
 # Changelog — ELVANOQ Play Roku
 
+## 1.1.6 (build 6)
+
+Paridade com o Android 2.17.45 e 2.17.48.
+
+- **Barra de tempo com foco** (filmes, episódios e rever): com a tela limpa, ◀/▶ já voltam e avançam; com os controles na tela, Cima leva o foco para a barra (bolinha branca, barra mais grossa) e Baixo volta para os botões. Passo de 10 s com aceleração ao apertar seguido (até 0,7 s entre toques): ×3 a partir do 4º toque e ×6 a partir do 7º. Os toques se acumulam num destino mostrado na barra e o salto é aplicado uma vez, 0,6 s depois do último toque (um seek por toque fazia a Roku bufferizar a cada passo). Trocar de direção recomeça no passo de 10 s. OK na barra aplica na hora (ou pausa/continua, se não houver salto pendente). ⏪/⏩ usam a mesma aceleração. Ao vivo não muda (Cima/Baixo continuam trocando de canal).
+- **Capas no tamanho do uso e do aparelho** (`sizedImageFor`, `source/ImageSize.brs`): pôster w342, detalhes w500, fundo w1280 e episódios w300; nos Roku de entrada (gráfico DirectFB ou interface 720p) w185, w342, w780 e w185. Passa a valer também na tela de detalhes (pôster e fundo vindos da lista) e nas imagens dos episódios, que antes vinham no tamanho do servidor (às vezes `original`). Logos de outros servidores sem mudança.
+
 ## 1.1.5 (build 5)
 
 - **Início com duas fileiras:** "Novidades para você" e "Continuar assistindo".

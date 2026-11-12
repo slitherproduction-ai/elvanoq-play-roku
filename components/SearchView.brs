@@ -119,7 +119,7 @@ sub renderResultsWindow()
         item = m.matches[index]
         child = CreateObject("roSGNode", "ContentNode")
         child.title = item.title
-        if item.logo <> invalid then child.hdPosterUrl = sizedImageUrl(item.logo, "w342")
+        if item.logo <> invalid then child.hdPosterUrl = sizedImageFor(item.logo, "poster")
         content.appendChild(child)
     end for
     m.resultsGrid.content = content

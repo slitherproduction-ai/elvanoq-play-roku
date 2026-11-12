@@ -115,8 +115,8 @@ sub onMetadataChanged()
         m.meta.text = safeTrim(details.release_date) + "   •   Avaliação " + safeTrim(str(details.vote_average))
     end if
     if details.genres <> invalid and details.genres.count() > 0 then m.genreLabel.text = genreSummary(details.genres)
-    if details.poster_path <> invalid and details.poster_path <> "" then m.poster.uri = "https://image.tmdb.org/t/p/w500" + details.poster_path
-    if details.backdrop_path <> invalid and details.backdrop_path <> "" then m.backdrop.uri = "https://image.tmdb.org/t/p/w1280" + details.backdrop_path
+    if details.poster_path <> invalid and details.poster_path <> "" then m.poster.uri = sizedImageFor("https://image.tmdb.org/t/p/w500" + details.poster_path, "detail")
+    if details.backdrop_path <> invalid and details.backdrop_path <> "" then m.backdrop.uri = sizedImageFor("https://image.tmdb.org/t/p/w1280" + details.backdrop_path, "backdrop")
     if details.seasons <> invalid and details.seasons.count() > 0 and not isXtreamSeries() then
         m.seasons = details.seasons
         m.selectedSeasonIndex = 0
@@ -232,7 +232,7 @@ sub renderEpisodeSelection()
             if episode.image <> invalid then image = episode.image
             if image = "" and m.top.item <> invalid and m.top.item.backdrop <> invalid then image = m.top.item.backdrop
             if image = "" and m.top.item <> invalid and m.top.item.logo <> invalid then image = m.top.item.logo
-            card.thumb.uri = image
+            card.thumb.uri = sizedImageFor(image, "still")
         end if
     end for
     focused = m.detailFocus = "episodes" or m.episodeFocus = true
@@ -304,13 +304,13 @@ sub onItemChanged()
     m.meta.text = item.category + "  •  Conteúdo da sua lista"
     m.genreLabel.text = ""
     m.overview.text = "Informações complementares, elenco, trailer e recomendações serão exibidos quando os metadados estiverem disponíveis."
-    if item.logo <> invalid then m.poster.uri = item.logo
+    if item.logo <> invalid then m.poster.uri = sizedImageFor(item.logo, "detail")
     ' Fundo: imagem larga da lista (series) ou o proprio poster ampliado.
     m.backdrop.uri = ""
     if item.backdrop <> invalid and item.backdrop <> "" then
-        m.backdrop.uri = item.backdrop
+        m.backdrop.uri = sizedImageFor(item.backdrop, "backdrop")
     else if item.logo <> invalid then
-        m.backdrop.uri = item.logo
+        m.backdrop.uri = sizedImageFor(item.logo, "detail")
     end if
     m.top.findNode("similarTitle").visible = not isXtreamSeries()
     m.top.findNode("similarHint").visible = not isXtreamSeries()
