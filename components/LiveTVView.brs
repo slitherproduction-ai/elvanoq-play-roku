@@ -1,5 +1,8 @@
 sub init()
     m.preview = m.top.findNode("preview")
+    m.previewReleaseTimer = m.top.findNode("previewReleaseTimer")
+    m.previewReleaseTimer.observeField("fire", "onPreviewReleased")
+    m.pendingOpen = invalid
     m.channelFocus = m.top.findNode("channelFocus")
     m.categoryFocus = m.top.findNode("categoryFocus")
     m.previewTitle = m.top.findNode("previewTitle")
@@ -503,8 +506,27 @@ sub openSelected()
         m.previewHint.text = "Conteúdo protegido. Valide o PIN em Ajustes para continuar."
         return
     end if
+    request = { item: selected, channels: m.visibleChannels, index: m.selectedIndex }
+    hadPreview = (m.preview.content <> invalid)
     stopPreview()
-    m.top.playRequested = { item: selected, channels: m.visibleChannels, index: m.selectedIndex }
+    ' Com a previa tocando, o servidor ainda conta aquela conexao por um instante;
+    ' em listas com 1 conexao o tela cheia ficava em "Carregando" (Samsung/LG 1.1.6).
+    ' Espera a TV soltar a previa antes de abrir o canal.
+    if not hadPreview then
+        m.top.playRequested = request
+        return
+    end if
+    if m.pendingOpen <> invalid then return
+    m.pendingOpen = request
+    m.previewHint.text = "Abrindo em tela cheia…"
+    m.previewReleaseTimer.control = "start"
+end sub
+
+sub onPreviewReleased()
+    request = m.pendingOpen
+    m.pendingOpen = invalid
+    if request = invalid or m.top.visible <> true then return
+    m.top.playRequested = request
 end sub
 
 sub toggleFavorite()

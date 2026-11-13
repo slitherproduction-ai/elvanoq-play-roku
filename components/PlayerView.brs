@@ -15,6 +15,8 @@ sub init()
     m.retryTimer = m.top.findNode("retryTimer")
     m.liveRetries = 0
     m.stallTimer = m.top.findNode("stallTimer")
+    m.openTimer = m.top.findNode("openTimer")
+    m.openAttempts = 0
     m.stallClock = CreateObject("roTimespan")
     m.stallAttempts = 0
     m.lastProgressPos = -1
@@ -83,6 +85,7 @@ sub init()
     m.nextEpisodeTimer.observeField("fire", "onNextEpisodeTimerFired")
     m.retryTimer.observeField("fire", "onRetryTimer")
     m.stallTimer.observeField("fire", "onStallTick")
+    m.openTimer.observeField("fire", "onOpenTimeout")
     ' Barra de tempo com foco (Android 2.17.48)
     m.timelineTrack = m.top.findNode("timelineTrack")
     m.timelineKnob = m.top.findNode("timelineKnob")
@@ -186,6 +189,7 @@ sub onStreamChanged()
     m.video.content = content
     m.video.control = "play"
     m.stallTimer.control = "start"
+    armOpenTimeout()
     if isLivePlayback() then
         m.hint.text = "↑/↓: trocar canal  •  *: favorito  •  Voltar: sair"
         renderLiveGuide()
@@ -265,6 +269,8 @@ sub onVideoState()
         return
     end if
     if m.video.state = "playing" then
+        m.openTimer.control = "stop"
+        m.openAttempts = 0
         m.liveRetries = 0
         if isLivePlayback() and m.currentContent <> invalid then rememberWorkingLiveFormat(m.currentContent.url)
         ' Retomada depois de travamento: volta ao ponto em que o video parou.
@@ -865,11 +871,13 @@ sub onRetryTimer()
     m.video.control = "stop"
     m.video.content = m.currentContent
     m.video.control = "play"
+    armOpenTimeout()
 end sub
 
 sub stopPlayback()
     m.retryTimer.control = "stop"
     m.stallTimer.control = "stop"
+    m.openTimer.control = "stop"
     m.awaitingNextEpisode = false
     m.video.control = "stop"
 end sub
@@ -904,6 +912,7 @@ function tryAlternateFormat() as Boolean
     m.video.control = "stop"
     m.video.content = content
     m.video.control = "play"
+    armOpenTimeout()
     return true
 end function
 
@@ -1015,6 +1024,8 @@ end function
 
 sub resetStallWatch()
     m.stallTimer.control = "stop"
+    m.openTimer.control = "stop"
+    m.openAttempts = 0
     m.stallAttempts = 0
     m.lastProgressPos = -1
     m.lastGoodPos = 0
@@ -1075,10 +1086,74 @@ end sub
 
 sub showStallError()
     m.stallTimer.control = "stop"
+    m.openTimer.control = "stop"
     m.retryTimer.control = "stop"
     persistProgress(false)
     m.video.control = "stop"
     showPlayerError("O sinal não voltou", "Não foi possível retomar depois de 3 tentativas. Confira a internet e toque em Tentar.", true)
+end sub
+
+' ---------- Abertura que nao comeca (Samsung/LG 1.1.6 e 1.1.8) ----------
+' Quando o servidor segura a conexao (limite de conexoes, canal fora do ar), a
+' TV fica em "Carregando" sem disparar erro. Sem comecar a tocar em 12 s (ao
+' vivo; 6 s na primeira tentativa sem formato lembrado) ou 30 s (filme/episodio),
+' conta como falha: 1o troca TS <-> HLS, depois reabre ate 2 vezes e mostra o erro.
+' Depois que o video ja andou, quem cuida e a retomada automatica (stallArmed).
+sub armOpenTimeout()
+    if m.openTimer = invalid then return
+    m.openTimer.control = "stop"
+    limit = 30
+    if isLivePlayback() then
+        limit = 12
+        if m.formatFallbackTried <> true and m.openAttempts = 0 and liveFormatPreference() = "auto" and rememberedLiveFormat() = "" then limit = 6
+    end if
+    m.openTimer.duration = limit
+    m.openTimer.control = "start"
+end sub
+
+sub onOpenTimeout()
+    if m.top.visible <> true or m.currentContent = invalid or m.errorPanel.visible then return
+    if m.stallArmed = true then return
+    state = m.video.state
+    ' Pausado pelo usuario durante a abertura: espera de novo.
+    if state = "paused" then
+        armOpenTimeout()
+        return
+    end if
+    if state <> "buffering" and state <> "none" then return
+    print "ELVANOQ open timeout state="; state; " attempts="; m.openAttempts
+    if m.catchupIndex >= 0 then
+        if tryNextCatchupUrl() then return
+        m.stallTimer.control = "stop"
+        m.video.control = "stop"
+        showPlayerError("Rever indisponível", "Este programa não está disponível para rever.", false)
+        return
+    end if
+    if tryAlternateFormat() then return
+    if m.openAttempts >= 2 then
+        showOpenError()
+        return
+    end if
+    m.openAttempts = m.openAttempts + 1
+    if isLivePlayback() then
+        m.hint.text = "O canal não respondeu. Tentando de novo… (" + safeTrim(str(m.openAttempts)) + "/2)"
+    else
+        m.hint.text = "O vídeo não respondeu. Tentando de novo… (" + safeTrim(str(m.openAttempts)) + "/2)"
+    end if
+    showOsd()
+    reopenCurrentContent()
+end sub
+
+sub showOpenError()
+    m.stallTimer.control = "stop"
+    m.retryTimer.control = "stop"
+    m.openTimer.control = "stop"
+    m.video.control = "stop"
+    if isLivePlayback() then
+        showPlayerError("O canal não abriu", "O servidor não respondeu. O canal pode estar fora do ar ou a lista no limite de conexões. Toque em Tentar ou escolha outro canal.", true)
+    else
+        showPlayerError("O vídeo não abriu", "O servidor não respondeu. Confira a internet e toque em Tentar.", true)
+    end if
 end sub
 
 sub reopenCurrentContent()
@@ -1089,11 +1164,13 @@ sub reopenCurrentContent()
     m.video.control = "stop"
     m.video.content = m.currentContent
     m.video.control = "play"
+    armOpenTimeout()
 end sub
 
 sub retryAfterStall()
     hidePlayerError()
     m.stallAttempts = 0
+    m.openAttempts = 0
     m.liveRetries = 0
     m.lastProgressAt = m.stallClock.TotalSeconds()
     m.hint.text = "Reconectando…"
@@ -1139,5 +1216,6 @@ function tryNextCatchupUrl() as Boolean
     m.video.control = "play"
     resetStallWatch()
     m.stallTimer.control = "start"
+    armOpenTimeout()
     return true
 end function
