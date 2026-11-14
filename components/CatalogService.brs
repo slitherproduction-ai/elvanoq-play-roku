@@ -264,12 +264,15 @@ function xtreamCategoryList(credentials, action)
 end function
 
 ' Categoria usada nas Novidades: a primeira com nome de lancamentos/novidades
-' (ex.: "Lançamentos 2026", "Novidades", "Adicionados recentemente"); sem ela, a primeira.
+' (ex.: "Lançamentos 2026", "Novidades", "Adicionados recentemente"); sem ela, a primeira nao adulta.
 function newsCategory(categories)
     news = CreateObject("roRegex", "lan(c|ç|Ç)amento|novidade|recente|adicionad|estreia|new release|recently|latest", "i")
     adult = CreateObject("roRegex", "xxx|adult|\+ ?18|18 ?\+", "i")
     for each category in categories
         if news.IsMatch(category.name) and not adult.IsMatch(category.name) then return category
+    end for
+    for each category in categories
+        if not adult.IsMatch(category.name) then return category
     end for
     return categories[0]
 end function
