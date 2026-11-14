@@ -117,6 +117,13 @@ function preferredLiveUrl(url as String) as String
     return url
 end function
 
+' Formato que ja abriu nesta lista no modo Automatico ("hls", "ts" ou "").
+function rememberedLiveFormat() as String
+    remembered = CreateObject("roRegistrySection", "ELVANOQPlay").Read("liveFormat_" + listScopeId())
+    if remembered = "hls" or remembered = "ts" then return remembered
+    return ""
+end function
+
 sub rememberWorkingLiveFormat(url as String)
     if liveFormatPreference() <> "auto" then return
     if instr(1, url, "/live/") = 0 then return

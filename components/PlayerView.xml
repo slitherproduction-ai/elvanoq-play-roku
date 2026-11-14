@@ -36,6 +36,7 @@
     <Timer id="retryTimer" duration="2" repeat="false" />
     <!-- Vigia de travamento: confere a cada 4 s se o video avanca -->
     <Timer id="stallTimer" duration="4" repeat="true" />
+    <Timer id="openTimer" duration="12" repeat="false" />
     <!-- Barra de tempo: aplica o salto acumulado 0,6 s depois do ultimo toque -->
     <Timer id="seekTimer" duration="0.6" repeat="false" />
 

@@ -1,5 +1,14 @@
 # Changelog — ELVANOQ Play Roku
 
+## 1.1.7 (build 7)
+
+Paridade com a Samsung MSX e a LG 1.1.6 (correção "Carregando") e 1.1.8.
+
+- **Canais e vídeos que ficavam em "Carregando":** quando o servidor segura a conexão (limite de conexões, canal fora do ar), a Roku podia ficar carregando sem fim, porque a retomada automática só começa depois que o vídeo anda. Agora, se não começar a tocar em 12 s no ao vivo ou 30 s em filmes e episódios, conta como falha: a 1ª tentativa troca TS ↔ HLS (no modo Automático), depois reabre até 2 vezes e mostra "O canal não abriu" / "O vídeo não abriu" com Tentar. No rever, passa ao próximo formato. Pausar durante a abertura não conta.
+- **Troca de formato mais rápida:** no ao vivo sem formato lembrado na lista (modo Automático), a primeira troca TS ↔ HLS acontece em 6 s.
+- **Prévia → tela cheia em listas com 1 conexão:** com a prévia tocando, a TV ao Vivo espera 1,2 s depois de parar a prévia para abrir o canal em tela cheia, para o servidor soltar a conexão da prévia.
+- **Novidades para você com os lançamentos de verdade:** nas listas Xtream, a fileira passa a usar a categoria do servidor com nome de lançamentos (ex.: "Lançamentos", "Novidades", "Recentes", "Adicionados"; categorias adultas ficam de fora). Sem uma, segue a primeira categoria, como antes. A fileira não mistura mais as categorias abertas durante a navegação, então não muda enquanto você explora Filmes e Séries.
+
 ## 1.1.6 (build 6)
 
 Paridade com o Android 2.17.45 e 2.17.48.

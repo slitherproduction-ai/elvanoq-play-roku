@@ -116,5 +116,6 @@
     <RoundRect id="archiveBadge" translation="[1272,920]" width="556" height="56" color="0x147DFF33" radius="14" borderColor="0x00D7FF55" visible="false" />
     <Label id="archiveHint" translation="[1272,920]" width="556" height="56" horizAlign="center" vertAlign="center" text="Replay ou Voltar rápido   •   Rever programas" visible="false" />
     <Label id="emptyState" translation="[562,600]" width="634" height="60" wrap="true" visible="false" />
+    <Timer id="previewReleaseTimer" duration="1.2" repeat="false" />
   </children>
 </component>
