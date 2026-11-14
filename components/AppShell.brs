@@ -397,6 +397,13 @@ function savedCatalogItems(kindFilter as String) as Object
     return items
 end function
 
+' Novidades: na lista Xtream, so a semente (categoria de lancamentos), sem misturar
+' as categorias abertas durante a navegacao. Nas outras listas, o catalogo todo.
+function homeRecentItems() as Dynamic
+    if m.lazy = true and m.seedItems <> invalid then return visibleItems(m.seedItems)
+    return invalid
+end function
+
 function homeItems() as Object
     items = []
     if m.catalog <> invalid then items.Append(m.catalog)
@@ -756,7 +763,7 @@ end function
 sub pushSectionCatalog()
     if m.catalog = invalid then return
     ' Categorias ocultas (Ajustes > Categorias visiveis) saem das colunas, de "Todos" e das grades.
-    if m.selectedIndex = 0 then m.homeView.callFunc("setCatalog", { items: visibleItems(homeItems()), categories: visibleCategoryNames(m.categories), xtream: m.xtream })
+    if m.selectedIndex = 0 then m.homeView.callFunc("setCatalog", { items: visibleItems(homeItems()), recent: homeRecentItems(), categories: visibleCategoryNames(m.categories), xtream: m.xtream })
     if m.lazy then
         if m.selectedIndex = 1 then m.liveTVView.callFunc("setCatalog", { lazy: true, liveCategories: visibleCategoryList(m.liveCategories, "live"), favorites: visibleItems(savedCatalogItems("live")), items: [] })
         if m.selectedIndex = 2 then m.moviesView.callFunc("setCatalog", { lazy: true, categories: visibleCategoryList(m.movieCategories, "movies") })

@@ -142,7 +142,9 @@ sub setCatalog(payload as Object)
     if m.heroCandidates.count() > 0 then renderHero(m.heroCandidates[0])
     m.continueTitle.text = "Novidades para você"
     m.continueHint.text = "Filmes e séries adicionados recentemente"
-    m.continueItems = recentTitles(items, 30)
+    recentSource = items
+    if payload.recent <> invalid and type(payload.recent) = "roArray" and payload.recent.count() > 0 then recentSource = payload.recent
+    m.continueItems = recentTitles(recentSource, 30)
     m.continueIndex = minHome(m.continueIndex, m.continueItems.count() - 1)
     if m.continueIndex < 0 then m.continueIndex = 0
     m.continueOffset = minHome(m.continueOffset, m.continueIndex)
