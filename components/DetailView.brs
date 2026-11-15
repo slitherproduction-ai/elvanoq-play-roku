@@ -118,12 +118,10 @@ sub onMetadataChanged()
     end if
     if details.genres <> invalid and details.genres.count() > 0 then m.genreLabel.text = genreSummary(details.genres)
     if details.poster_path <> invalid and details.poster_path <> "" then
-        m.poster.visible = true
-        setImageChain(m.poster, [sizedImageFor("https://image.tmdb.org/t/p/w500" + details.poster_path, "detail"), m.listPoster])
+        m.poster.visible = setImageChain(m.poster, [sizedImageFor("https://image.tmdb.org/t/p/w500" + details.poster_path, "detail"), m.listPoster])
     end if
     if details.backdrop_path <> invalid and details.backdrop_path <> "" then
-        m.backdrop.visible = true
-        setImageChain(m.backdrop, [sizedImageFor("https://image.tmdb.org/t/p/w1280" + details.backdrop_path, "backdrop"), m.listBackdrop])
+        m.backdrop.visible = setImageChain(m.backdrop, [sizedImageFor("https://image.tmdb.org/t/p/w1280" + details.backdrop_path, "backdrop"), m.listBackdrop])
     end if
     if details.seasons <> invalid and details.seasons.count() > 0 and not isXtreamSeries() then
         m.seasons = details.seasons
@@ -314,8 +312,7 @@ sub onItemChanged()
     m.overview.text = "Informações complementares, elenco, trailer e recomendações serão exibidos quando os metadados estiverem disponíveis."
     m.listPoster = ""
     if item.logo <> invalid then m.listPoster = sizedImageFor(item.logo, "detail")
-    m.poster.visible = true
-    setImageChain(m.poster, [m.listPoster])
+    m.poster.visible = setImageChain(m.poster, [m.listPoster])
     ' Fundo: imagem larga da lista (series). Sem ela, a capa so vira fundo se
     ' for do TMDB, pedida em 1280 px; capa pequena ampliada ficava borrada.
     m.listBackdrop = ""
@@ -324,8 +321,7 @@ sub onItemChanged()
     else if isTmdbImage(item.logo) then
         m.listBackdrop = sizedImageFor(item.logo, "backdrop")
     end if
-    m.backdrop.visible = true
-    setImageChain(m.backdrop, [m.listBackdrop])
+    m.backdrop.visible = setImageChain(m.backdrop, [m.listBackdrop])
     m.top.findNode("similarTitle").visible = not isXtreamSeries()
     m.top.findNode("similarHint").visible = not isXtreamSeries()
     m.top.findNode("similarHint").text = ""
@@ -624,6 +620,6 @@ end sub
 
 ' Nenhuma imagem respondeu: o fundo fica so com a cor e os degrades, e o
 ' cartao da capa fica vazio em vez de mostrar uma imagem quebrada.
-sub imageChainExhausted(node as Object)
-    node.visible = false
+sub onImageChainStatus(event as Object)
+    if not advanceImageChain(event) then event.getRoSGNode().visible = false
 end sub

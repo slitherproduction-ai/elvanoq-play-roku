@@ -356,18 +356,23 @@ sub showHeroArt(wide as String)
     m.heroPortrait.visible = false
     m.heroPortrait.uri = ""
     m.heroArt.visible = true
-    setImageChain(m.heroArt, urls)
+    if not setImageChain(m.heroArt, urls) then showHeroPortrait()
 end sub
 
-sub imageChainExhausted(node as Object)
-    if node.id <> "heroArt" then
-        node.visible = false
-        return
-    end if
+sub showHeroPortrait()
     m.heroArt.visible = false
     if m.heroPosterUrl = invalid or m.heroPosterUrl = "" then return
     m.heroPortrait.visible = true
-    setImageChain(m.heroPortrait, [sizedImageFor(m.heroPosterUrl, "detail")])
+    if not setImageChain(m.heroPortrait, [sizedImageFor(m.heroPosterUrl, "detail")]) then m.heroPortrait.visible = false
+end sub
+
+sub onImageChainStatus(event as Object)
+    if advanceImageChain(event) then return
+    if event.getRoSGNode().id = "heroArt" then
+        showHeroPortrait()
+    else
+        m.heroPortrait.visible = false
+    end if
 end sub
 
 sub requestVodInfo(hero as Object)
