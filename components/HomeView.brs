@@ -1,4 +1,4 @@
- Inicio em formato de hub: menu com icones no topo, destaque largo e duas fileiras.
+' Inicio em formato de hub: menu com icones no topo, destaque largo e duas fileiras.
 ' O foco fica no AppShell; esta tela recebe as teclas por handleKey().
 sub init()
     m.heroArt = m.top.findNode("heroArt")
