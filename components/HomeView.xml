@@ -12,6 +12,7 @@
   </interface>
   <script type="text/brightscript" uri="pkg:/components/HomeView.brs" />
   <script type="text/brightscript" uri="pkg:/source/ImageSize.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ImageChain.brs" />
   <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
   <script type="text/brightscript" uri="pkg:/source/FocusFrame.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
@@ -24,6 +25,8 @@
     <Group id="page">
       <!-- Destaque em tela larga: arte + degradês (paleta do app Android) -->
       <Poster id="heroArt" width="1920" height="640" loadWidth="1280" loadHeight="427" loadDisplayMode="scaleToZoom" />
+      <!-- Sem imagem larga: a capa aparece inteira a direita, sem ampliar (como no Android) -->
+      <Poster id="heroPortrait" translation="[1493,0]" width="427" height="640" loadWidth="427" loadHeight="640" loadDisplayMode="scaleToZoom" visible="false" />
       <Poster id="heroShadeLeft" uri="pkg:/images/hero_shade_left.png" width="1920" height="640" />
       <Poster id="heroShadeBottom" uri="pkg:/images/hero_shade_bottom.png" width="1920" height="640" />
       <Poster id="heroShadeTop" uri="pkg:/images/hero_shade_top.png" width="1920" height="220" />

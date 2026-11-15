@@ -21,6 +21,8 @@ sub init()
     m.top.observeField("metadata", "onMetadataChanged")
     m.top.observeField("seriesInfo", "onSeriesInfoChanged")
     m.backdrop = m.top.findNode("backdrop")
+    m.listPoster = ""
+    m.listBackdrop = ""
     m.seasonFocus = m.top.findNode("seasonFocus")
     m.episodesPanel = m.top.findNode("episodesPanel")
     m.episodeFocusBar = m.top.findNode("episodeFocusBar")
@@ -115,8 +117,14 @@ sub onMetadataChanged()
         m.meta.text = safeTrim(details.release_date) + "   •   Avaliação " + safeTrim(str(details.vote_average))
     end if
     if details.genres <> invalid and details.genres.count() > 0 then m.genreLabel.text = genreSummary(details.genres)
-    if details.poster_path <> invalid and details.poster_path <> "" then m.poster.uri = sizedImageFor("https://image.tmdb.org/t/p/w500" + details.poster_path, "detail")
-    if details.backdrop_path <> invalid and details.backdrop_path <> "" then m.backdrop.uri = sizedImageFor("https://image.tmdb.org/t/p/w1280" + details.backdrop_path, "backdrop")
+    if details.poster_path <> invalid and details.poster_path <> "" then
+        m.poster.visible = true
+        setImageChain(m.poster, [sizedImageFor("https://image.tmdb.org/t/p/w500" + details.poster_path, "detail"), m.listPoster])
+    end if
+    if details.backdrop_path <> invalid and details.backdrop_path <> "" then
+        m.backdrop.visible = true
+        setImageChain(m.backdrop, [sizedImageFor("https://image.tmdb.org/t/p/w1280" + details.backdrop_path, "backdrop"), m.listBackdrop])
+    end if
     if details.seasons <> invalid and details.seasons.count() > 0 and not isXtreamSeries() then
         m.seasons = details.seasons
         m.selectedSeasonIndex = 0
@@ -304,14 +312,20 @@ sub onItemChanged()
     m.meta.text = item.category + "  •  Conteúdo da sua lista"
     m.genreLabel.text = ""
     m.overview.text = "Informações complementares, elenco, trailer e recomendações serão exibidos quando os metadados estiverem disponíveis."
-    if item.logo <> invalid then m.poster.uri = sizedImageFor(item.logo, "detail")
-    ' Fundo: imagem larga da lista (series) ou o proprio poster ampliado.
-    m.backdrop.uri = ""
-    if item.backdrop <> invalid and item.backdrop <> "" then
-        m.backdrop.uri = sizedImageFor(item.backdrop, "backdrop")
-    else if item.logo <> invalid then
-        m.backdrop.uri = sizedImageFor(item.logo, "detail")
+    m.listPoster = ""
+    if item.logo <> invalid then m.listPoster = sizedImageFor(item.logo, "detail")
+    m.poster.visible = true
+    setImageChain(m.poster, [m.listPoster])
+    ' Fundo: imagem larga da lista (series). Sem ela, a capa so vira fundo se
+    ' for do TMDB, pedida em 1280 px; capa pequena ampliada ficava borrada.
+    m.listBackdrop = ""
+    if item.backdrop <> invalid and item.backdrop <> "" and item.backdrop <> item.logo then
+        m.listBackdrop = sizedImageFor(item.backdrop, "backdrop")
+    else if isTmdbImage(item.logo) then
+        m.listBackdrop = sizedImageFor(item.logo, "backdrop")
     end if
+    m.backdrop.visible = true
+    setImageChain(m.backdrop, [m.listBackdrop])
     m.top.findNode("similarTitle").visible = not isXtreamSeries()
     m.top.findNode("similarHint").visible = not isXtreamSeries()
     m.top.findNode("similarHint").text = ""
@@ -606,4 +620,10 @@ sub setDetailFocus(zone as String)
     m.watchFocus.visible = zone = "actions"
     m.seasonFocus.visible = zone = "seasons"
     if m.episodes <> invalid then renderEpisodeSelection()
+end sub
+
+' Nenhuma imagem respondeu: o fundo fica so com a cor e os degrades, e o
+' cartao da capa fica vazio em vez de mostrar uma imagem quebrada.
+sub imageChainExhausted(node as Object)
+    node.visible = false
 end sub
