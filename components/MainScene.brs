@@ -23,53 +23,53 @@ sub init()
     m.clockDate = m.top.findNode("clockDate")
     m.clockTimer = m.top.findNode("clockTimer")
     ' Padrao do login Android 2.17.23 (o mesmo da LG 1.1.1).
-    m.eyebrow.font = appFont(19, "bold")
+    m.eyebrow.font = appFont(18, "bold")
     m.eyebrow.color = "0x00D7FFFF"
-    m.headline.font = appFont(66, "bold")
+    m.headline.font = appFont(72, "bold")
     m.headline.color = "0xF4F8FFFF"
-    m.description.font = appFont(27, "regular")
-    m.description.color = "0xB8C4D6FF"
+    m.description.font = appFont(24, "regular")
+    m.description.color = "0xC9D2E3FF"
     for i = 1 to 3
         n = m.top.findNode("stepNumber" + i.ToStr())
         ' Passos no padrao do redesign: numero ciano sobre #1A2438.
-        n.font = appFont(22, "bold")
+        n.font = appFont(20, "bold")
         n.color = "0x00D7FFFF"
         t = m.top.findNode("stepText" + i.ToStr())
-        t.font = appFont(25, "regular")
-        t.color = "0xE4EAF4FF"
+        t.font = appFont(24, "regular")
+        t.color = "0xF4F8FFFF"
     end for
     ' Codigo numa linha so, menor (redesign).
-    m.deviceCode.font = appFont(34, "bold")
+    m.deviceCode.font = appFont(36, "bold")
     m.deviceCode.color = "0xFFFFFFFF"
     m.portalCaption.font = appFont(19, "bold")
     m.portalCaption.color = "0x8E9AAEFF"
     codeLabel = m.top.findNode("codeLabel")
-    codeLabel.font = appFont(18, "bold")
+    codeLabel.font = appFont(16, "bold")
     codeLabel.color = "0x8E9AAEFF"
     qrCaption = m.top.findNode("qrCaption")
-    qrCaption.font = appFont(21, "semibold")
+    qrCaption.font = appFont(20, "regular")
     qrCaption.color = "0xB8C4D6FF"
     m.portal.font = appFont(26, "bold")
     m.portal.color = "0x00D7FFFF"
-    m.serverCodeButtonText.font = appFont(29, "bold")
+    m.serverCodeButtonText.font = appFont(24, "bold")
     m.serverCodeButtonText.color = "0x070B14FF"
     m.checkButton = m.top.findNode("checkButton")
     m.helpButton = m.top.findNode("helpButton")
     for each id in ["checkButtonText", "helpButtonText"]
         label = m.top.findNode(id)
-        label.font = appFont(24, "semibold")
+        label.font = appFont(20, "semibold")
         label.color = "0xF4F8FFFF"
     end for
     m.actionIndex = 0
     layoutActivationActions()
-    m.status.font = appFont(22, "regular")
+    m.status.font = appFont(20, "regular")
     m.status.color = "0xB8C4D6FF"
     m.homeStatus.font = appFont(40, "bold")
-    m.clockTime.font = appFont(46, "semibold")
+    m.clockTime.font = appFont(44, "semibold")
     m.clockTime.color = "0xF4F8FFFF"
-    m.clockDate.font = appFont(22, "regular")
+    m.clockDate.font = appFont(20, "regular")
     m.clockDate.color = "0x8894A8FF"
-    m.appVersion.font = appFont(19, "regular")
+    m.appVersion.font = appFont(18, "regular")
     m.appVersion.color = "0x8E9AAEFF"
     appInfo = CreateObject("roAppInfo")
     versionName = appInfo.GetValue("version_name")
@@ -183,11 +183,11 @@ sub showStoreConnect(message as String, tone as String)
         m.top.findNode(id).visible = false
     end for
     m.actionIndex = 0
-    m.top.findNode("stepsGroup").translation = [112, 408]
-    m.serverCodeButton.translation = [112, 600]
-    m.serverCodeButtonText.translation = [112, 600]
-    m.top.findNode("statusDot").translation = [112, 733]
-    m.status.translation = [140, 720]
+    m.top.findNode("stepsGroup").translation = [96, 446]
+    m.serverCodeButton.translation = [96, 672]
+    m.serverCodeButtonText.translation = [96, 672]
+    m.top.findNode("statusDot").translation = [96, 786]
+    m.status.translation = [120, 772]
     layoutActivationActions()
     if m.retryPlaylist <> invalid then
         m.serverCodeButtonText.text = "Tentar de novo   •   *  Outra lista"
@@ -418,11 +418,11 @@ end sub
 ' Larguras medidas com a fonte Inter nos tamanhos usados.
 sub layoutActivationActions()
     primary = m.serverCodeButton.translation
-    textWidth = 428
-    if m.serverCodeButtonText.text <> "Entrar com código do servidor" then textWidth = len(m.serverCodeButtonText.text) * 16
-    startX = primary[0] + int((930 - (33 + 18 + textWidth)) / 2)
-    m.top.findNode("serverCodeIcon").translation = [startX, primary[1] + 30]
-    m.serverCodeButtonText.translation = [startX + 51, primary[1]]
+    textWidth = 354
+    if m.serverCodeButtonText.text <> "Entrar com código do servidor" then textWidth = len(m.serverCodeButtonText.text) * 13
+    startX = primary[0] + int((760 - (28 + 16 + textWidth)) / 2)
+    m.top.findNode("serverCodeIcon").translation = [startX, primary[1] + 24]
+    m.serverCodeButtonText.translation = [startX + 44, primary[1]]
     m.serverCodeButtonText.width = textWidth + 40
     m.serverCodeButtonText.horizAlign = "left"
     ' Foco = pilula clara com texto escuro; sem foco = superficie escura com
@@ -430,8 +430,8 @@ sub layoutActivationActions()
     inner = m.top.findNode("serverCodeInner")
     icon = m.top.findNode("serverCodeIcon")
     inner.translation = primary
-    inner.width = 930
-    inner.height = 93
+    inner.width = 760
+    inner.height = 76
     m.serverCodeButton.color = "0x00000000"
     if m.actionIndex = 0 then
         inner.color = "0xF4F8FFFF"
@@ -442,16 +442,16 @@ sub layoutActivationActions()
         m.serverCodeButtonText.color = "0xF4F8FFFF"
         icon.blendColor = "0xF4F8FFFF"
     end if
-    layoutShortcut("check", 112, 204, m.actionIndex = 1)
-    layoutShortcut("help", 583, 140, m.actionIndex = 2)
+    layoutShortcut("check", 96, 170, m.actionIndex = 1)
+    layoutShortcut("help", 484, 117, m.actionIndex = 2)
 end sub
 
 sub layoutShortcut(prefix as String, x as Integer, textWidth as Integer, focused as Boolean)
     button = m.top.findNode(prefix + "Button")
-    startX = x + int((459 - (28 + 15 + textWidth)) / 2)
-    m.top.findNode(prefix + "Icon").translation = [startX, 911]
+    startX = x + int((372 - (24 + 12 + textWidth)) / 2)
+    m.top.findNode(prefix + "Icon").translation = [startX, 918]
     label = m.top.findNode(prefix + "ButtonText")
-    label.translation = [startX + 43, 885]
+    label.translation = [startX + 36, 900]
     label.width = textWidth + 30
     label.horizAlign = "left"
     icon = m.top.findNode(prefix + "Icon")
@@ -811,10 +811,10 @@ sub renderActivationQr()
     matrix = qrMatrix(url)
     if matrix = invalid then return
     holder = m.top.findNode("qrModules")
-    ' Modulos de 8 px centralizados no cartao branco de 294 px.
+    ' Modulos de 8 px centralizados no quadro branco de 300 px.
     moduleSize = 8
     if matrix.count() * moduleSize > 264 then moduleSize = int(264 / matrix.count())
-    offset = int((294 - matrix.count() * moduleSize) / 2)
+    offset = int((300 - matrix.count() * moduleSize) / 2)
     holder.translation = [offset, offset]
     for r = 0 to matrix.count() - 1
         row = matrix[r]
