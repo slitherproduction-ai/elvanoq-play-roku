@@ -31,13 +31,15 @@ sub init()
     m.description.color = "0xB8C4D6FF"
     for i = 1 to 3
         n = m.top.findNode("stepNumber" + i.ToStr())
+        ' Passos no padrao do redesign: numero ciano sobre #1A2438.
         n.font = appFont(22, "bold")
-        n.color = "0xFFFFFFFF"
+        n.color = "0x00D7FFFF"
         t = m.top.findNode("stepText" + i.ToStr())
         t.font = appFont(25, "regular")
         t.color = "0xE4EAF4FF"
     end for
-    m.deviceCode.font = appFont(42, "bold")
+    ' Codigo numa linha so, menor (redesign).
+    m.deviceCode.font = appFont(34, "bold")
     m.deviceCode.color = "0xFFFFFFFF"
     m.portalCaption.font = appFont(19, "bold")
     m.portalCaption.color = "0x8E9AAEFF"
@@ -423,17 +425,22 @@ sub layoutActivationActions()
     m.serverCodeButtonText.translation = [startX + 51, primary[1]]
     m.serverCodeButtonText.width = textWidth + 40
     m.serverCodeButtonText.horizAlign = "left"
+    ' Foco = pilula clara com texto escuro; sem foco = superficie escura com
+    ' texto claro (mesma regra do menu, do player e dos Ajustes).
     inner = m.top.findNode("serverCodeInner")
+    icon = m.top.findNode("serverCodeIcon")
+    inner.translation = primary
+    inner.width = 930
+    inner.height = 93
+    m.serverCodeButton.color = "0x00000000"
     if m.actionIndex = 0 then
-        m.serverCodeButton.color = "0x00D7FFFF"
-        inner.translation = [primary[0] + 4, primary[1] + 4]
-        inner.width = 922
-        inner.height = 85
+        inner.color = "0xF4F8FFFF"
+        m.serverCodeButtonText.color = "0x070B14FF"
+        icon.blendColor = "0x070B14FF"
     else
-        m.serverCodeButton.color = "0xF4F8FFFF"
-        inner.translation = primary
-        inner.width = 930
-        inner.height = 93
+        inner.color = "0x0E1524EB"
+        m.serverCodeButtonText.color = "0xF4F8FFFF"
+        icon.blendColor = "0xF4F8FFFF"
     end if
     layoutShortcut("check", 112, 204, m.actionIndex = 1)
     layoutShortcut("help", 583, 140, m.actionIndex = 2)
@@ -447,12 +454,15 @@ sub layoutShortcut(prefix as String, x as Integer, textWidth as Integer, focused
     label.translation = [startX + 43, 885]
     label.width = textWidth + 30
     label.horizAlign = "left"
+    icon = m.top.findNode(prefix + "Icon")
     if focused then
-        button.color = "0xFFFFFF24"
-        button.borderColor = "0x00D7FFFF"
+        button.color = "0xF4F8FFFF"
+        label.color = "0x070B14FF"
+        icon.blendColor = "0x070B14FF"
     else
-        button.color = "0x0D1422B8"
-        button.borderColor = "0xBEDCFF29"
+        button.color = "0x0E1524EB"
+        label.color = "0xF4F8FFFF"
+        icon.blendColor = "0x00D7FFFF"
     end if
 end sub
 
@@ -551,7 +561,9 @@ sub showActivationState(state as String, message as String)
         m.licenseTimer.control = "start"
         setActivationVisible(false)
         m.homeStatus.visible = false
+        firstOpen = (m.appShell = invalid)
         openAppShell()
+        if firstOpen then showWelcomeBack()
         return
     end if
     if (state = "expired" or state = "blocked") and m.appShell <> invalid and m.appShell.visible then
@@ -860,6 +872,56 @@ sub updateActivationClock()
     days = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
     months = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
     m.clockDate.text = days[now.GetDayOfWeek()] + ", " + now.GetDayOfMonth().ToStr() + " " + months[now.GetMonth() - 1]
+end sub
+
+' "Bem-vindo de volta": na primeira abertura com lista salva, por 1,2 s, por
+' cima da Inicio que ja carrega por baixo. Entra sozinho, sem apertar nada.
+sub showWelcomeBack()
+    if m.welcomeShown = true then return
+    m.welcomeShown = true
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    raw = section.Read("playlist_metadata")
+    if raw = invalid or raw = "" then return
+    metadata = ParseJson(raw)
+    if metadata = invalid or type(metadata) <> "roAssociativeArray" then return
+    name = ""
+    if metadata.display_name <> invalid then name = safeTrim(metadata.display_name)
+    if name = "" then name = "Minha lista"
+    overlay = m.top.findNode("welcomeOverlay")
+    ' Traz o aviso para a frente da AppShell recem-criada.
+    m.top.removeChild(overlay)
+    m.top.appendChild(overlay)
+    status = m.top.findNode("welcomeStatus")
+    status.font = appFont(22, "regular")
+    status.color = "0xC9D2E3FF"
+    title = m.top.findNode("welcomeTitle")
+    title.font = appFont(66, "bold")
+    title.color = "0xF4F8FFFF"
+    subtitle = m.top.findNode("welcomeSubtitle")
+    subtitle.font = appFont(27, "regular")
+    subtitle.color = "0xC9D2E3FF"
+    initial = m.top.findNode("welcomeInitial")
+    initial.font = appFont(34, "bold")
+    initial.color = "0x00D7FFFF"
+    initial.text = ucase(left(name, 1))
+    nameLabel = m.top.findNode("welcomeName")
+    nameLabel.font = appFont(30, "bold")
+    nameLabel.color = "0xF4F8FFFF"
+    nameLabel.text = name
+    info = m.top.findNode("welcomeInfo")
+    info.font = appFont(20, "regular")
+    info.color = "0x9AA6BDFF"
+    m.top.findNode("welcomeBar").width = 0
+    overlay.visible = true
+    animation = m.top.findNode("welcomeAnimation")
+    animation.observeField("state", "onWelcomeAnimation")
+    animation.control = "start"
+end sub
+
+sub onWelcomeAnimation()
+    animation = m.top.findNode("welcomeAnimation")
+    if animation.state <> "stopped" then return
+    m.top.findNode("welcomeOverlay").visible = false
 end sub
 
 sub openAppShell()
