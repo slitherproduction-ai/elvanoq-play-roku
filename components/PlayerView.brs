@@ -77,6 +77,24 @@ sub init()
         label.font = appFont(22, "semibold")
         label.color = "0xF4F8FFFF"
     end for
+    m.pillBackgrounds = []
+    for index = 0 to 4
+        m.pillBackgrounds.push(m.top.findNode("pillBg" + index.ToStr()))
+    end for
+    ' Topo a direita: relogio e, em filmes e episodios, "termina as".
+    m.contentBadge.font = appFont(22, "semibold")
+    m.contentBadge.color = "0xF4F8FFFF"
+    m.contentBadge.width = 600
+    m.contentBadge.translation = [1256, 52]
+    m.openingCover = m.top.findNode("openingCover")
+    m.openingArt = m.top.findNode("openingArt")
+    m.openingAnimation = m.top.findNode("openingAnimation")
+    m.openingTitle = m.top.findNode("openingTitle")
+    m.openingTitle.font = appFont(44, "bold")
+    m.openingTitle.color = "0xF4F8FFFF"
+    openingEyebrow = m.top.findNode("openingEyebrow")
+    openingEyebrow.font = appFont(18, "bold")
+    openingEyebrow.color = "0x00D7FFFF"
     m.liveQueue = []
     m.video.notificationInterval = 1
     m.video.observeField("state", "onVideoState")
@@ -186,6 +204,7 @@ sub onStreamChanged()
         m.resumeNotice = true
     end if
     m.currentContent = content
+    showOpeningCover()
     m.video.content = content
     m.video.control = "play"
     m.stallTimer.control = "start"
@@ -225,7 +244,49 @@ function programmeText(programme as Dynamic) as String
     return title
 end function
 
+' Capa da abertura: so filmes e episodios, so ate o primeiro quadro.
+sub showOpeningCover()
+    cover = m.top.coverUrl
+    if isLivePlayback() or cover = invalid or cover = "" then
+        hideOpeningCover()
+        return
+    end if
+    m.openingArt.uri = sizedImageFor(cover, "backdrop")
+    m.openingTitle.text = m.top.contentTitle
+    m.openingCover.visible = true
+    m.openingAnimation.control = "start"
+end sub
+
+sub hideOpeningCover()
+    if m.openingCover.visible = false then return
+    m.openingAnimation.control = "stop"
+    m.openingCover.visible = false
+end sub
+
+' "21:40   •   termina às 22:12" (o fim so para filmes e episodios).
+sub updateClockBadge()
+    now = CreateObject("roDateTime")
+    now.ToLocalTime()
+    text = clockText(now)
+    if not isLivePlayback() and m.video.duration <> invalid and m.video.duration > 0 and m.video.position <> invalid then
+        remaining = int(m.video.duration - m.video.position)
+        if remaining > 0 then
+            ends = CreateObject("roDateTime")
+            ends.FromSeconds(ends.AsSeconds() + remaining)
+            ends.ToLocalTime()
+            text = text + "   •   termina às " + clockText(ends)
+        end if
+    end if
+    m.contentBadge.text = text
+end sub
+
+function clockText(moment as Object) as String
+    return twoDigits(moment.GetHours()) + ":" + twoDigits(moment.GetMinutes())
+end function
+
 sub onVideoState()
+    state = m.video.state
+    if state = "playing" or state = "error" or state = "finished" or state = "stopped" then hideOpeningCover()
     if m.video.state = "error" then print "ELVANOQ video error code="; m.video.errorCode; " retry="; m.liveRetries
     ' Rever programa: erro passa para o proximo formato; sem nenhum, avisa (nao cai para o ao vivo).
     if m.catchupIndex >= 0 and m.video.state = "error" then
@@ -313,7 +374,8 @@ sub onVideoState()
         showOsd()
     else if m.video.state = "buffering" then
         m.hint.text = "Carregando stream…"
-        showOsd()
+        ' Com a capa da abertura na tela, os controles esperam o primeiro quadro.
+        if not m.openingCover.visible then showOsd()
     end if
     if m.video.state = "paused" then m.controlLabels[1].text = "Retomar"
     if m.video.state = "error" then
@@ -547,6 +609,7 @@ sub showOsd()
     m.topShade.visible = true
     m.bottomShade.visible = true
     m.backLabel.visible = true
+    updateClockBadge()
     m.contentBadge.visible = true
     m.nowPlayingLabel.text = playbackBadge()
     m.nowPlayingLabel.visible = true
@@ -560,6 +623,9 @@ sub showOsd()
     end if
     for each label in m.controlLabels
         label.visible = true
+    end for
+    for each pill in m.pillBackgrounds
+        pill.visible = true
     end for
     if m.video.state = "playing" then m.osdTimer.control = "start"
 end sub
@@ -597,6 +663,9 @@ sub hideOsd()
     m.nextEpisodeHint.visible = false
     for each label in m.controlLabels
         label.visible = false
+    end for
+    for each pill in m.pillBackgrounds
+        pill.visible = false
     end for
 end sub
 
@@ -732,6 +801,7 @@ sub updateTimeline()
     m.timelineProgress.width = int(1792 * percentage)
     m.timelineKnob.translation = [52 + int(1792 * percentage), 889]
     m.timeLabel.text = formatTime(position) + " / " + formatTime(m.video.duration)
+    if m.contentBadge.visible then updateClockBadge()
 end sub
 
 ' ---- Barra de tempo com foco (Android 2.17.48) -------------------------------
@@ -879,6 +949,7 @@ sub stopPlayback()
     m.stallTimer.control = "stop"
     m.openTimer.control = "stop"
     m.awaitingNextEpisode = false
+    hideOpeningCover()
     m.video.control = "stop"
 end sub
 
@@ -1180,6 +1251,7 @@ sub retryAfterStall()
 end sub
 
 sub showPlayerError(title as String, message as String, canRetry as Boolean)
+    hideOpeningCover()
     m.errorRetryAllowed = canRetry
     m.top.findNode("errorTitle").text = title
     m.top.findNode("errorMessage").text = message

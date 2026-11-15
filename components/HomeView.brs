@@ -1,4 +1,4 @@
-' Inicio em formato de hub: destaque largo, blocos de navegacao e duas fileiras.
+ Inicio em formato de hub: menu com icones no topo, destaque largo e duas fileiras.
 ' O foco fica no AppShell; esta tela recebe as teclas por handleKey().
 sub init()
     m.heroArt = m.top.findNode("heroArt")
@@ -12,7 +12,16 @@ sub init()
     m.detailsLabel = m.top.findNode("detailsLabel")
     m.actionFocus = m.top.findNode("actionFocus")
     m.heroTimer = m.top.findNode("heroTimer")
-    m.tileFocus = m.top.findNode("tileFocus")
+    m.navGroup = m.top.findNode("navGroup")
+    m.navClock = m.top.findNode("navClock")
+    m.navClock.font = appFont(22, "regular")
+    m.navClock.color = "0x9AA6BDFF"
+    m.clockTimer = m.top.findNode("clockTimer")
+    m.clockTimer.observeField("fire", "updateClock")
+    m.heroFocusTimer = m.top.findNode("heroFocusTimer")
+    m.heroFocusTimer.observeField("fire", "onHeroFocusTimer")
+    m.heroFocusItem = invalid
+    m.heroPinned = false
     m.continueTitle = m.top.findNode("continueTitle")
     m.continueHint = m.top.findNode("continueHint")
     m.continueGrid = m.top.findNode("continueGrid")
@@ -52,18 +61,16 @@ sub init()
     m.emptyState.font = appFont(24, "regular")
     m.emptyState.color = "0x8894A8FF"
 
-    ' Blocos: indice da secao no AppShell (1 = TV ao Vivo ... 6 = Ajustes)
+    ' Menu: indice da secao no AppShell (0 = Inicio, 1 = TV ao Vivo ... 6 = Ajustes).
+    ' A Busca continua dentro de Filmes e Series.
     m.tileDefs = [
-        { section: 1, title: "TV ao Vivo", icon: "pkg:/images/icon_live.png" },
-        { section: 2, title: "Filmes", icon: "pkg:/images/icon_movies.png" },
-        { section: 3, title: "Séries", icon: "pkg:/images/icon_series.png" },
-        { section: 4, title: "Busca", icon: "pkg:/images/icon_search.png" },
-        { section: 5, title: "Minha Lista", icon: "pkg:/images/icon_list.png" },
-        { section: 6, title: "Ajustes", icon: "pkg:/images/icon_settings.png" }
+        { section: 0, title: "Início", icon: "pkg:/images/icon_home.png", width: 168 },
+        { section: 1, title: "TV ao Vivo", icon: "pkg:/images/icon_live.png", width: 220 },
+        { section: 2, title: "Filmes", icon: "pkg:/images/icon_movies.png", width: 164 },
+        { section: 3, title: "Séries", icon: "pkg:/images/icon_series.png", width: 164 },
+        { section: 5, title: "Minha Lista", icon: "pkg:/images/icon_list.png", width: 226 },
+        { section: 6, title: "", icon: "pkg:/images/icon_settings.png", width: 56 }
     ]
-    m.tileWidth = 280
-    m.tileHeight = 150
-    m.tileGap = 22
     buildTiles()
 
     m.selectedAction = 0
@@ -85,35 +92,82 @@ sub init()
 end sub
 
 sub buildTiles()
-    group = m.top.findNode("tiles")
+    group = m.navGroup
     m.tileBackgrounds = []
     m.tileLabels = []
-    for index = 0 to m.tileDefs.count() - 1
+    m.tileIcons = []
+    m.tileX = []
+    x = 0
+    lastIndex = m.tileDefs.count() - 1
+    for index = 0 to lastIndex
         definition = m.tileDefs[index]
-        x = index * (m.tileWidth + m.tileGap)
+        ' Ajustes fica sozinho a direita, antes do relogio.
+        if index = lastIndex then x = 1656 - 310 - 56 - 16
         background = group.createChild("RoundRect")
         background.translation = [x, 0]
-        background.width = m.tileWidth
-        background.height = m.tileHeight
-        background.radius = 18
-        background.borderColor = "0xBEDCFF22"
-        background.color = "0x0D1422FF"
+        background.width = definition.width
+        background.height = 56
+        background.radius = 28
+        background.color = "0x00000000"
         icon = group.createChild("Poster")
         icon.uri = definition.icon
-        icon.width = 64
-        icon.height = 64
-        icon.translation = [x + int((m.tileWidth - 64) / 2), 24]
+        icon.width = 30
+        icon.height = 30
+        if definition.title = "" then
+            icon.translation = [x + 13, 13]
+        else
+            icon.translation = [x + 22, 13]
+        end if
         label = group.createChild("Label")
         label.text = definition.title
-        label.font = appFont(24, "regular")
-        label.color = "0xF4F8FFFF"
-        label.horizAlign = "center"
-        label.width = m.tileWidth
-        label.height = 40
-        label.translation = [x, 98]
+        label.font = appFont(22, "regular")
+        label.color = "0xC9D2E3FF"
+        label.width = definition.width - 64
+        if label.width < 1 then
+            label.width = 1
+            label.visible = false
+        end if
+        label.height = 56
+        label.vertAlign = "center"
+        label.translation = [x + 62, 0]
         m.tileBackgrounds.push(background)
         m.tileLabels.push(label)
+        m.tileIcons.push(icon)
+        m.tileX.push(x)
+        x = x + definition.width + 8
     end for
+    updateClock()
+    m.clockTimer.control = "start"
+end sub
+
+sub updateClock()
+    now = CreateObject("roDateTime")
+    now.ToLocalTime()
+    hours = now.GetHours()
+    minutes = now.GetMinutes()
+    text = hours.ToStr() + ":"
+    if hours < 10 then text = "0" + text
+    if minutes < 10 then text = text + "0"
+    m.navClock.text = text + minutes.ToStr()
+end sub
+
+' Parar sobre um poster de "Novidades para voce" leva o titulo ao destaque
+' (0,3 s depois de parar, para rolar rapido nao buscar imagem a cada tecla).
+sub scheduleHeroFocus(item as Object)
+    m.heroFocusItem = item
+    m.heroFocusTimer.control = "stop"
+    m.heroFocusTimer.control = "start"
+end sub
+
+sub onHeroFocusTimer()
+    item = m.heroFocusItem
+    if item = invalid or not m.isActive then return
+    if m.hero <> invalid and m.hero.id = item.id then return
+    eyebrow = "FILME"
+    if item.type = "series" then eyebrow = "SÉRIE"
+    m.heroPinned = true
+    m.heroTimer.control = "stop"
+    renderHero({ item: item, eyebrow: eyebrow })
 end sub
 
 sub setCatalog(payload as Object)
@@ -137,6 +191,7 @@ sub setCatalog(payload as Object)
     continueItems = resolveLocalItems(state.continue_watching, items)
     favoriteItems = resolveLocalItems(state.favorites, items)
     m.heroTimer.control = "stop"
+    m.heroPinned = false
     m.heroCandidates = uniqueHeroCandidates(continueItems, favoriteItems, items)
     m.heroIndex = 0
     if m.heroCandidates.count() > 0 then renderHero(m.heroCandidates[0])
@@ -151,7 +206,7 @@ sub setCatalog(payload as Object)
     refreshContinueWatching()
     renderRails()
     renderDots()
-    if m.isActive and m.heroCandidates.count() > 1 then m.heroTimer.control = "start"
+    if m.isActive and m.heroCandidates.count() > 1 and not m.heroPinned then m.heroTimer.control = "start"
 end sub
 
 ' ---------- Destaque ----------
@@ -312,7 +367,7 @@ sub renderDots()
     count = m.heroCandidates.count()
     for index = 0 to 2
         dot = m.dots[index]
-        dot.visible = count > 1 and index < count
+        dot.visible = count > 1 and index < count and not m.heroPinned
         if index = m.heroIndex then
             dot.color = "0x00D7FFFF"
         else
@@ -322,7 +377,7 @@ sub renderDots()
 end sub
 
 sub onHeroTimerFired()
-    if not m.isActive or m.heroCandidates.count() < 2 then return
+    if not m.isActive or m.heroCandidates.count() < 2 or m.heroPinned then return
     ' Nao troca o destaque enquanto o usuario esta nos botoes dele.
     if m.focusArea = 0 then return
     m.heroIndex = m.heroIndex + 1
@@ -341,7 +396,7 @@ sub setActive(active as Boolean)
         m.resumeTask.control = "STOP"
         m.resumeTask = invalid
     end if
-    if active and m.heroCandidates.count() > 1 then
+    if active and m.heroCandidates.count() > 1 and not m.heroPinned then
         m.heroTimer.control = "start"
     else
         m.heroTimer.control = "stop"
@@ -367,14 +422,20 @@ function handleKey(event as Object) as Boolean
     if event.press <> true then return false
     key = event.key
     if key = "back" then return false
+    ' Ordem vertical: menu (1) > destaque (0) > Novidades (2) > Continuar (3).
     if key = "down" then
         if m.focusArea = 2 and m.resumeItems.count() > 0 then
             column = m.continueIndex - m.continueOffset
             m.resumeIndex = minHome(m.resumeOffset + column, m.resumeItems.count() - 1)
             m.focusArea = 3
-        else if m.focusArea < 2 then
-            m.focusArea = m.focusArea + 1
-            if m.focusArea = 2 and m.continueItems.count() = 0 then m.focusArea = 1
+        else if m.focusArea = 1 then
+            if m.hero <> invalid then
+                m.focusArea = 0
+            else if m.continueItems.count() > 0 then
+                m.focusArea = 2
+            end if
+        else if m.focusArea = 0 and m.continueItems.count() > 0 then
+            m.focusArea = 2
         end if
         updateFocusArea()
         return true
@@ -383,8 +444,16 @@ function handleKey(event as Object) as Boolean
         if m.focusArea = 3 then
             column = m.resumeIndex - m.resumeOffset
             m.continueIndex = minHome(m.continueOffset + column, m.continueItems.count() - 1)
+            m.focusArea = 2
+        else if m.focusArea = 2 then
+            if m.hero <> invalid then
+                m.focusArea = 0
+            else
+                m.focusArea = 1
+            end if
+        else if m.focusArea = 0 then
+            m.focusArea = 1
         end if
-        if m.focusArea > 0 and not (m.focusArea = 1 and m.hero = invalid) then m.focusArea = m.focusArea - 1
         updateFocusArea()
         return true
     end if
@@ -418,7 +487,8 @@ function handleTileKey(key as String) as Boolean
         m.tileIndex = m.tileIndex - 1
         updateFocusArea()
     else if key = "OK" then
-        m.top.sectionRequested = m.tileDefs[m.tileIndex].section
+        section = m.tileDefs[m.tileIndex].section
+        if section > 0 then m.top.sectionRequested = section
     end if
     return true
 end function
@@ -446,6 +516,7 @@ function handleRailKey(key as String) as Boolean
         m.continueOffset = offset
     end if
     if offset <> oldOffset then renderRails()
+    if m.focusArea = 2 and (key = "left" or key = "right") then scheduleHeroFocus(items[index])
     if key = "OK" then
         if m.focusArea = 3 then
             resumeHomeItem(items[index])
@@ -515,16 +586,25 @@ sub updateFocusArea()
         m.actionFocus.translation = [318, 494]
         m.actionFocus.width = 272
     end if
-    ' Blocos
+    ' Menu: aba ativa (Inicio) em fundo elevado com icone ciano; foco em
+    ' pilula clara com icone e texto escuros.
     for index = 0 to m.tileBackgrounds.count() - 1
-        if visible and m.focusArea = 1 and index = m.tileIndex then
-            m.tileBackgrounds[index].color = "0x147DFFFF"
+        focused = visible and m.focusArea = 1 and index = m.tileIndex
+        active = m.tileDefs[index].section = 0
+        if focused then
+            m.tileBackgrounds[index].color = "0xF4F8FFFF"
+            m.tileIcons[index].blendColor = "0x070B14FF"
+            m.tileLabels[index].color = "0x070B14FF"
+        else if active then
+            m.tileBackgrounds[index].color = "0x1A2438FF"
+            m.tileIcons[index].blendColor = "0x00D7FFFF"
+            m.tileLabels[index].color = "0xF4F8FFFF"
         else
-            m.tileBackgrounds[index].color = "0x0D1422FF"
+            m.tileBackgrounds[index].color = "0x00000000"
+            m.tileIcons[index].blendColor = "0xC9D2E3FF"
+            m.tileLabels[index].color = "0xC9D2E3FF"
         end if
     end for
-    m.tileFocus.visible = visible and m.focusArea = 1
-    m.tileFocus.translation = [58 + m.tileIndex * (m.tileWidth + m.tileGap), 656]
     ' Fileiras independentes
     frame = m.top.findNode("continueFocus")
     resumeFrame = m.top.findNode("resumeFocus")
@@ -538,9 +618,9 @@ sub updateFocusArea()
         placeFocusFrame(resumeFrame, m.resumeGrid, m.resumeIndex - m.resumeOffset, 8, 196, 294, 24, 0)
     end if
     if m.focusArea = 3 then
-        scrollPage(-712)
+        scrollPage(-510)
     else if m.focusArea = 2 then
-        scrollPage(-328)
+        scrollPage(-126)
     else
         scrollPage(0)
     end if
@@ -555,7 +635,7 @@ sub renderRails()
         item = m.resumeItems[index]
         if item.homeProgress <> invalid and item.homeProgress > 0 then
             track = m.resumeBars.createChild("Rectangle")
-            track.translation = [64 + (index - m.resumeOffset) * 220, 892 + 282]
+            track.translation = [64 + (index - m.resumeOffset) * 220, 690 + 282]
             track.width = 196
             track.height = 6
             track.color = "0x8894A880"
