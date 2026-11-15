@@ -292,6 +292,15 @@ sub onLibraryItemRequested()
     openCatalogItem(resolved)
 end sub
 
+' Capa mostrada enquanto o filme ou episodio abre (a mesma ja baixada na tela anterior).
+function playerCoverFor(item as Object) as String
+    if item = invalid or item.type = "live" then return ""
+    if item.backdrop <> invalid and safeTrim(item.backdrop) <> "" then return safeTrim(item.backdrop)
+    if item.image <> invalid and safeTrim(item.image) <> "" then return safeTrim(item.image)
+    if item.logo <> invalid and safeTrim(item.logo) <> "" then return safeTrim(item.logo)
+    return ""
+end function
+
 sub playCatalogItem(item as Object, resumePosition as Integer)
     if item = invalid or item.stream_url = invalid or item.stream_url = "" then return
     clearEpisodeQueue()
@@ -305,6 +314,7 @@ sub playCatalogItem(item as Object, resumePosition as Integer)
     m.playerView.persistEnabled = true
     m.playerView.nextEpisode = invalid
     m.playerView.skipIntroEnd = 0
+    m.playerView.coverUrl = playerCoverFor(item)
     m.playerView.streamUrl = item.stream_url
     m.playerView.visible = true
 end sub
@@ -799,6 +809,7 @@ sub playLiveItem(item as Object, channels as Object, index as Integer)
     m.playerView.persistEnabled = false
     m.playerView.nextEpisode = invalid
     m.playerView.skipIntroEnd = 0
+    m.playerView.coverUrl = playerCoverFor(item)
     m.playerView.streamUrl = item.stream_url
     m.playerView.visible = true
 end sub
@@ -915,6 +926,7 @@ sub onTrailerRequested()
     m.playerView.persistEnabled = false
     m.playerView.nextEpisode = invalid
     m.playerView.skipIntroEnd = 0
+    m.playerView.coverUrl = ""
     m.playerView.streamUrl = trailer.url
     m.playerView.visible = true
 end sub
@@ -943,6 +955,7 @@ sub onEpisodeRequested()
     else
         m.playerView.nextEpisode = invalid
     end if
+    m.playerView.coverUrl = playerCoverFor(episode)
     m.playerView.streamUrl = episode.url
     m.playerView.visible = true
 end sub
@@ -969,6 +982,7 @@ sub onNextEpisodeRequested()
     else
         m.playerView.nextEpisode = invalid
     end if
+    m.playerView.coverUrl = playerCoverFor(episode)
     m.playerView.streamUrl = episode.url
 end sub
 

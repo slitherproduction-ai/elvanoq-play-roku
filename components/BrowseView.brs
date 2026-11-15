@@ -21,10 +21,11 @@ sub init()
     m.selectedItems = []
     m.selectedTitle = m.top.findNode("selectedTitle")
     m.selectedMeta = m.top.findNode("selectedMeta")
-    m.selectedTitle.font = appFont(26, "semibold")
+    ' Faixa do titulo em foco acima da grade (como no Android, LG e MSX).
+    m.selectedTitle.font = appFont(36, "bold")
     m.selectedTitle.color = "0xF4F8FFFF"
     m.selectedMeta.font = appFont(20, "regular")
-    m.selectedMeta.color = "0x8894A8FF"
+    m.selectedMeta.color = "0xC9D2E3FF"
     m.selectedGridIndex = 0
     m.grid.observeField("itemSelected", "onItemSelected")
     m.eyebrow.font = appFont(18, "bold")
@@ -365,13 +366,15 @@ sub renderCategories()
                 count.text = category.total.ToStr()
             end if
             isCurrent = (index = m.categoryIndex)
+            ' Foco = pilula clara com texto escuro; selecionada = fundo
+            ' elevado com marcador ciano.
             if isCurrent and focusOnList then
-                label.color = "0xFFFFFFFF"
-                count.color = "0xFFFFFFFF"
+                label.color = "0x070B14FF"
+                count.color = "0x070B14FF"
                 label.font = m.fontStrong
             else if isCurrent then
-                label.color = "0x00D7FFFF"
-                count.color = "0x00D7FFFF"
+                label.color = "0xF4F8FFFF"
+                count.color = "0x9AA6BDFF"
                 label.font = m.fontStrong
             else
                 label.color = "0xC9D3E3FF"
@@ -388,6 +391,9 @@ sub renderCategories()
     y = 236 + visibleRow * 52
     m.categoryFocus.translation = [76, y]
     m.categoryMarker.translation = [76, y]
+    categorySelected = m.top.findNode("categorySelected")
+    categorySelected.translation = [76, y]
+    categorySelected.visible = not focusOnList and m.categories.count() > 0
     m.categoryFocus.visible = focusOnList
     m.categoryMarker.visible = not focusOnList and m.categories.count() > 0
     if m.categories.count() > m.visibleCategories then

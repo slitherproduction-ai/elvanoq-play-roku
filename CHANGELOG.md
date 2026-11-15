@@ -1,5 +1,14 @@
 # Changelog — ELVANOQ Play Roku
 
+## 1.1.8 (build 8)
+
+Paridade com o redesign de TV do Android 2.17.61–2.17.63 (mesmo sistema visual no Android, Roku, LG e MSX).
+
+- **Menu com ícones na Início:** os seis blocos dão lugar a um menu no topo, ao lado da marca — Início, TV ao Vivo, Filmes, Séries e Minha Lista em pílulas com ícone, Ajustes só com ícone e o relógio à direita. Sem atalho de Busca (ela continua dentro de Filmes e Séries). Aba ativa com fundo elevado `#1A2438` e ícone ciano; foco em pílula clara com ícone e texto escuros. Ordem vertical: menu › destaque › Novidades › Continuar. As fileiras sobem para onde ficavam os blocos. Novo ícone `images/icon_home.png`.
+- **Destaque acompanha o pôster em foco:** parar 0,3 s sobre um pôster de "Novidades para você" leva o título ao destaque (com a mesma busca de imagem larga do `VodInfoService`); a rotação automática para até a lista ser recarregada. Moldura de foco das fileiras em branco.
+- **Filmes e Séries:** a faixa com o título em foco (nome e dados) sai do rodapé e fica acima da grade. Categorias num trilho sem borda; foco em pílula clara com texto escuro, categoria selecionada com fundo elevado e marcador ciano.
+- **Player:** relógio no topo à direita e, em filmes e episódios, "termina às HH:MM" (no lugar do selo "ELVANOQ PLAY"). Controles em pílulas translúcidas, com o foco claro andando sobre elas. Ao abrir filme ou episódio, a capa já baixada na tela anterior aparece na hora, com véu, título e uma linha fina animada, até o primeiro quadro (campo `coverUrl`, preenchido pelo `AppShell`; ao vivo e trailer não usam).
+
 ## 1.1.7 (build 7)
 
 Paridade com a Samsung MSX e a LG 1.1.6 (correção "Carregando") e 1.1.8.

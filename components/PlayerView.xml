@@ -6,6 +6,7 @@
     <field id="contentItem" type="assocarray" />
     <field id="contentTitle" type="string" />
     <field id="contentCategory" type="string" />
+    <field id="coverUrl" type="string" value="" />
     <field id="resumePosition" type="integer" value="0" />
     <field id="persistEnabled" type="boolean" value="true" />
     <field id="skipIntroEnd" type="integer" value="0" />
@@ -28,6 +29,7 @@
   <script type="text/brightscript" uri="pkg:/source/StreamFormat.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <script type="text/brightscript" uri="pkg:/source/ListPrefs.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ImageSize.brs" />
   <children>
     <Rectangle width="1920" height="1080" color="0x000000FF" />
     <Video id="video" width="1920" height="1080" enableUI="false" />
@@ -39,6 +41,20 @@
     <Timer id="openTimer" duration="12" repeat="false" />
     <!-- Barra de tempo: aplica o salto acumulado 0,6 s depois do ultimo toque -->
     <Timer id="seekTimer" duration="0.6" repeat="false" />
+
+    <!-- Abertura: ate o primeiro quadro, a capa (ja em cache da tela anterior)
+         com veu, titulo e uma linha fina animada, no lugar de "Carregando". -->
+    <Group id="openingCover" visible="false">
+      <Poster id="openingArt" width="1920" height="1080" loadDisplayMode="scaleToZoom" />
+      <Rectangle width="1920" height="1080" color="0x040912A0" />
+      <Label id="openingEyebrow" translation="[96,900]" text="ABRINDO" width="1200" height="28" />
+      <Label id="openingTitle" translation="[96,934]" width="1600" height="60" />
+      <Rectangle translation="[0,1074]" width="1920" height="6" color="0xF4F8FF1F" />
+      <Rectangle id="openingBar" translation="[-360,1074]" width="360" height="6" color="0x00D7FFFF" />
+    </Group>
+    <Animation id="openingAnimation" duration="1.1" repeat="true" easeFunction="inOutQuad">
+      <Vector2DFieldInterpolator key="[0.0, 1.0]" keyValue="[[-360.0, 1074.0], [1920.0, 1074.0]]" fieldToInterp="openingBar.translation" />
+    </Animation>
 
     <!-- OSD: so degradês no topo e embaixo; o vídeo continua visível -->
     <Rectangle id="osdBackground" width="1920" height="1080" color="0x070B1433" />
@@ -63,6 +79,12 @@
     <Label id="timeLabel" translation="[64,914]" width="700" height="30" />
     <Label id="trackStatus" translation="[856,914]" width="1000" height="30" horizAlign="right" />
 
+    <!-- Pilulas translucidas: o foco (pilula clara) anda sobre elas. -->
+    <RoundRect id="pillBg0" translation="[64,958]" width="160" height="56" color="0xF4F8FF1F" radius="28" />
+    <RoundRect id="pillBg1" translation="[240,958]" width="160" height="56" color="0xF4F8FF1F" radius="28" />
+    <RoundRect id="pillBg2" translation="[416,958]" width="160" height="56" color="0xF4F8FF1F" radius="28" />
+    <RoundRect id="pillBg3" translation="[592,958]" width="160" height="56" color="0xF4F8FF1F" radius="28" />
+    <RoundRect id="pillBg4" translation="[768,958]" width="160" height="56" color="0xF4F8FF1F" radius="28" />
     <RoundRect id="controlFocus" translation="[240,958]" width="160" height="56" color="0xF4F8FFFF"  radius="28" />
     <Label id="controlBack" translation="[64,958]" text="-10s" width="160" height="56" horizAlign="center" vertAlign="center" />
     <Label id="controlPlay" translation="[240,958]" text="Pausar" width="160" height="56" horizAlign="center" vertAlign="center" />
