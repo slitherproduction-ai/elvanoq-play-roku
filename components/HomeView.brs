@@ -2,6 +2,7 @@
 ' O foco fica no AppShell; esta tela recebe as teclas por handleKey().
 sub init()
     m.heroArt = m.top.findNode("heroArt")
+    m.heroPortrait = m.top.findNode("heroPortrait")
     m.eyebrow = m.top.findNode("eyebrow")
     m.heroTitle = m.top.findNode("heroTitle")
     m.heroMeta = m.top.findNode("heroMeta")
@@ -334,13 +335,44 @@ sub renderHero(candidate as Object)
     end if
     art = ""
     if hero.backdrop <> invalid and safeTrim(hero.backdrop) <> "" then art = safeTrim(hero.backdrop)
+    if hero.logo <> invalid and art = hero.logo then art = ""
     if art = "" and m.heroArtCache[hero.id] <> invalid then art = m.heroArtCache[hero.id]
-    if art = "" and hero.logo <> invalid then art = hero.logo
-    m.heroArt.uri = sizedImageFor(art, "backdrop")
+    m.heroPosterUrl = ""
+    if hero.logo <> invalid then m.heroPosterUrl = hero.logo
+    showHeroArt(art)
     ' Filmes Xtream nao trazem imagem larga na lista: busca no get_vod_info.
     if hero.type = "movies" and m.heroArtCache[hero.id] = invalid then requestVodInfo(hero)
     updateActionCopy()
     renderDots()
+end sub
+
+' Arte do destaque: imagem larga (com reserva do TMDB). A capa vertical so
+' preenche o destaque quando e do TMDB, pedida em 1280 px; capa pequena do
+' servidor ampliada ficava borrada, entao ela aparece inteira a direita.
+sub showHeroArt(wide as String)
+    urls = []
+    if wide <> "" then urls.push(sizedImageFor(wide, "backdrop"))
+    if isTmdbImage(m.heroPosterUrl) then urls.push(sizedImageFor(m.heroPosterUrl, "backdrop"))
+    m.heroPortrait.visible = false
+    m.heroPortrait.uri = ""
+    m.heroArt.visible = true
+    if not setImageChain(m.heroArt, urls) then showHeroPortrait()
+end sub
+
+sub showHeroPortrait()
+    m.heroArt.visible = false
+    if m.heroPosterUrl = invalid or m.heroPosterUrl = "" then return
+    m.heroPortrait.visible = true
+    if not setImageChain(m.heroPortrait, [sizedImageFor(m.heroPosterUrl, "detail")]) then m.heroPortrait.visible = false
+end sub
+
+sub onImageChainStatus(event as Object)
+    if advanceImageChain(event) then return
+    if event.getRoSGNode().id = "heroArt" then
+        showHeroPortrait()
+    else
+        m.heroPortrait.visible = false
+    end if
 end sub
 
 sub requestVodInfo(hero as Object)
@@ -359,7 +391,7 @@ sub onVodInfo(event as Object)
     m.heroArtCache[result.itemId] = ""
     if result.backdrop <> invalid and result.backdrop <> "" then m.heroArtCache[result.itemId] = result.backdrop
     if m.hero = invalid or m.hero.id <> result.itemId then return
-    if result.backdrop <> invalid and result.backdrop <> "" then m.heroArt.uri = sizedImageFor(result.backdrop, "backdrop")
+    if result.backdrop <> invalid and result.backdrop <> "" then showHeroArt(result.backdrop)
     if result.plot <> invalid and result.plot <> "" then m.heroDescription.text = result.plot
 end sub
 
