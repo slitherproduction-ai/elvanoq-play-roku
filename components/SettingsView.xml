@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- Ajustes: menu com Controle parental, Categorias visiveis, Formato do ao vivo e Sobre. -->
+<!-- Ajustes: Controle parental, Categorias visiveis, Formato do ao vivo, Conta e Sobre. -->
 <component name="SettingsView" extends="Group">
   <interface>
     <field id="categories" type="array" onChange="onCategoriesChanged" />
@@ -19,49 +19,62 @@
   <script type="text/brightscript" uri="pkg:/source/ListPrefs.brs" />
   <children>
     <Group id="hub">
-    <Rectangle width="1920" height="1080" color="0x070B14FF" />
-    <Poster uri="pkg:/images/elvanoq-login-tv-backdrop.jpg" width="1920" height="1080" />
-    <Rectangle width="1920" height="1080" color="0x070B14C7" />
-      <Label id="pageTitle" translation="[64,64]" text="Ajustes" width="900" height="52" />
-      <Label id="pageSubtitle" translation="[64,118]" text="Preferências desta TV" width="1200" height="28" />
-      <RoundRect translation="[64,180]" width="760" height="830" color="0x0D1422EB" radius="20" borderColor="0xBEDCFF22" />
-      <Label id="groupLabel0" translation="[104,212]" text="PROTEÇÃO E LISTA" width="600" height="26" />
-      <RoundRect id="rowBg0" translation="[88,250]" width="712" height="76" color="0x111B2DFF" radius="14" />
-      <Label id="rowTitle0" translation="[116,250]" width="420" height="76" vertAlign="center" />
-      <RoundRect id="rowBadge0" translation="[548,270]" width="228" height="36" color="0x00D7FF33" radius="18" />
-      <Label id="rowBadgeLabel0" translation="[548,270]" width="228" height="36" horizAlign="center" vertAlign="center" />
-      <RoundRect id="rowBg1" translation="[88,338]" width="712" height="76" color="0x111B2DFF" radius="14" />
-      <Label id="rowTitle1" translation="[116,338]" width="420" height="76" vertAlign="center" />
-      <RoundRect id="rowBadge1" translation="[548,358]" width="228" height="36" color="0x00D7FF33" radius="18" />
-      <Label id="rowBadgeLabel1" translation="[548,358]" width="228" height="36" horizAlign="center" vertAlign="center" />
-      <Label id="groupLabel1" translation="[104,452]" text="REPRODUÇÃO" width="600" height="26" />
-      <RoundRect id="rowBg2" translation="[88,490]" width="712" height="76" color="0x111B2DFF" radius="14" />
-      <Label id="rowTitle2" translation="[116,490]" width="420" height="76" vertAlign="center" />
-      <RoundRect id="rowBadge2" translation="[548,510]" width="228" height="36" color="0x00D7FF33" radius="18" />
-      <Label id="rowBadgeLabel2" translation="[548,510]" width="228" height="36" horizAlign="center" vertAlign="center" />
-      <Label id="groupLabel2" translation="[104,604]" text="APLICATIVO" width="600" height="26" />
-      <RoundRect id="rowBg3" translation="[88,642]" width="712" height="76" color="0x111B2DFF" radius="14" />
-      <Label id="rowTitle3" translation="[116,642]" width="420" height="76" vertAlign="center" />
-      <RoundRect id="rowBadge3" translation="[548,662]" width="228" height="36" color="0x00D7FF33" radius="18" />
-      <Label id="rowBadgeLabel3" translation="[548,662]" width="228" height="36" horizAlign="center" vertAlign="center" />
-      <RoundRect id="rowBg4" translation="[88,730]" width="712" height="76" color="0x111B2DFF" radius="14" />
-      <Label id="rowTitle4" translation="[116,730]" width="420" height="76" vertAlign="center" />
-      <RoundRect id="rowBadge4" translation="[548,750]" width="228" height="36" color="0x00D7FF33" radius="18" />
-      <Label id="rowBadgeLabel4" translation="[548,750]" width="228" height="36" horizAlign="center" vertAlign="center" />
-      <RoundRect translation="[844,180]" width="1012" height="830" color="0x0D1422EB" radius="20" borderColor="0xBEDCFF22" />
-      <Label id="detailEyebrow" translation="[884,212]" width="900" height="26" />
-      <Label id="detailTitle" translation="[884,250]" width="932" height="52" />
-      <Label id="detailBody" translation="[884,316]" width="932" height="120" wrap="true" maxLines="4" />
+      <!-- Ajustes no padrão premium (LG/MSX 1.2.0, Android 2.17.21): grupos
+           Conteúdo / Sistema, linhas com ícone, título, descrição e valor, e
+           o cartão de detalhes à direita. -->
+      <Rectangle width="1920" height="1080" color="0x070B14FF" />
+      <Poster uri="pkg:/images/settings_glow.png" width="1920" height="420" />
+      <Label id="pageTitle" translation="[64,60]" text="Ajustes" width="1100" height="56" />
+      <Label id="pageSubtitle" translation="[64,118]" text="Conteúdo e sistema desta TV" width="1100" height="30" />
+      <Label id="deviceInfo" translation="[944,124]" width="912" height="28" horizAlign="right" />
+      <Label id="groupLabel0" translation="[72,176]" text="CONTEÚDO" width="600" height="24" />
+      <Label id="groupLabel1" translation="[72,468]" text="SISTEMA" width="600" height="24" />
+      <RoundRect id="rowBg0" translation="[64,210]" width="1100" height="76" color="0x0D1422B8" radius="16" borderColor="0xBEDEFF1A" />
+      <Poster id="rowIcon0" translation="[92,231]" width="34" height="34" blendColor="0x00D7FFFF" />
+      <Label id="rowTitle0" translation="[146,219]" width="560" height="34" />
+      <Label id="rowSub0" translation="[146,253]" width="560" height="24" />
+      <Label id="rowMeta0" translation="[700,210]" width="394" height="76" horizAlign="right" vertAlign="center" />
+      <Poster translation="[1114,237]" width="22" height="22" uri="pkg:/images/icon_chevron.png" blendColor="0x8894A8FF" />
+      <RoundRect id="rowBg1" translation="[64,296]" width="1100" height="76" color="0x0D1422B8" radius="16" borderColor="0xBEDEFF1A" />
+      <Poster id="rowIcon1" translation="[92,317]" width="34" height="34" blendColor="0x00D7FFFF" />
+      <Label id="rowTitle1" translation="[146,305]" width="560" height="34" />
+      <Label id="rowSub1" translation="[146,339]" width="560" height="24" />
+      <Label id="rowMeta1" translation="[700,296]" width="394" height="76" horizAlign="right" vertAlign="center" />
+      <Poster translation="[1114,323]" width="22" height="22" uri="pkg:/images/icon_chevron.png" blendColor="0x8894A8FF" />
+      <RoundRect id="rowBg2" translation="[64,382]" width="1100" height="76" color="0x0D1422B8" radius="16" borderColor="0xBEDEFF1A" />
+      <Poster id="rowIcon2" translation="[92,403]" width="34" height="34" blendColor="0x00D7FFFF" />
+      <Label id="rowTitle2" translation="[146,391]" width="560" height="34" />
+      <Label id="rowSub2" translation="[146,425]" width="560" height="24" />
+      <Label id="rowMeta2" translation="[700,382]" width="394" height="76" horizAlign="right" vertAlign="center" />
+      <Poster translation="[1114,409]" width="22" height="22" uri="pkg:/images/icon_chevron.png" blendColor="0x8894A8FF" />
+      <RoundRect id="rowBg3" translation="[64,502]" width="1100" height="76" color="0x0D1422B8" radius="16" borderColor="0xBEDEFF1A" />
+      <Poster id="rowIcon3" translation="[92,523]" width="34" height="34" blendColor="0x00D7FFFF" />
+      <Label id="rowTitle3" translation="[146,511]" width="560" height="34" />
+      <Label id="rowSub3" translation="[146,545]" width="560" height="24" />
+      <Label id="rowMeta3" translation="[700,502]" width="394" height="76" horizAlign="right" vertAlign="center" />
+      <Poster translation="[1114,529]" width="22" height="22" uri="pkg:/images/icon_chevron.png" blendColor="0x8894A8FF" />
+      <RoundRect id="rowBg4" translation="[64,588]" width="1100" height="76" color="0x0D1422B8" radius="16" borderColor="0xBEDEFF1A" />
+      <Poster id="rowIcon4" translation="[92,609]" width="34" height="34" blendColor="0x00D7FFFF" />
+      <Label id="rowTitle4" translation="[146,597]" width="560" height="34" />
+      <Label id="rowSub4" translation="[146,631]" width="560" height="24" />
+      <Label id="rowMeta4" translation="[700,588]" width="394" height="76" horizAlign="right" vertAlign="center" />
+      <Poster translation="[1114,615]" width="22" height="22" uri="pkg:/images/icon_chevron.png" blendColor="0x8894A8FF" />
+      <RoundRect translation="[1204,210]" width="652" height="640" color="0x0D1422B8" radius="16" borderColor="0xBEDEFF1A" />
+      <Poster id="detailIcon" translation="[1252,254]" width="64" height="64" blendColor="0x00D7FFFF" />
+      <Label id="detailTitle" translation="[1252,344]" width="556" height="44" />
+      <Label id="detailBody" translation="[1252,400]" width="556" height="170" wrap="true" maxLines="5" />
       <Group id="aboutGroup" visible="false">
-        <Label id="historyLabel" translation="[884,430]" text="HISTÓRICO DE VERSÕES" width="600" height="26" />
-        <Label id="historyVersion0" translation="[884,470]" width="160" height="32" />
-        <Label id="historyText0" translation="[1044,470]" width="772" height="132" wrap="true" maxLines="4" />
-        <Label id="historyVersion1" translation="[884,620]" width="160" height="32" />
-        <Label id="historyText1" translation="[1044,620]" width="772" height="132" wrap="true" maxLines="4" />
-        <Label id="historyVersion2" translation="[884,770]" width="160" height="32" />
-        <Label id="historyText2" translation="[1044,770]" width="772" height="132" wrap="true" maxLines="4" />
+        <Label id="historyLabel" translation="[1252,500]" text="NOVIDADES" width="556" height="24" />
+        <Label id="historyVersion0" translation="[1252,538]" width="110" height="30" />
+        <Label id="historyText0" translation="[1362,538]" width="446" height="90" wrap="true" maxLines="3" />
+        <Label id="historyVersion1" translation="[1252,640]" width="110" height="30" />
+        <Label id="historyText1" translation="[1362,640]" width="446" height="90" wrap="true" maxLines="3" />
+        <Label id="historyVersion2" translation="[1252,742]" width="110" height="30" />
+        <Label id="historyText2" translation="[1362,742]" width="446" height="90" wrap="true" maxLines="3" />
       </Group>
-      <Label id="detailHint" translation="[884,950]" width="932" height="30" />
+      <Label id="detailValue" translation="[1252,640]" width="556" height="34" />
+      <Label id="detailHint" translation="[1252,770]" width="556" height="60" wrap="true" maxLines="2" />
+      <Label id="footerHint" translation="[64,1020]" text="↑/↓ escolher   •   OK abrir   •   Voltar sair de Ajustes" width="1100" height="26" />
     </Group>
     <ParentalView id="parentalPage" visible="false" />
     <VisibleCategoriesView id="visiblePage" visible="false" />

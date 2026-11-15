@@ -1,7 +1,10 @@
 ' Ajustes: menu principal e paginas (Controle parental e Categorias visiveis).
 
 sub init()
-    m.rowKeys = ["parental", "visible", "format", "about", "account"]
+    m.rowKeys = ["parental", "visible", "format", "account", "about"]
+    m.rowTitleText = ["Controle parental", "Categorias visíveis", "Formato do ao vivo", "Conta", "Sobre"]
+    m.rowSubText = ["PIN, conteúdo adulto e bloqueios", "Mostrar ou ocultar categorias desta lista", "OK alterna entre Automático, HLS e TS", "Excluir o login desta TV", "Versão e novidades"]
+    m.rowIconUri = ["pkg:/images/icon_lock.png", "pkg:/images/icon_grid.png", "pkg:/images/icon_broadcast.png", "pkg:/images/icon_key.png", "pkg:/images/icon_sparkles.png"]
     m.selected = 0
     m.page = ""
     m.parentalPage = m.top.findNode("parentalPage")
@@ -9,54 +12,70 @@ sub init()
     m.visiblePage.observeField("changed", "onVisibleCategoriesChanged")
     m.hub = m.top.findNode("hub")
     title = m.top.findNode("pageTitle")
-    title.font = appFont(40, "bold")
+    title.font = appFont(44, "bold")
     title.color = "0xF4F8FFFF"
     subtitle = m.top.findNode("pageSubtitle")
-    subtitle.font = appFont(20, "regular")
+    subtitle.font = appFont(21, "regular")
     subtitle.color = "0x8894A8FF"
-    for index = 0 to 2
+    m.deviceInfo = m.top.findNode("deviceInfo")
+    m.deviceInfo.font = appFont(20, "regular")
+    m.deviceInfo.color = "0xB6C2D6FF"
+    m.deviceInfo.text = "Roku   •   Versão " + appVersionText()
+    for index = 0 to 1
         label = m.top.findNode("groupLabel" + index.ToStr())
-        label.font = appFont(18, "bold")
-        label.color = "0x8894A8FF"
+        label.font = appFont(16, "bold")
+        label.color = "0x63728AFF"
     end for
+    footer = m.top.findNode("footerHint")
+    footer.font = appFont(18, "regular")
+    footer.color = "0x63728AFF"
     m.rowBgs = []
     m.rowTitles = []
-    m.rowBadges = []
-    m.rowBadgeLabels = []
+    m.rowSubs = []
+    m.rowMetas = []
     for index = 0 to m.rowKeys.count() - 1
         suffix = index.ToStr()
         m.rowBgs.push(m.top.findNode("rowBg" + suffix))
+        m.top.findNode("rowIcon" + suffix).uri = m.rowIconUri[index]
         rowTitle = m.top.findNode("rowTitle" + suffix)
-        rowTitle.font = appFont(26, "semibold")
+        rowTitle.font = appFont(25, "semibold")
+        rowTitle.color = "0xF4F8FFFF"
+        rowTitle.text = m.rowTitleText[index]
         m.rowTitles.push(rowTitle)
-        m.rowBadges.push(m.top.findNode("rowBadge" + suffix))
-        badgeLabel = m.top.findNode("rowBadgeLabel" + suffix)
-        badgeLabel.font = appFont(18, "bold")
-        m.rowBadgeLabels.push(badgeLabel)
+        rowSub = m.top.findNode("rowSub" + suffix)
+        rowSub.font = appFont(18, "regular")
+        rowSub.color = "0x9AA6BDFF"
+        rowSub.text = m.rowSubText[index]
+        m.rowSubs.push(rowSub)
+        rowMeta = m.top.findNode("rowMeta" + suffix)
+        rowMeta.font = appFont(20, "regular")
+        rowMeta.color = "0xB8C4D6FF"
+        m.rowMetas.push(rowMeta)
     end for
-    m.detailEyebrow = m.top.findNode("detailEyebrow")
-    m.detailEyebrow.font = appFont(18, "bold")
-    m.detailEyebrow.color = "0x00D7FFFF"
+    m.detailIcon = m.top.findNode("detailIcon")
     m.detailTitle = m.top.findNode("detailTitle")
-    m.detailTitle.font = appFont(36, "bold")
+    m.detailTitle.font = appFont(32, "bold")
     m.detailTitle.color = "0xF4F8FFFF"
     m.detailBody = m.top.findNode("detailBody")
-    m.detailBody.font = appFont(24, "regular")
-    m.detailBody.color = "0xC9D3E3FF"
+    m.detailBody.font = appFont(22, "regular")
+    m.detailBody.color = "0xB8C4D6FF"
+    m.detailValue = m.top.findNode("detailValue")
+    m.detailValue.font = appFont(22, "semibold")
+    m.detailValue.color = "0x00D7FFFF"
     m.detailHint = m.top.findNode("detailHint")
     m.detailHint.font = appFont(20, "regular")
     m.detailHint.color = "0x8894A8FF"
     m.aboutGroup = m.top.findNode("aboutGroup")
     historyLabel = m.top.findNode("historyLabel")
-    historyLabel.font = appFont(18, "bold")
-    historyLabel.color = "0x8894A8FF"
+    historyLabel.font = appFont(16, "bold")
+    historyLabel.color = "0x63728AFF"
     history = appHistory()
     for index = 0 to 2
         versionLabel = m.top.findNode("historyVersion" + index.ToStr())
         textLabel = m.top.findNode("historyText" + index.ToStr())
-        versionLabel.font = appFont(24, "bold")
+        versionLabel.font = appFont(22, "bold")
         versionLabel.color = "0xF4F8FFFF"
-        textLabel.font = appFont(21, "regular")
+        textLabel.font = appFont(19, "regular")
         textLabel.color = "0xB8C4D6FF"
         if index < history.count() then
             versionLabel.text = history[index][0]
@@ -123,28 +142,22 @@ sub renderHub()
     if m.rowBgs = invalid then return
     subtitle = m.top.findNode("pageSubtitle")
     if m.top.storeEdition then
-        subtitle.text = "Preferências desta TV   •   Tecla Replay: desconectar a lista desta TV"
+        subtitle.text = "Conteúdo e sistema desta TV   •   Replay: desconectar a lista"
     else
-        subtitle.text = "Preferências desta TV"
+        subtitle.text = "Conteúdo e sistema desta TV"
     end if
-    titles = ["Controle parental", "Categorias visíveis", "Formato do ao vivo", "Sobre", "Conta"]
     protectedTotal = protectedCategoryTotal(m.top.categories)
     hiddenTotal = hiddenCategoryTotal()
-    badges = [protectedTotal.ToStr() + " protegidas", hiddenTotal.ToStr() + " ocultas", liveFormatLabel(liveFormatPreference()), "v" + appVersionText(), "Excluir login"]
+    visibleText = "Todas visíveis"
+    if hiddenTotal > 0 then visibleText = hiddenTotal.ToStr() + " ocultas"
+    metas = [protectedTotal.ToStr() + " protegidas", visibleText, liveFormatLabel(liveFormatPreference()), "", "Versão " + appVersionText()]
     for index = 0 to m.rowKeys.count() - 1
-        focused = index = m.selected
-        m.rowTitles[index].text = titles[index]
-        m.rowBadgeLabels[index].text = badges[index]
-        if focused then
-            m.rowBgs[index].color = "0x147DFFFF"
-            m.rowTitles[index].color = "0xFFFFFFFF"
-            m.rowBadges[index].color = "0xFFFFFF2E"
-            m.rowBadgeLabels[index].color = "0xFFFFFFFF"
+        m.rowMetas[index].text = metas[index]
+        ' Foco como na LG/MSX: contorno ciano; sem foco, contorno quase invisível.
+        if index = m.selected then
+            m.rowBgs[index].borderColor = "0x00D7FFFF"
         else
-            m.rowBgs[index].color = "0x111B2DFF"
-            m.rowTitles[index].color = "0xC9D3E3FF"
-            m.rowBadges[index].color = "0x00D7FF26"
-            m.rowBadgeLabels[index].color = "0x7FE9FFFF"
+            m.rowBgs[index].borderColor = "0xBEDEFF1A"
         end if
     end for
     renderDetail(m.rowKeys[m.selected], protectedTotal, hiddenTotal)
@@ -152,31 +165,27 @@ end sub
 
 sub renderDetail(key as String, protectedTotal as Integer, hiddenTotal as Integer)
     m.aboutGroup.visible = key = "about"
+    m.detailIcon.uri = m.rowIconUri[m.selected]
+    m.detailTitle.text = m.rowTitleText[m.selected]
+    m.detailValue.text = ""
     if key = "parental" then
-        m.detailEyebrow.text = "PROTEÇÃO E LISTA"
-        m.detailTitle.text = "Controle parental"
-        m.detailBody.text = "PIN de quatro dígitos para categorias, canais e títulos. Categorias adultas são protegidas automaticamente. " + protectedTotal.ToStr() + " categorias protegidas nesta lista."
-        m.detailHint.text = "OK abrir   •   Voltar sair de Ajustes"
+        m.detailBody.text = "Crie um PIN e escolha as categorias e títulos protegidos. Categorias adultas são protegidas automaticamente."
+        m.detailValue.text = protectedTotal.ToStr() + " categorias protegidas"
+        m.detailHint.text = "OK abrir"
     else if key = "visible" then
-        m.detailEyebrow.text = "PROTEÇÃO E LISTA"
-        m.detailTitle.text = "Categorias visíveis"
-        m.detailBody.text = "Escolha quais categorias de Ao vivo, Filmes e Séries aparecem nesta TV. Ocultar não apaga nada da lista. " + hiddenTotal.ToStr() + " categorias ocultas."
-        m.detailHint.text = "OK abrir   •   Voltar sair de Ajustes"
+        m.detailBody.text = "Oculte categorias que você não usa em Ao vivo, Filmes e Séries. Ocultar não apaga nada da lista."
+        m.detailValue.text = hiddenTotal.ToStr() + " categorias ocultas"
+        m.detailHint.text = "OK abrir"
     else if key = "format" then
-        m.detailEyebrow.text = "REPRODUÇÃO"
-        m.detailTitle.text = "Formato do ao vivo"
-        m.detailBody.text = "Automático começa pelo formato que funcionou nesta lista. HLS (.m3u8) ou TS (.ts) fixam o formato dos canais. Atual: " + liveFormatLabel(liveFormatPreference()) + "."
-        m.detailHint.text = "OK alternar Automático, HLS e TS"
+        m.detailBody.text = "No Automático, a TV começa pelo formato que funcionou nesta lista. HLS (.m3u8) ou TS (.ts) fixam o formato dos canais."
+        m.detailValue.text = "Atual: " + liveFormatLabel(liveFormatPreference())
+        m.detailHint.text = "OK alterna entre Automático, HLS e TS"
     else if key = "account" then
-        m.detailEyebrow.text = "CONTA"
-        m.detailTitle.text = "Conta"
-        m.detailBody.text = "Exclua os dados de acesso desta TV e volte para a tela de login."
+        m.detailBody.text = "Apaga os dados de acesso desta TV e volta para a tela de login."
         m.detailHint.text = "OK excluir login"
     else
-        m.detailEyebrow.text = "APLICATIVO"
-        m.detailTitle.text = "ELVANOQ Play para Roku"
-        m.detailBody.text = "Versão " + appVersionText() + " (build " + appBuildText() + ")"
-        m.detailHint.text = "Voltar sair de Ajustes"
+        m.detailBody.text = "ELVANOQ Play para Roku   •   Versão " + appVersionText() + " (build " + appBuildText() + ")"
+        m.detailHint.text = ""
     end if
 end sub
 
