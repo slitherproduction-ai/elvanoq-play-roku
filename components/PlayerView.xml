@@ -23,6 +23,7 @@
     <function name="stopPlayback" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/PlayerView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/I18n.brs" />
   <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
   <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />

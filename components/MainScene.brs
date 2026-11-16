@@ -1,4 +1,5 @@
 sub init()
+    i18nAttach(m.top)
     clearParentalSession()
     m.playlistSynced = false
     m.codeCard = m.top.findNode("codeCard")
@@ -61,6 +62,35 @@ sub init()
         label.color = "0xF4F8FFFF"
     end for
     m.actionIndex = 0
+    ' Idioma: pilula no topo e janela de escolha (Automatico, Portugues, English).
+    m.languagePill = m.top.findNode("languagePill")
+    m.languagePillBg = m.top.findNode("languagePillBg")
+    m.languageLabel = m.top.findNode("languageLabel")
+    m.languageLabel.font = appFont(20, "semibold")
+    m.textMeasure = m.top.findNode("textMeasure")
+    m.languageOverlay = m.top.findNode("languageOverlay")
+    m.languageValues = ["auto", "pt", "en"]
+    labels = ["Automático", "Português (Brasil)", "English"]
+    subs = ["Igual ao idioma da TV", "Português", "Inglês"]
+    for i = 0 to 2
+        label = m.top.findNode("languageOptionLabel" + i.ToStr())
+        label.font = appFont(26, "semibold")
+        label.text = labels[i]
+        subLabel = m.top.findNode("languageOptionSub" + i.ToStr())
+        subLabel.font = appFont(18, "regular")
+        subLabel.text = subs[i]
+    end for
+    title = m.top.findNode("languageTitle")
+    title.font = appFont(34, "bold")
+    title.color = "0xF4F8FFFF"
+    text = m.top.findNode("languageText")
+    text.font = appFont(20, "regular")
+    text.color = "0x9AA6BDFF"
+    hint = m.top.findNode("languageHint")
+    hint.font = appFont(18, "regular")
+    hint.color = "0x7F8BA3FF"
+    m.global.observeField("language", "onMainLanguage")
+    layoutLanguagePill()
     layoutActivationActions()
     m.status.font = appFont(20, "regular")
     m.status.color = "0xB8C4D6FF"
@@ -235,6 +265,7 @@ sub openStoreServerKeyboard()
     dialog.text = "http://"
     dialog.observeField("buttonSelected", "onStoreServerKeyboardSelected")
     m.inputDialog = dialog
+    i18nDialog(dialog)
     m.top.dialog = dialog
 end sub
 
@@ -334,6 +365,10 @@ end sub
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
+    if m.languageOverlay <> invalid and m.languageOverlay.visible then
+        handleLanguageKey(key)
+        return true
+    end if
     if m.appShell <> invalid and m.appShell.visible then return false
     ' Aviso de teste encerrado: OK verifica de novo; Voltar sai do app (Roku exige sair pela tela inicial).
     if m.expiredOverlay <> invalid and m.expiredOverlay.visible then
@@ -347,6 +382,16 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
     if m.storeEdition = true and m.inputDialog = invalid then
         if key = "OK" and m.retryPlaylist <> invalid then
             connectStorePlaylist(m.retryPlaylist, false)
+            return true
+        end if
+        if key = "up" or key = "down" then
+            m.actionIndex = 0
+            if key = "up" then m.actionIndex = 3
+            layoutLanguagePill()
+            return true
+        end if
+        if key = "OK" and m.actionIndex = 3 then
+            openLanguagePicker()
             return true
         end if
         if key = "OK" or key = "options" then
@@ -370,7 +415,20 @@ end function
 
 sub moveActivationFocus(key as String)
     index = m.actionIndex
-    if key = "down" and index = 0 then index = 1
+    ' ↑ a partir do botao principal leva ao idioma; ↓ volta.
+    if index = 3 then
+        if key = "down" then index = 0
+    else if key = "up" and index = 0 then
+        index = 3
+    else if key = "down" and index = 0 then
+        index = 1
+    end if
+    if index = 3 or m.actionIndex = 3 then
+        m.actionIndex = index
+        layoutActivationActions()
+        layoutLanguagePill()
+        return
+    end if
     if key = "up" and index > 0 then index = 0
     if key = "right" and index = 1 then index = 2
     if key = "left" and index = 2 then index = 1
@@ -380,6 +438,10 @@ sub moveActivationFocus(key as String)
 end sub
 
 sub runActivationAction()
+    if m.actionIndex = 3 then
+        openLanguagePicker()
+        return
+    end if
     if m.actionIndex <> 2 then
         section = CreateObject("roRegistrySection", "ELVANOQPlay")
         section.Delete("login_removed")
@@ -404,6 +466,7 @@ sub openActivationHelp()
     dialog.observeField("buttonSelected", "closeActivationHelp")
     dialog.observeField("wasClosed", "closeActivationHelp")
     m.helpDialog = dialog
+    i18nDialog(dialog)
     m.top.dialog = dialog
 end sub
 
@@ -420,6 +483,7 @@ sub layoutActivationActions()
     primary = m.serverCodeButton.translation
     textWidth = 354
     if m.serverCodeButtonText.text <> "Entrar com código do servidor" then textWidth = len(m.serverCodeButtonText.text) * 13
+    if i18nLanguage() = "en" then textWidth = measureText(m.serverCodeButtonText)
     startX = primary[0] + int((760 - (28 + 16 + textWidth)) / 2)
     m.top.findNode("serverCodeIcon").translation = [startX, primary[1] + 24]
     m.serverCodeButtonText.translation = [startX + 44, primary[1]]
@@ -442,8 +506,14 @@ sub layoutActivationActions()
         m.serverCodeButtonText.color = "0xF4F8FFFF"
         icon.blendColor = "0xF4F8FFFF"
     end if
-    layoutShortcut("check", 96, 170, m.actionIndex = 1)
-    layoutShortcut("help", 484, 117, m.actionIndex = 2)
+    checkWidth = 170
+    helpWidth = 117
+    if i18nLanguage() = "en" then
+        checkWidth = measureText(m.top.findNode("checkButtonText"))
+        helpWidth = measureText(m.top.findNode("helpButtonText"))
+    end if
+    layoutShortcut("check", 96, checkWidth, m.actionIndex = 1)
+    layoutShortcut("help", 484, helpWidth, m.actionIndex = 2)
 end sub
 
 sub layoutShortcut(prefix as String, x as Integer, textWidth as Integer, focused as Boolean)
@@ -659,6 +729,7 @@ sub openServerCodeKeyboard()
     dialog.buttons = ["Continuar", "Cancelar"]
     dialog.observeField("buttonSelected", "onServerCodeKeyboardSelected")
     m.inputDialog = dialog
+    i18nDialog(dialog)
     m.top.dialog = dialog
 end sub
 
@@ -714,6 +785,7 @@ sub openCredentialKeyboard(stage as String)
         if dialog.textEditBox <> invalid then dialog.textEditBox.secureMode = true
     end if
     m.inputDialog = dialog
+    i18nDialog(dialog)
     m.top.dialog = dialog
 end sub
 
@@ -869,9 +941,16 @@ sub updateActivationClock()
     ms = mi.ToStr()
     if mi < 10 then ms = "0" + ms
     m.clockTime.text = hs + ":" + ms
-    days = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
-    months = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
-    m.clockDate.text = days[now.GetDayOfWeek()] + ", " + now.GetDayOfMonth().ToStr() + " " + months[now.GetMonth() - 1]
+    if i18nLanguage() = "en" then
+        days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+        months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        m.clockDate.text = days[now.GetDayOfWeek()] + ", " + months[now.GetMonth() - 1] + " " + now.GetDayOfMonth().ToStr()
+    else
+        days = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"]
+        months = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
+        m.clockDate.text = days[now.GetDayOfWeek()] + ", " + now.GetDayOfMonth().ToStr() + " " + months[now.GetMonth() - 1]
+    end if
+    layoutLanguagePill()
 end sub
 
 ' "Bem-vindo de volta": na primeira abertura com lista salva, por 1,2 s, por
@@ -968,3 +1047,142 @@ function deviceRequestKey(clientId as String) as String
     if len(normalized) < 16 then return ""
     return left(normalized, 16)
 end function
+
+' ---------- Idioma do aplicativo ----------
+
+function measureText(label as Object) as Integer
+    m.textMeasure.font = label.font
+    m.textMeasure.text = label.text
+    return Int(m.textMeasure.boundingRect().width)
+end function
+
+function languageName(preference as String) as String
+    if preference = "en" then return "English"
+    if preference = "pt" then return "Português (Brasil)"
+    return "Automático"
+end function
+
+' Pilula ao lado do relogio: 18 + globo 26 + 12 + texto + 12 + seta 20 + 22,
+' terminando a 36 px do texto mais largo do relogio.
+sub layoutLanguagePill()
+    if m.languagePill = invalid then return
+    m.languageLabel.text = languageName(i18nPreference())
+    labelWidth = measureText(m.languageLabel)
+    m.languageLabel.width = labelWidth + 4
+    width = 18 + 26 + 12 + labelWidth + 12 + 20 + 22
+    m.languagePillBg.width = width
+    m.top.findNode("languageChevron").translation = [56 + labelWidth + 12, 18]
+    clockWidth = measureText(m.clockDate)
+    timeWidth = measureText(m.clockTime)
+    if timeWidth > clockWidth then clockWidth = timeWidth
+    m.languagePill.translation = [1824 - clockWidth - 36 - width, 79]
+    focused = m.actionIndex = 3
+    if focused then
+        m.languagePillBg.color = "0xF4F8FFFF"
+        m.languageLabel.color = "0x070B14FF"
+        m.top.findNode("languageGlobe").blendColor = "0x070B14FF"
+        m.top.findNode("languageChevron").blendColor = "0x070B14FF"
+    else
+        m.languagePillBg.color = "0x0E1524EB"
+        m.languageLabel.color = "0xF4F8FFFF"
+        m.top.findNode("languageGlobe").blendColor = "0x00D7FFFF"
+        m.top.findNode("languageChevron").blendColor = "0xF4F8FFFF"
+    end if
+end sub
+
+sub onLanguageRequested()
+    openLanguagePicker()
+end sub
+
+' No que esta em foco agora, para devolver o foco ao fechar a janela.
+function focusedNode(node as Object) as Object
+    if node = invalid then return invalid
+    if node.hasFocus() then return node
+    for each child in node.getChildren(-1, 0)
+        if child.isInFocusChain() then return focusedNode(child)
+    end for
+    return invalid
+end function
+
+sub openLanguagePicker()
+    m.languageReturn = focusedNode(m.top)
+    preference = i18nPreference()
+    m.languageSelected = 0
+    for i = 0 to 2
+        if m.languageValues[i] = preference then m.languageSelected = i
+        m.top.findNode("languageOptionCheck" + i.ToStr()).visible = m.languageValues[i] = preference
+    end for
+    m.top.removeChild(m.languageOverlay)
+    m.top.appendChild(m.languageOverlay)
+    m.languageOverlay.visible = true
+    m.languageOverlay.setFocus(true)
+    renderLanguagePicker()
+end sub
+
+sub renderLanguagePicker()
+    for i = 0 to 2
+        focused = i = m.languageSelected
+        option = m.top.findNode("languageOption" + i.ToStr())
+        label = m.top.findNode("languageOptionLabel" + i.ToStr())
+        subLabel = m.top.findNode("languageOptionSub" + i.ToStr())
+        check = m.top.findNode("languageOptionCheck" + i.ToStr())
+        if focused then
+            option.color = "0xF4F8FFFF"
+            label.color = "0x070B14FF"
+            subLabel.color = "0x4A5568FF"
+            check.blendColor = "0x070B14FF"
+        else
+            option.color = "0x00000000"
+            label.color = "0xF4F8FFFF"
+            subLabel.color = "0x9AA6BDFF"
+            check.blendColor = "0x00D7FFFF"
+        end if
+    end for
+end sub
+
+sub handleLanguageKey(key as String)
+    if key = "back" then
+        closeLanguagePicker()
+    else if key = "up" and m.languageSelected > 0 then
+        m.languageSelected = m.languageSelected - 1
+        renderLanguagePicker()
+    else if key = "down" and m.languageSelected < 2 then
+        m.languageSelected = m.languageSelected + 1
+        renderLanguagePicker()
+    else if key = "OK" then
+        chooseLanguage(m.languageValues[m.languageSelected])
+    end if
+end sub
+
+sub closeLanguagePicker()
+    m.languageOverlay.visible = false
+    if m.languageReturn <> invalid then
+        m.languageReturn.setFocus(true)
+    else
+        m.top.setFocus(true)
+    end if
+end sub
+
+' Salva a escolha e troca o idioma na hora (os textos observados se refazem).
+sub chooseLanguage(preference as String)
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    if preference = "auto" then
+        section.Delete("language")
+    else
+        section.Write("language", preference)
+    end if
+    section.Flush()
+    closeLanguagePicker()
+    language = i18nResolve(preference)
+    if m.global.language <> language then
+        m.global.language = language
+    else
+        layoutLanguagePill()
+    end if
+end sub
+
+sub onMainLanguage()
+    updateActivationClock()
+    layoutActivationActions()
+    layoutLanguagePill()
+end sub

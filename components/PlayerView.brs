@@ -1,4 +1,5 @@
 sub init()
+    i18nAttach(m.top)
     m.video = m.top.findNode("video")
     logCodecSupport()
     m.title = m.top.findNode("title")

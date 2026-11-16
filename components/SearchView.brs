@@ -1,4 +1,5 @@
 sub init()
+    i18nAttach(m.top)
     m.queryLabel = m.top.findNode("queryLabel")
     m.resultsGrid = m.top.findNode("resultsGrid")
     m.emptyState = m.top.findNode("emptyState")

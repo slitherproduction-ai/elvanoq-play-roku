@@ -2,6 +2,8 @@ sub Main(args as Dynamic)
     screen = CreateObject("roSGScreen")
     port = CreateObject("roMessagePort")
     screen.SetMessagePort(port)
+    ' Idioma em uso, antes dos componentes (eles observam este campo).
+    screen.getGlobalNode().addFields({ language: i18nResolve(i18nPreference()) })
     scene = screen.CreateScene("MainScene")
     screen.Show()
     scene.SetFocus(true)

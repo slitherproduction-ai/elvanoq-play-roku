@@ -12,6 +12,7 @@
     <function name="handleKey" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/DetailView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/I18n.brs" />
   <script type="text/brightscript" uri="pkg:/source/ImageSize.brs" />
   <script type="text/brightscript" uri="pkg:/source/ImageChain.brs" />
   <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />

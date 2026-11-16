@@ -1,4 +1,5 @@
 sub init()
+    i18nAttach(m.top)
     m.dots = m.top.findNode("dots")
     m.status = m.top.findNode("status")
     m.pin = ""

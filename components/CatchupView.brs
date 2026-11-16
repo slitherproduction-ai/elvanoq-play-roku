@@ -1,4 +1,5 @@
 sub init()
+    i18nAttach(m.top)
     m.visibleRows = 10
     m.selected = 0
     m.offset = 0
