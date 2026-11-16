@@ -74,7 +74,7 @@ function i18nTranslate(text as String) as String
 end function
 
 ' Traduz um texto em portugues para o idioma em uso.
-function tr(text as Dynamic) as Dynamic
+function i18nTr(text as Dynamic) as Dynamic
     if text = invalid or i18nLanguage() <> "en" then return text
     return i18nTranslate(text)
 end function
@@ -138,23 +138,23 @@ end sub
 ' Caixas de dialogo padrao da Roku: titulo, mensagem, botoes e dica.
 sub i18nDialog(dialog as Object)
     if dialog = invalid or i18nLanguage() <> "en" then return
-    if dialog.hasField("title") then dialog.title = tr(dialog.title)
+    if dialog.hasField("title") then dialog.title = i18nTr(dialog.title)
     if dialog.hasField("message") and dialog.message <> invalid then
         lines = []
         for each line in dialog.message
-            lines.push(tr(line))
+            lines.push(i18nTr(line))
         end for
         dialog.message = lines
     end if
     if dialog.hasField("buttons") and dialog.buttons <> invalid then
         buttons = []
         for each button in dialog.buttons
-            buttons.push(tr(button))
+            buttons.push(i18nTr(button))
         end for
         dialog.buttons = buttons
     end if
     if dialog.hasField("textEditBox") and dialog.textEditBox <> invalid then
         editBox = dialog.textEditBox
-        if editBox.hintText <> invalid and editBox.hintText <> "" then editBox.hintText = tr(editBox.hintText)
+        if editBox.hintText <> invalid and editBox.hintText <> "" then editBox.hintText = i18nTr(editBox.hintText)
     end if
 end sub
