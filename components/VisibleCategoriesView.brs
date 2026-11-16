@@ -2,6 +2,7 @@
 ' Grava por lista (ListPrefs); nada e apagado da lista.
 
 sub init()
+    i18nAttach(m.top)
     m.kinds = ["live", "movies", "series"]
     m.tab = 0
     m.selected = 0

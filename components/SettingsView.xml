@@ -13,6 +13,7 @@
     <function name="cancelPinEntry" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/SettingsView.brs" />
+  <script type="text/brightscript" uri="pkg:/source/I18n.brs" />
   <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
   <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
   <script type="text/brightscript" uri="pkg:/source/ParentalPolicy.brs" />
@@ -59,6 +60,12 @@
       <Label id="rowSub4" translation="[146,631]" width="560" height="24" />
       <Label id="rowMeta4" translation="[700,588]" width="394" height="76" horizAlign="right" vertAlign="center" />
       <Poster translation="[1114,615]" width="22" height="22" uri="pkg:/images/icon_chevron.png" blendColor="0x8894A8FF" />
+      <RoundRect id="rowBg5" translation="[64,674]" width="1100" height="76" color="0x0D1422B8" radius="16" borderColor="0xBEDEFF1A" />
+      <Poster id="rowIcon5" translation="[92,695]" width="34" height="34" blendColor="0x00D7FFFF" />
+      <Label id="rowTitle5" translation="[146,683]" width="560" height="34" />
+      <Label id="rowSub5" translation="[146,717]" width="560" height="24" />
+      <Label id="rowMeta5" translation="[700,674]" width="394" height="76" horizAlign="right" vertAlign="center" />
+      <Poster translation="[1114,701]" width="22" height="22" uri="pkg:/images/icon_chevron.png" blendColor="0x8894A8FF" />
       <RoundRect translation="[1204,210]" width="652" height="640" color="0x0D1422B8" radius="16" borderColor="0xBEDEFF1A" />
       <Poster id="detailIcon" translation="[1252,254]" width="64" height="64" blendColor="0x00D7FFFF" />
       <Label id="detailTitle" translation="[1252,344]" width="556" height="44" />

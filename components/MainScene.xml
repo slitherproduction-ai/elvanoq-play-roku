@@ -4,8 +4,10 @@
     <field id="deepLink" type="assocarray" alwaysNotify="true" />
     <field id="memoryWarning" type="boolean" alwaysNotify="true" />
     <field id="memoryInfo" type="assocarray" />
+    <field id="languageRequested" type="boolean" alwaysNotify="true" onChange="onLanguageRequested" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/MainScene.brs" />
+  <script type="text/brightscript" uri="pkg:/source/I18n.brs" />
   <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
   <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
   <script type="text/brightscript" uri="pkg:/source/QrCode.brs" />
@@ -22,6 +24,14 @@
     <Timer id="clockTimer" duration="20" repeat="true" />
     <Label id="clockTime" translation="[1460,64]" width="364" height="54" horizAlign="right" />
     <Label id="clockDate" translation="[1460,120]" width="364" height="28" horizAlign="right" />
+    <!-- Idioma (canvas "Idioma do aplicativo", tela 9): pilula a 36 px do relogio -->
+    <Group id="languagePill" translation="[1300,79]">
+      <RoundRect id="languagePillBg" width="260" height="56" color="0x0E1524EB" radius="28" />
+      <Poster id="languageGlobe" uri="pkg:/images/icon_language.png" translation="[18,15]" width="26" height="26" blendColor="0x00D7FFFF" />
+      <Label id="languageLabel" translation="[56,0]" height="56" vertAlign="center" />
+      <Poster id="languageChevron" uri="pkg:/images/icon_chevron_down.png" width="20" height="20" />
+    </Group>
+    <Label id="textMeasure" visible="false" />
 
     <Label id="eyebrow" translation="[96,246]" text="ACESSO SEGURO" width="900" height="26" />
     <Label id="headline" translation="[96,282]" text="Ative sua TV" width="1000" height="84" />
@@ -111,6 +121,27 @@
     <Animation id="welcomeAnimation" duration="1.2" repeat="false" easeFunction="outQuad">
       <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[0.0, 700.0]" fieldToInterp="welcomeBar.width" />
     </Animation>
+    <!-- Escolha do idioma (canvas "Idioma do aplicativo", tela 10) -->
+    <Group id="languageOverlay" visible="false" focusable="true">
+      <Rectangle width="1920" height="1080" color="0x03060CC7" />
+      <RoundRect translation="[600,283]" width="720" height="514" color="0x0E1524FF" radius="28" />
+      <Poster uri="pkg:/images/icon_language.png" translation="[666,331]" width="32" height="32" blendColor="0x00D7FFFF" />
+      <Label id="languageTitle" translation="[712,327]" text="Idioma do aplicativo" width="560" height="40" vertAlign="center" />
+      <Label id="languageText" translation="[666,379]" text="Muda os textos do app. O áudio e as legendas dos vídeos continuam os da sua lista." width="588" height="56" wrap="true" maxLines="2" />
+      <RoundRect id="languageOption0" translation="[640,453]" width="640" height="84" color="0x00000000" radius="18" />
+      <Label id="languageOptionLabel0" translation="[666,467]" width="520" height="32" />
+      <Label id="languageOptionSub0" translation="[666,501]" width="520" height="24" />
+      <Poster id="languageOptionCheck0" uri="pkg:/images/icon_check.png" translation="[1226,481]" width="28" height="28" visible="false" />
+      <RoundRect id="languageOption1" translation="[640,547]" width="640" height="84" color="0x00000000" radius="18" />
+      <Label id="languageOptionLabel1" translation="[666,561]" width="520" height="32" />
+      <Label id="languageOptionSub1" translation="[666,595]" width="520" height="24" />
+      <Poster id="languageOptionCheck1" uri="pkg:/images/icon_check.png" translation="[1226,575]" width="28" height="28" visible="false" />
+      <RoundRect id="languageOption2" translation="[640,641]" width="640" height="84" color="0x00000000" radius="18" />
+      <Label id="languageOptionLabel2" translation="[666,655]" width="520" height="32" />
+      <Label id="languageOptionSub2" translation="[666,689]" width="520" height="24" />
+      <Poster id="languageOptionCheck2" uri="pkg:/images/icon_check.png" translation="[1226,669]" width="28" height="28" visible="false" />
+      <Label id="languageHint" translation="[666,741]" text="OK escolher   •   Voltar fechar" width="588" height="24" />
+    </Group>
     <Label id="homeStatus" translation="[225,510]" width="1470" height="75" horizAlign="center" visible="false" />
     <Label id="appVersion" translation="[1224,994]" text="ELVANOQ · Roku · Versão 1.1.4" width="600" height="36" horizAlign="right" vertAlign="center" />
     <Timer id="registerTimer" repeat="false" duration="3" />

@@ -1,10 +1,13 @@
 ' Ajustes: menu principal e paginas (Controle parental e Categorias visiveis).
 
 sub init()
-    m.rowKeys = ["parental", "visible", "format", "account", "about"]
-    m.rowTitleText = ["Controle parental", "Categorias visíveis", "Formato do ao vivo", "Conta", "Sobre"]
-    m.rowSubText = ["PIN, conteúdo adulto e bloqueios", "Mostrar ou ocultar categorias desta lista", "OK alterna entre Automático, HLS e TS", "Excluir o login desta TV", "Versão e novidades"]
-    m.rowIconUri = ["pkg:/images/icon_lock.png", "pkg:/images/icon_grid.png", "pkg:/images/icon_broadcast.png", "pkg:/images/icon_key.png", "pkg:/images/icon_sparkles.png"]
+    i18nAttach(m.top)
+    m.rowKeys = ["parental", "visible", "format", "language", "account", "about"]
+    m.rowTitleText = ["Controle parental", "Categorias visíveis", "Formato do ao vivo", "Idioma", "Conta", "Sobre"]
+    m.rowSubText = ["PIN, conteúdo adulto e bloqueios", "Mostrar ou ocultar categorias desta lista", "OK alterna entre Automático, HLS e TS", "Português, English ou Automático", "Excluir o login desta TV", "Versão e novidades"]
+    m.rowIconUri = ["pkg:/images/icon_lock.png", "pkg:/images/icon_grid.png", "pkg:/images/icon_broadcast.png", "pkg:/images/icon_language.png", "pkg:/images/icon_key.png", "pkg:/images/icon_sparkles.png"]
+    ' Idioma trocado: refaz valores e detalhes desta tela.
+    m.global.observeField("language", "onSettingsLanguage")
     m.selected = 0
     m.page = ""
     m.parentalPage = m.top.findNode("parentalPage")
@@ -150,7 +153,11 @@ sub renderHub()
     hiddenTotal = hiddenCategoryTotal()
     visibleText = "Todas visíveis"
     if hiddenTotal > 0 then visibleText = hiddenTotal.ToStr() + " ocultas"
-    metas = [protectedTotal.ToStr() + " protegidas", visibleText, liveFormatLabel(liveFormatPreference()), "", "Versão " + appVersionText()]
+    languagePref = i18nPreference()
+    languageText = "Automático"
+    if languagePref = "en" then languageText = "English"
+    if languagePref = "pt" then languageText = "Português (Brasil)"
+    metas = [protectedTotal.ToStr() + " protegidas", visibleText, liveFormatLabel(liveFormatPreference()), languageText, "", "Versão " + appVersionText()]
     for index = 0 to m.rowKeys.count() - 1
         m.rowMetas[index].text = metas[index]
         ' Foco como na LG/MSX: contorno ciano; sem foco, contorno quase invisível.
@@ -180,6 +187,10 @@ sub renderDetail(key as String, protectedTotal as Integer, hiddenTotal as Intege
         m.detailBody.text = "No Automático, a TV começa pelo formato que funcionou nesta lista. HLS (.m3u8) ou TS (.ts) fixam o formato dos canais."
         m.detailValue.text = "Atual: " + liveFormatLabel(liveFormatPreference())
         m.detailHint.text = "OK alterna entre Automático, HLS e TS"
+    else if key = "language" then
+        m.detailBody.text = "Muda os textos do app. O áudio e as legendas dos vídeos continuam os da sua lista."
+        m.detailValue.text = metasLanguage()
+        m.detailHint.text = "OK abrir"
     else if key = "account" then
         m.detailBody.text = "Apaga os dados de acesso desta TV e volta para a tela de login."
         m.detailHint.text = "OK excluir login"
@@ -230,6 +241,10 @@ function handleKey(event as Object) as Boolean
 end function
 
 sub activateRow(key as String)
+    if key = "language" then
+        m.top.getScene().languageRequested = true
+        return
+    end if
     if key = "account" then
         m.top.accountRequested = true
         return
@@ -278,3 +293,14 @@ function isTrue(value as Dynamic) as Boolean
     return false
 end function
 
+
+function metasLanguage() as String
+    preference = i18nPreference()
+    if preference = "en" then return "English"
+    if preference = "pt" then return "Português (Brasil)"
+    return "Automático"
+end function
+
+sub onSettingsLanguage()
+    renderHub()
+end sub

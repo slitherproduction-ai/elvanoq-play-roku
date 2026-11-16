@@ -1,4 +1,5 @@
 sub init()
+    i18nAttach(m.top)
     m.title = m.top.findNode("title")
     m.tabs = m.top.findNode("tabs")
     m.tabFocus = m.top.findNode("tabFocus")

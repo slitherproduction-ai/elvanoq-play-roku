@@ -1,4 +1,5 @@
 sub init()
+    i18nAttach(m.top)
     m.title = m.top.findNode("title")
     m.description = m.top.findNode("description")
     m.countLabel = m.top.findNode("countLabel")

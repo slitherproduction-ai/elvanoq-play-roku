@@ -1,4 +1,5 @@
 sub init()
+    i18nAttach(m.top)
     m.preview = m.top.findNode("preview")
     m.previewReleaseTimer = m.top.findNode("previewReleaseTimer")
     m.previewReleaseTimer.observeField("fire", "onPreviewReleased")

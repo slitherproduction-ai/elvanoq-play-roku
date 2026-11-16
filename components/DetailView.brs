@@ -1,4 +1,5 @@
 sub init()
+    i18nAttach(m.top)
     m.poster = m.top.findNode("poster")
     m.title = m.top.findNode("title")
     m.meta = m.top.findNode("meta")

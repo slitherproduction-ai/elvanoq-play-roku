@@ -1,4 +1,5 @@
 sub init()
+    i18nAttach(m.top)
     m.localState = loadLocalState()
     m.epg = {}
     m.sectionEyebrow = m.top.findNode("sectionEyebrow")
@@ -235,6 +236,7 @@ sub onLiveSearchRequested()
     dialog.observeField("buttonSelected", "onLiveSearchKeyboardSelected")
     dialog.observeField("wasClosed", "onLiveSearchKeyboardClosed")
     m.liveSearchKeyboard = dialog
+    i18nDialog(dialog)
     m.top.getScene().dialog = dialog
 end sub
 
@@ -268,6 +270,7 @@ sub openSearchKeyboard()
     dialog.buttons = ["Buscar", "Cancelar"]
     dialog.observeField("buttonSelected", "onSearchKeyboardSelected")
     m.searchKeyboard = dialog
+    i18nDialog(dialog)
     m.top.getScene().dialog = dialog
 end sub
 
@@ -561,6 +564,7 @@ sub onBrowseSearchRequested(event as Object)
     dialog.buttons = ["Buscar", "Cancelar"]
     dialog.observeField("buttonSelected", "onBrowseSearchKeyboardSelected")
     m.browseSearchKeyboard = dialog
+    i18nDialog(dialog)
     m.top.getScene().dialog = dialog
 end sub
 
@@ -1248,6 +1252,7 @@ sub openDisconnectDialog()
     dialog.buttons = ["Excluir login", "Cancelar"]
     dialog.observeField("buttonSelected", "onDisconnectDialogSelected")
     m.disconnectDialog = dialog
+    i18nDialog(dialog)
     m.top.getScene().dialog = dialog
 end sub
 
