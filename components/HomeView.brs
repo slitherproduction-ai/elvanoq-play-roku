@@ -262,20 +262,128 @@ function recentTitles(items as Object, limit as Integer, ordered = false as Bool
         end if
     end for
     if not ordered then titles.SortBy("added", "r")
+    ' Versoes do mesmo titulo (DUB/LEG/[L]/Dual/4K...) viram uma so, como o
+    ' dedupeTitleVariants do Android: fica na posicao da primeira e, entre as
+    ' versoes, a preferida e Dublado > sem marca > Nacional > Legendado.
     result = []
-    seen = {}
-    suffix = CreateObject("roRegex", "\b(DUB|LEG|DUBLADO|LEGENDADO|FHD|UHD|HD|SD|4K|1080P|720P)\b", "i")
-    punctuation = CreateObject("roRegex", "[^a-z0-9áàâãéêíóôõúç]+", "i")
+    positions = {}
+    tools = titleVariantTools()
     for each entry in titles
-        if result.count() >= limit then exit for
-        key = punctuation.ReplaceAll(lcase(suffix.ReplaceAll(entry.item.title, "")), " ").Trim()
-        key = key + "|" + safeTrim(entry.item.year)
-        if not seen.DoesExist(key) then
-            seen[key] = true
+        key = titleGroupKey(entry.item.title, tools)
+        if key = "" then key = "#" + safeTrim(entry.item.id)
+        if positions.DoesExist(key) then
+            index = positions[key]
+            if titleVariantRank(entry.item.title, tools) < titleVariantRank(result[index].title, tools) then result[index] = entry.item
+        else if result.count() < limit then
+            positions[key] = result.count()
             result.push(entry.item)
         end if
     end for
     return result
+end function
+
+' ---------- Versoes do mesmo titulo (Android: features/catalog/display.ts) ----------
+function titleVariantTools() as Object
+    return {
+        split: CreateObject("roRegex", "[^a-z0-9]+", ""),
+        year: CreateObject("roRegex", "^(19|20)[0-9][0-9]$", ""),
+        noise: { fhd: true, "4k": true, uhd: true, hd: true, hq: true, sdr: true, hdr: true, hdr10: true, hevc: true, h265: true, h264: true, x265: true, x264: true, dublado: true, dublada: true, legendado: true, legendada: true, dual: true },
+        legShort: { l: true, leg: true, legendado: true, legendada: true, sub: true, legendas: true },
+        dubShort: { d: true, dub: true, dublado: true, dublada: true },
+        nacShort: { nac: true, nacional: true },
+        legWords: { legendado: true, legendada: true },
+        dubWords: { dublado: true, dublada: true },
+        nacWords: { nacional: true },
+        accents: [["áàâãäåÁÀÂÃÄÅ", "a"], ["éèêëÉÈÊË", "e"], ["íìîïÍÌÎÏ", "i"], ["óòôõöÓÒÔÕÖ", "o"], ["úùûüÚÙÛÜ", "u"], ["çÇ", "c"], ["ñÑ", "n"], ["ýÿÝ", "y"]]
+    }
+end function
+
+' Palavras minusculas, sem acentos e sem pontuacao.
+function titleWords(value as Dynamic, tools as Object) as Object
+    text = lcase(safeTrim(value))
+    folded = ""
+    for index = 1 to len(text)
+        character = mid(text, index, 1)
+        if asc(character) > 127 then
+            for each group in tools.accents
+                if instr(1, group[0], character) > 0 then
+                    character = group[1]
+                    exit for
+                end if
+            end for
+        end if
+        folded = folded + character
+    end for
+    output = []
+    for each token in tools.split.Split(folded)
+        if token <> "" then output.push(token)
+    end for
+    return output
+end function
+
+' Separa o texto fora de [ ] / ( ) dos trechos de dentro.
+function titleEnclosed(value as Dynamic) as Object
+    title = safeTrim(value)
+    result = { text: "", enclosed: [] }
+    depth = 0
+    current = ""
+    for index = 1 to len(title)
+        character = mid(title, index, 1)
+        if character = "[" or character = "(" then
+            if depth = 0 then current = ""
+            depth = depth + 1
+        else if (character = "]" or character = ")") and depth > 0 then
+            depth = depth - 1
+            if depth = 0 then result.enclosed.push(current)
+            result.text = result.text + " "
+        else if depth > 0 then
+            current = current + character
+        else
+            result.text = result.text + character
+        end if
+    end for
+    return result
+end function
+
+function titleTagOnly(part as String, tools as Object) as Boolean
+    for each token in titleWords(part, tools)
+        if not (tools.noise.DoesExist(token) or tools.legShort.DoesExist(token) or tools.dubShort.DoesExist(token) or tools.nacShort.DoesExist(token) or tools.year.IsMatch(token)) then return false
+    end for
+    return true
+end function
+
+function titleGroupKey(title as Dynamic, tools as Object) as String
+    parts = titleEnclosed(title)
+    text = parts.text
+    for each part in parts.enclosed
+        if not titleTagOnly(part, tools) then text = text + " " + part
+    end for
+    key = ""
+    for each token in titleWords(text, tools)
+        if not tools.noise.DoesExist(token) then
+            if key <> "" then key = key + " "
+            key = key + token
+        end if
+    end for
+    return key
+end function
+
+' 0 Dublado, 1 sem marca, 2 Nacional, 3 Legendado.
+function titleVariantRank(title as Dynamic, tools as Object) as Integer
+    parts = titleEnclosed(title)
+    for each part in parts.enclosed
+        for each token in titleWords(part, tools)
+            if tools.legShort.DoesExist(token) then return 3
+            if tools.dubShort.DoesExist(token) then return 0
+            if tools.nacShort.DoesExist(token) then return 2
+        end for
+    end for
+    for each token in titleWords(parts.text, tools)
+        if tools.legWords.DoesExist(token) then return 3
+        if tools.dubWords.DoesExist(token) then return 0
+        if tools.nacWords.DoesExist(token) then return 2
+    end for
+    return 1
 end function
 
 function newestItem(items as Object) as Object
