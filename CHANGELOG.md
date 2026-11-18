@@ -1,5 +1,9 @@
 # Changelog — ELVANOQ Play Roku
 
+## 1.1.10 (build 10)
+
+- **Novidades para você sem versões repetidas** (mesma regra do `dedupeTitleVariants` do Android): o agrupamento passa a ignorar marcações entre colchetes/parênteses que são só versão, qualidade ou ano (`[L]`, `[D]`, `(DUB)`, `(Legendado)`, `[Nacional]`, `(Dual)`, `(2024)`, `[4K]`…), palavras técnicas fora delas (FHD, 4K, HDR, HEVC, Dublado, Legendado, Dual…), acentos, maiúsculas e pontuação. Antes só caíam DUB/LEG/HD soltos, e "Filme [L]" e "Filme" apareciam como dois títulos. Entre as versões fica a Dublada (depois sem marca, Nacional e Legendada), na posição da mais nova. Trechos que fazem parte do nome continuam, como "Duna (Parte Dois)".
+
 ## 1.1.9 (build 9)
 
 - **Novidades para você igual ao Android** (`recentTitles` do Android, mesma regra da LG/Samsung 1.2.1): nas listas Xtream, a fileira passa a mostrar os filmes adicionados mais recentemente no **catálogo inteiro** (data `added`), e não mais só os primeiros 150 da categoria de lançamentos. A Início abre como antes (com a última lista de Novidades guardada em `cachefs:/elvanoq-recentes.json`, ou a semente de lançamentos na primeira vez) e, em segundo plano (`CatalogService` modo `recent`), baixa a lista completa de filmes para o cache, lê em blocos de 256 KB como a Busca, separa os 60 mais novos (ordem estável) e só converte esses em itens; depois troca só a fileira (`HomeView.setRecentTitles`), sem mexer no destaque. Versões do mesmo título agrupadas; mostra 30. Séries só completam quando a lista tem menos de 60 filmes, na ordem do servidor. Categorias adultas ficam de fora. Lista M3U sem mudança.
