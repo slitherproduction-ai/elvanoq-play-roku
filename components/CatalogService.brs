@@ -13,7 +13,7 @@ sub runTask()
     result.mode = m.top.mode
 
     ' Pedidos sob demanda do AppShell: uma categoria ou uma busca.
-    if m.top.mode = "category" or m.top.mode = "search" then
+    if m.top.mode = "category" or m.top.mode = "search" or m.top.mode = "recent" then
         credentials = m.top.xtream
         if credentials = invalid or credentials.host = invalid then
             result.message = "Lista não conectada."
@@ -22,6 +22,8 @@ sub runTask()
         end if
         if m.top.mode = "category" then
             loadXtreamCategoryItems(credentials, m.top.kind, m.top.categoryId, m.top.categoryName, result)
+        else if m.top.mode = "recent" then
+            loadRecentTitles(credentials, m.top.categoryNames, result)
         else
             searchXtream(credentials, m.top.query, m.top.categoryNames, m.top.searchToken, m.top.kinds, m.top.titles, result)
         end if
@@ -349,6 +351,122 @@ sub searchXtream(credentials, query, categoryNames, token, kinds, titles, result
     end for
     result.ok = failed < kinds.count()
     if not result.ok then result.message = "Não foi possível consultar o servidor da lista."
+end sub
+
+' ---------- Novidades para voce (regra do Android: recentTitles) ----------
+' No catalogo inteiro de filmes, os 60 com a data de inclusao (added) mais nova;
+' com menos de 60 filmes, completa com series na ordem do servidor. A lista
+' completa e baixada para o cache e lida em blocos de 256 KB (como a Busca);
+' so os 60 escolhidos viram itens. A Inicio agrupa as versoes e mostra 30.
+sub loadRecentTitles(credentials, categoryNames, result)
+    result.items = []
+    wanted = 60
+    movieNames = {}
+    seriesNames = {}
+    if categoryNames <> invalid and categoryNames.movies <> invalid then movieNames = categoryNames.movies
+    if categoryNames <> invalid and categoryNames.series <> invalid then seriesNames = categoryNames.series
+    liveExtension = "ts"
+    if credentials.liveExtension <> invalid then liveExtension = credentials.liveExtension
+    path = "cachefs:/elvanoq-recentes-movies.json"
+    DeleteFile(path)
+    if not ensureSearchFile(credentials, "movies", path) then
+        result.message = "Não foi possível consultar o servidor da lista."
+        return
+    end if
+    top = []
+    scanRecentFile(path, movieNames, top, wanted, true)
+    DeleteFile(path)
+    for each entry in top
+        item = searchItemFromPart(entry.part, "movies", credentials, liveExtension, movieNames)
+        if item <> invalid then result.items.push(item)
+    end for
+    top = invalid
+    if result.items.count() < wanted then
+        path = "cachefs:/elvanoq-recentes-series.json"
+        DeleteFile(path)
+        if ensureSearchFile(credentials, "series", path) then
+            fill = []
+            scanRecentFile(path, seriesNames, fill, wanted - result.items.count(), false)
+            DeleteFile(path)
+            for each entry in fill
+                item = searchItemFromPart(entry.part, "series", credentials, liveExtension, seriesNames)
+                if item <> invalid then result.items.push(item)
+            end for
+        end if
+    end if
+    result.ok = true
+end sub
+
+' byAdded = true: guarda os `limit` mais novos (estavel, como o topItems do
+' Android). byAdded = false: os primeiros `limit` na ordem do arquivo.
+sub scanRecentFile(path, names, top, limit, byAdded)
+    if limit <= 0 then return
+    fileSystem = CreateObject("roFileSystem")
+    info = fileSystem.Stat(path)
+    if info = invalid or info.size = invalid then return
+    size = info.size
+    q = chr(34)
+    addedRegex = CreateObject("roRegex", q + "added" + q + "\s*:\s*" + q + "?(\d+)", "")
+    categoryRegex = CreateObject("roRegex", q + "category_id" + q + "\s*:\s*" + q + "?([^" + q + ",}]*)", "")
+    adult = CreateObject("roRegex", "xxx|adult|\+ ?18|18 ?\+", "i")
+    bytes = CreateObject("roByteArray")
+    chunkSize = 262144
+    position = 0
+    carry = ""
+    while position < size
+        if not byAdded and top.count() >= limit then exit while
+        length = chunkSize
+        if position + length > size then length = size - position
+        if not bytes.ReadFile(path, position, length) then exit while
+        position = position + length
+        text = carry + bytes.ToAsciiString()
+        parts = text.Split("},{")
+        lastIndex = parts.count() - 1
+        carry = ""
+        if position < size then
+            carry = parts[lastIndex]
+            lastIndex = lastIndex - 1
+        end if
+        for index = 0 to lastIndex
+            part = parts[index]
+            categoryName = ""
+            categoryMatch = categoryRegex.Match(part)
+            if categoryMatch.count() > 1 and names[categoryMatch[1]] <> invalid then categoryName = names[categoryMatch[1]]
+            if not adult.IsMatch(categoryName) then
+                if byAdded then
+                    added = 0
+                    addedMatch = addedRegex.Match(part)
+                    if addedMatch.count() > 1 then
+                        digits = addedMatch[1]
+                        if len(digits) > 10 then digits = left(digits, 10)
+                        added = digits.ToInt()
+                    end if
+                    if top.count() < limit or added > top[top.count() - 1].added then
+                        insertAt = top.count()
+                        while insertAt > 0 and added > top[insertAt - 1].added
+                            insertAt = insertAt - 1
+                        end while
+                        entry = { added: added, part: part }
+                        if insertAt = top.count() then
+                            top.push(entry)
+                        else
+                            top.push(top[top.count() - 1])
+                            moveIndex = top.count() - 2
+                            while moveIndex > insertAt
+                                top[moveIndex] = top[moveIndex - 1]
+                                moveIndex = moveIndex - 1
+                            end while
+                            top[insertAt] = entry
+                        end if
+                        if top.count() > limit then top.pop()
+                    end if
+                else
+                    top.push({ added: 0, part: part })
+                    if top.count() >= limit then exit for
+                end if
+            end if
+        end for
+    end while
 end sub
 
 function searchCachePath(token, kind)

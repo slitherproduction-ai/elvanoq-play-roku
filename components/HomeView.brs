@@ -201,7 +201,9 @@ sub setCatalog(payload as Object)
     m.continueHint.text = "Filmes e séries adicionados recentemente"
     recentSource = items
     if payload.recent <> invalid and type(payload.recent) = "roArray" and payload.recent.count() > 0 then recentSource = payload.recent
-    m.continueItems = recentTitles(recentSource, 30)
+    orderedType = type(payload.recentOrdered)
+    ordered = (orderedType = "roBoolean" or orderedType = "Boolean") and payload.recentOrdered
+    m.continueItems = recentTitles(recentSource, 30, ordered)
     m.continueIndex = minHome(m.continueIndex, m.continueItems.count() - 1)
     if m.continueIndex < 0 then m.continueIndex = 0
     m.continueOffset = minHome(m.continueOffset, m.continueIndex)
@@ -233,8 +235,22 @@ function uniqueHeroCandidates(continueItems as Object, favoriteItems as Object, 
     return candidates
 end function
 
+' Novidades prontas em segundo plano: troca so a fileira, sem mexer no destaque.
+sub setRecentTitles(payload as Object)
+    if payload = invalid or type(payload) <> "roAssociativeArray" then return
+    items = payload.items
+    if items = invalid or type(items) <> "roArray" or items.count() = 0 then return
+    if m.catalogItems = invalid or m.catalogItems.count() = 0 then return
+    m.continueItems = recentTitles(items, 30, true)
+    m.continueIndex = minHome(m.continueIndex, m.continueItems.count() - 1)
+    if m.continueIndex < 0 then m.continueIndex = 0
+    m.continueOffset = minHome(m.continueOffset, m.continueIndex)
+    renderRails()
+end sub
+
 ' Filmes e series ordenados do mais recente para o mais antigo.
-function recentTitles(items as Object, limit as Integer) as Object
+' ordered = true: a lista ja vem na ordem final (regra do Android), nao reordena.
+function recentTitles(items as Object, limit as Integer, ordered = false as Boolean) as Object
     titles = []
     for each item in items
         if item.type = "movies" or item.type = "series" then
@@ -245,7 +261,7 @@ function recentTitles(items as Object, limit as Integer) as Object
             titles.push(entry)
         end if
     end for
-    titles.SortBy("added", "r")
+    if not ordered then titles.SortBy("added", "r")
     result = []
     seen = {}
     suffix = CreateObject("roRegex", "\b(DUB|LEG|DUBLADO|LEGENDADO|FHD|UHD|HD|SD|4K|1080P|720P)\b", "i")

@@ -7,6 +7,7 @@
     <function name="handleKey" />
     <function name="setActive" />
     <function name="setCatalog" />
+    <function name="setRecentTitles" />
     <function name="setFocusVisible" />
     <function name="focusTile" />
   </interface>

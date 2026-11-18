@@ -413,9 +413,48 @@ end function
 ' Novidades: na lista Xtream, so a semente (categoria de lancamentos), sem misturar
 ' as categorias abertas durante a navegacao. Nas outras listas, o catalogo todo.
 function homeRecentItems() as Dynamic
+    ' Regra do Android (filmes mais novos do catalogo inteiro) assim que pronta.
+    if m.lazy = true and m.recentTitles <> invalid then return visibleItems(m.recentTitles)
     if m.lazy = true and m.seedItems <> invalid then return visibleItems(m.seedItems)
     return invalid
 end function
+
+' ---------- Novidades para voce (regra do Android) ----------
+' Mostra na hora a ultima lista guardada desta lista Xtream e atualiza em
+' segundo plano (CatalogService mode "recent").
+function recentTitlesKey() as String
+    if m.xtream = invalid then return ""
+    return safeTrim(m.xtream.host) + "|" + safeTrim(m.xtream.username)
+end function
+
+sub startRecentTitles()
+    m.recentTitles = invalid
+    m.recentService = invalid
+    if not m.lazy or m.xtream = invalid then return
+    saved = ReadAsciiFile("cachefs:/elvanoq-recentes.json")
+    if saved <> invalid and saved <> "" then
+        data = ParseJson(saved)
+        if data <> invalid and type(data) = "roAssociativeArray" and data.key = recentTitlesKey() and type(data.items) = "roArray" and data.items.count() > 0 then m.recentTitles = data.items
+    end if
+    service = CreateObject("roSGNode", "CatalogService")
+    service.mode = "recent"
+    service.xtream = m.xtream
+    service.categoryNames = m.categoryNames
+    service.observeField("result", "onRecentTitlesResult")
+    m.recentService = service
+    service.control = "RUN"
+end sub
+
+sub onRecentTitlesResult(event as Object)
+    service = event.getRoSGNode()
+    if m.recentService = invalid or not service.isSameNode(m.recentService) then return
+    m.recentService = invalid
+    result = service.result
+    if result = invalid or result.ok <> true or result.items = invalid or result.items.count() = 0 then return
+    m.recentTitles = result.items
+    WriteAsciiFile("cachefs:/elvanoq-recentes.json", FormatJson({ key: recentTitlesKey(), items: result.items }))
+    if m.selectedIndex = 0 then m.homeView.callFunc("setRecentTitles", { items: visibleItems(result.items) })
+end sub
 
 function homeItems() as Object
     items = []
@@ -777,7 +816,7 @@ end function
 sub pushSectionCatalog()
     if m.catalog = invalid then return
     ' Categorias ocultas (Ajustes > Categorias visiveis) saem das colunas, de "Todos" e das grades.
-    if m.selectedIndex = 0 then m.homeView.callFunc("setCatalog", { items: visibleItems(homeItems()), recent: homeRecentItems(), categories: visibleCategoryNames(m.categories), xtream: m.xtream })
+    if m.selectedIndex = 0 then m.homeView.callFunc("setCatalog", { items: visibleItems(homeItems()), recent: homeRecentItems(), recentOrdered: (m.lazy = true and m.recentTitles <> invalid), categories: visibleCategoryNames(m.categories), xtream: m.xtream })
     if m.lazy then
         if m.selectedIndex = 1 then m.liveTVView.callFunc("setCatalog", { lazy: true, liveCategories: visibleCategoryList(m.liveCategories, "live"), favorites: visibleItems(savedCatalogItems("live")), items: [] })
         if m.selectedIndex = 2 then m.moviesView.callFunc("setCatalog", { lazy: true, categories: visibleCategoryList(m.movieCategories, "movies") })
@@ -1146,9 +1185,12 @@ sub onCatalogResult()
         m.categoryNames = { live: categoryNameMap(m.liveCategories), movies: categoryNameMap(m.movieCategories), series: categoryNameMap(m.seriesCategories) }
         m.seedItems = result.channels
         rebuildCatalogPool()
+        startRecentTitles()
     else
         m.xtream = invalid
         m.seedItems = invalid
+        m.recentTitles = invalid
+        m.recentService = invalid
         m.catalog = result.channels
     end if
     if result.epgUrl <> invalid and result.epgUrl <> "" then loadEpg(result.epgUrl)
