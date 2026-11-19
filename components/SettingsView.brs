@@ -2,10 +2,10 @@
 
 sub init()
     i18nAttach(m.top)
-    m.rowKeys = ["parental", "visible", "format", "language", "account", "about"]
-    m.rowTitleText = ["Controle parental", "Categorias visíveis", "Formato do ao vivo", "Idioma", "Conta", "Sobre"]
-    m.rowSubText = ["PIN, conteúdo adulto e bloqueios", "Mostrar ou ocultar categorias desta lista", "OK alterna entre Automático, HLS e TS", "Português, English ou Automático", "Excluir o login desta TV", "Versão e novidades"]
-    m.rowIconUri = ["pkg:/images/icon_lock.png", "pkg:/images/icon_grid.png", "pkg:/images/icon_broadcast.png", "pkg:/images/icon_language.png", "pkg:/images/icon_key.png", "pkg:/images/icon_sparkles.png"]
+    m.rowKeys = ["parental", "visible", "format", "join", "language", "account", "about"]
+    m.rowTitleText = ["Controle parental", "Categorias visíveis", "Formato do ao vivo", "Juntar qualidades", "Idioma", "Conta", "Sobre"]
+    m.rowSubText = ["PIN, conteúdo adulto e bloqueios", "Mostrar ou ocultar categorias desta lista", "OK alterna entre Automático, HLS e TS", "OK liga ou desliga", "Português, English ou Automático", "Excluir o login desta TV", "Versão e novidades"]
+    m.rowIconUri = ["pkg:/images/icon_lock.png", "pkg:/images/icon_grid.png", "pkg:/images/icon_broadcast.png", "pkg:/images/icon_grid.png", "pkg:/images/icon_language.png", "pkg:/images/icon_key.png", "pkg:/images/icon_sparkles.png"]
     ' Idioma trocado: refaz valores e detalhes desta tela.
     m.global.observeField("language", "onSettingsLanguage")
     m.selected = 0
@@ -159,7 +159,9 @@ sub renderHub()
     languageText = "Automático"
     if languagePref = "en" then languageText = "English"
     if languagePref = "pt" then languageText = "Português (Brasil)"
-    metas = [protectedTotal.ToStr() + " protegidas", visibleText, liveFormatLabel(liveFormatPreference()), languageText, "", "Versão " + appVersionText()]
+    joinText = "Desligado"
+    if joinQualitiesEnabled() then joinText = "Ligado"
+    metas = [protectedTotal.ToStr() + " protegidas", visibleText, liveFormatLabel(liveFormatPreference()), joinText, languageText, "", "Versão " + appVersionText()]
     for index = 0 to m.rowKeys.count() - 1
         m.rowMetas[index].text = metas[index]
         ' Foco como na LG/MSX: contorno ciano; sem foco, contorno quase invisível.
@@ -189,6 +191,14 @@ sub renderDetail(key as String, protectedTotal as Integer, hiddenTotal as Intege
         m.detailBody.text = "No Automático, a TV começa pelo formato que funcionou nesta lista. HLS (.m3u8) ou TS (.ts) fixam o formato dos canais."
         m.detailValue.text = "Atual: " + liveFormatLabel(liveFormatPreference())
         m.detailHint.text = "OK alterna entre Automático, HLS e TS"
+    else if key = "join" then
+        m.detailBody.text = "FHD, HD e SD do mesmo canal numa linha só, com o botão Fonte no player. Desligue se algum canal for agrupado errado: cada canal da lista volta a ter a sua linha."
+        if joinQualitiesEnabled() then
+            m.detailValue.text = "Ligado"
+        else
+            m.detailValue.text = "Desligado"
+        end if
+        m.detailHint.text = "OK liga ou desliga"
     else if key = "language" then
         m.detailBody.text = "Muda os textos do app. O áudio e as legendas dos vídeos continuam os da sua lista."
         m.detailValue.text = metasLanguage()
@@ -255,6 +265,10 @@ sub activateRow(key as String)
         openPage("parental")
     else if key = "visible" then
         openPage("visible")
+    else if key = "join" then
+        saveJoinQualities(not joinQualitiesEnabled())
+        m.top.hiddenChanged = true
+        renderHub()
     else if key = "format" then
         current = liveFormatPreference()
         nextValue = "auto"

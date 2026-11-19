@@ -135,3 +135,18 @@ sub rememberWorkingLiveFormat(url as String)
     section.Write(key, format)
     section.Flush()
 end sub
+
+' Ajustes > Juntar qualidades (ligado por padrao; Android 2.17.76).
+function joinQualitiesEnabled() as Boolean
+    return CreateObject("roRegistrySection", "ELVANOQPlay").Read("join_qualities") <> "0"
+end function
+
+sub saveJoinQualities(enabled as Boolean)
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    if enabled then
+        section.Write("join_qualities", "1")
+    else
+        section.Write("join_qualities", "0")
+    end if
+    section.Flush()
+end sub

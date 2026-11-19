@@ -2,6 +2,7 @@
 
 ## 1.1.10 (build 10)
 
+- **Interruptor Juntar qualidades** (Android 2.17.76): Ajustes › Conteúdo › Juntar qualidades, ligado por padrão (`joinQualitiesEnabled` em `source/ListPrefs.brs`). Desligado, cada canal da lista volta a ter a sua linha e o player fica sem o botão Fonte; vale a partir da próxima categoria aberta. Ajustes com 7 linhas (Sistema desce 86 px).
 - **Qualidades do mesmo canal numa linha** (19/11; Android 2.17.75): na TV ao Vivo, canais da mesma categoria cujo nome, sem as marcas de qualidade (4K, FHD, HD, SD, H265, ALT, Backup, Opção N, ᴴᴰ…), é igual viram uma linha com o nome limpo e "N fontes" (`source/ChannelGroups.brs`; listas de até 3000 canais). Coração vale para o grupo. No player, o 6º botão "Fonte" (só ao vivo com mais de uma fonte) mostra "FHD 1/3" e troca de fonte; se a fonte não abre, a próxima é tentada sozinha; TV sem H.265 passa para HD/SD entre as fontes. ▲/▼ trocam de canal, não de qualidade.
 - **Erros da lista com motivo:** lista vencida (com a data), bloqueada, usuário recusado, HTTP 401/403, servidor fora do ar (5xx) e resposta que não é uma lista.
 - **Hora do servidor no guia** (`source/ServerClock.brs`, `m.global.clockOffset`): com o relógio do aparelho errado, o guia usa a hora do servidor (cabeçalho `Date` de duas respostas que concordam ou `timestamp_now`; só a partir de 2 min).
