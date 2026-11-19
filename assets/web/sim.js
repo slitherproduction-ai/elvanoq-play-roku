@@ -63,7 +63,7 @@
                 return;
             }
             if (k === "home") {
-                if (down) { log("Tecla", "Home"); brs.sendKeyDown("home"); }
+                if (down) brs.sendKeyDown("home");
                 else brs.sendKeyUp("home");
                 return;
             }
@@ -285,6 +285,19 @@
         }).then(function (b) { pkgData = b; return b; });
     }
 
+    /** O motor baixa o common.zip (fontes, sons) sem avisar: abrir o canal antes disso derruba o canal. */
+    function waitAssets() {
+        return new Promise(function (resolve) {
+            var t0 = Date.now();
+            (function check() {
+                var a = brs.deviceData && brs.deviceData.assets;
+                if (a && a.byteLength > 0) return resolve();
+                if (Date.now() - t0 > 15000) { log("Sim", "common.zip do motor não carregou em 15 s"); return resolve(); }
+                setTimeout(check, 100);
+            })();
+        });
+    }
+
     function launch() {
         if (running || starting || !engineReady) return;
         if (!pkgData) { homeMsg("Nenhum canal carregado. Baixe a branch ou importe o ZIP nas configurações."); return; }
@@ -319,7 +332,7 @@
             engineReady = true;
             layout();
             log("Motor", "pronto · brs-engine " + (brs.getVersion ? brs.getVersion() : "?") + " · " + d.deviceModel + " · " + d.displayMode + " · " + d.locale);
-            return loadPkg();
+            return Promise.all([loadPkg(), waitAssets()]);
         }).then(function () {
             homeMsg(cfg.belowMin ? "Atenção: esta Roku tem OS " + cfg.os + "; o canal exige 15.1+ (a loja não instalaria)." : "");
             launch();
