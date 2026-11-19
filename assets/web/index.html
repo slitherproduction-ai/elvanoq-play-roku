@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#1E1730" />
+    <title>ELVANOQ Roku Sim</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+    <link rel="stylesheet" href="sim.css" />
+</head>
+<body>
+    <div id="app">
+        <div id="tvwrap">
+            <div id="tv">
+                <div id="stats"></div>
+                <canvas id="display" width="1280" height="720"></canvas>
+                <video id="player" crossorigin="anonymous" playsinline></video>
+                <div id="home" class="overlay">
+                    <div class="home-box">
+                        <div class="home-brand">Roku Sim</div>
+                        <div id="homeTile" class="tile">
+                            <div class="tile-title" id="tileTitle">ELVANOQ Play</div>
+                            <div class="tile-sub" id="tileSub"></div>
+                        </div>
+                        <div id="homeMsg" class="home-msg">Carregando o motor…</div>
+                        <div class="home-hint">OK abre o canal</div>
+                    </div>
+                </div>
+                <div id="fatal" class="overlay hidden"><div class="fatal-box" id="fatalMsg"></div></div>
+                <div id="logpanel" class="hidden"><pre id="logtext"></pre></div>
+                <div id="typer" class="hidden">
+                    <div class="typer-box">
+                        <div class="typer-title">Digitar no canal (como o app Roku do celular)</div>
+                        <input id="typerInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" />
+                        <div class="typer-row">
+                            <button id="typerSend">Enviar</button>
+                            <button id="typerBksp">⌫ Apagar 1</button>
+                            <button id="typerClose">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="remote">
+            <div class="rrow small">
+                <button data-act="menu" title="Menu">☰</button>
+                <button data-act="log" title="Log">Log</button>
+                <button data-act="full" title="Tela cheia">⛶</button>
+            </div>
+            <div class="rrow">
+                <button data-key="back" class="wide">↩ Voltar</button>
+                <button data-key="home" class="wide">⌂ Home</button>
+            </div>
+            <div class="pad">
+                <button data-key="up" class="p-up">▲</button>
+                <button data-key="left" class="p-left">◀</button>
+                <button data-key="select" class="p-ok">OK</button>
+                <button data-key="right" class="p-right">▶</button>
+                <button data-key="down" class="p-down">▼</button>
+            </div>
+            <div class="rrow">
+                <button data-key="instantreplay" title="Repetir">↺</button>
+                <button data-act="type" title="Digitar texto">⌨</button>
+                <button data-key="info" title="Opções">✱</button>
+            </div>
+            <div class="rrow">
+                <button data-key="rev">⏪</button>
+                <button data-key="play">⏯</button>
+                <button data-key="fwd">⏩</button>
+            </div>
+            <div id="remoteInfo"></div>
+        </div>
+    </div>
+    <div id="menu" class="hidden">
+        <div class="menu-box">
+            <div class="menu-title" id="menuTitle">Roku simulada</div>
+            <button data-m="restart">Reiniciar o canal</button>
+            <button data-m="deeplink">Enviar deep link com o canal aberto (roInput)</button>
+            <button data-m="remote">Mostrar/ocultar controle</button>
+            <button data-m="stats">Mostrar/ocultar desempenho</button>
+            <button data-m="share">Compartilhar log</button>
+            <button data-m="settings">Configurações do simulador</button>
+            <button data-m="info">Info do aparelho</button>
+            <button data-m="close">Fechar</button>
+        </div>
+    </div>
+    <script src="lib/brs.api.js"></script>
+    <script src="sim.js"></script>
+</body>
+</html>
