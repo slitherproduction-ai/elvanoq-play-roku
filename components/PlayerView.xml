@@ -31,6 +31,7 @@
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
   <script type="text/brightscript" uri="pkg:/source/ListPrefs.brs" />
   <script type="text/brightscript" uri="pkg:/source/ImageSize.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ChannelGroups.brs" />
   <children>
     <Rectangle width="1920" height="1080" color="0x000000FF" />
     <Video id="video" width="1920" height="1080" enableUI="false" />
@@ -86,12 +87,14 @@
     <RoundRect id="pillBg2" translation="[416,958]" width="160" height="56" color="0xF4F8FF1F" radius="28" />
     <RoundRect id="pillBg3" translation="[592,958]" width="160" height="56" color="0xF4F8FF1F" radius="28" />
     <RoundRect id="pillBg4" translation="[768,958]" width="160" height="56" color="0xF4F8FF1F" radius="28" />
+    <RoundRect id="pillBg5" translation="[944,958]" width="160" height="56" color="0xF4F8FF1F" radius="28" visible="false" />
     <RoundRect id="controlFocus" translation="[240,958]" width="160" height="56" color="0xF4F8FFFF"  radius="28" />
     <Label id="controlBack" translation="[64,958]" text="-10s" width="160" height="56" horizAlign="center" vertAlign="center" />
     <Label id="controlPlay" translation="[240,958]" text="Pausar" width="160" height="56" horizAlign="center" vertAlign="center" />
     <Label id="controlForward" translation="[416,958]" text="+10s" width="160" height="56" horizAlign="center" vertAlign="center" />
     <Label id="controlAudio" translation="[592,958]" text="Áudio" width="160" height="56" horizAlign="center" vertAlign="center" />
     <Label id="controlSubtitles" translation="[768,958]" text="Legendas" width="160" height="56" horizAlign="center" vertAlign="center" />
+    <Label id="controlSource" translation="[944,958]" text="Fonte" width="160" height="56" horizAlign="center" vertAlign="center" visible="false" />
     <Label id="controls" translation="[1256,972]" width="600" height="30" horizAlign="right" />
 
     <!-- Erro de reproducao (travamento sem volta ou programa indisponivel para rever) -->

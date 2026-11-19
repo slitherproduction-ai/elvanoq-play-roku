@@ -47,7 +47,7 @@ sub init()
     m.trackPanel = m.top.findNode("trackPanel")
     m.trackPanelTitle = m.top.findNode("trackPanelTitle")
     m.trackPanelValue = m.top.findNode("trackPanelValue")
-    m.controlLabels = [m.top.findNode("controlBack"), m.top.findNode("controlPlay"), m.top.findNode("controlForward"), m.top.findNode("controlAudio"), m.top.findNode("controlSubtitles")]
+    m.controlLabels = [m.top.findNode("controlBack"), m.top.findNode("controlPlay"), m.top.findNode("controlForward"), m.top.findNode("controlAudio"), m.top.findNode("controlSubtitles"), m.top.findNode("controlSource")]
     m.title.font = appFont(44, "bold")
     m.title.color = "0xF4F8FFFF"
     m.hint.font = appFont(22, "medium")
@@ -79,7 +79,7 @@ sub init()
         label.color = "0xF4F8FFFF"
     end for
     m.pillBackgrounds = []
-    for index = 0 to 4
+    for index = 0 to 5
         m.pillBackgrounds.push(m.top.findNode("pillBg" + index.ToStr()))
     end for
     ' Topo a direita: relogio e, em filmes e episodios, "termina as".
@@ -135,6 +135,14 @@ sub onStreamChanged()
     m.shouldRestorePosition = m.top.resumePosition > 0
     m.liveRetries = 0
     m.formatFallbackTried = false
+    m.hasPlayed = false
+    ' Troca automatica de fonte em andamento mantem as fontes ja tentadas.
+    if m.sourcePending = true then
+        m.sourcePending = false
+    else
+        m.sourceTried = {}
+    end if
+    renderSourceControl()
     ' Uma troca de qualidade em andamento mantem a lista de versoes ja tentadas.
     if m.qualityFallbackPending = true then
         m.qualityFallbackPending = false
@@ -321,6 +329,10 @@ sub onVideoState()
         end if
         return
     end if
+    ' Canal que nunca abriu, ja tentado de novo uma vez: proxima fonte do mesmo canal.
+    if isLivePlayback() and m.hasPlayed <> true and m.video.state = "error" and m.liveRetries >= 1 then
+        if trySourceFallback() then return
+    end if
     if isLivePlayback() and (m.video.state = "error" or m.video.state = "finished") and m.liveRetries < 3 then
         m.liveRetries = m.liveRetries + 1
         m.hint.text = "Reconectando ao canal… (" + safeTrim(str(m.liveRetries)) + "/3)"
@@ -331,6 +343,7 @@ sub onVideoState()
         return
     end if
     if m.video.state = "playing" then
+        m.hasPlayed = true
         m.openTimer.control = "stop"
         m.openAttempts = 0
         m.liveRetries = 0
@@ -496,7 +509,7 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
         return true
     end if
     if key = "right" then
-        if m.selectedControl < 4 then m.selectedControl = m.selectedControl + 1
+        if m.selectedControl < lastControl() then m.selectedControl = m.selectedControl + 1
         updateControlFocus()
         showOsd()
         return true
@@ -628,6 +641,10 @@ sub showOsd()
     for each pill in m.pillBackgrounds
         pill.visible = true
     end for
+    ' 6o controle so ao vivo com mais de uma fonte do mesmo canal.
+    many = hasSources()
+    m.controlLabels[5].visible = many
+    m.pillBackgrounds[5].visible = many
     if m.video.state = "playing" then m.osdTimer.control = "start"
 end sub
 
@@ -672,7 +689,8 @@ end sub
 
 sub updateControlFocus()
     ' Pilula branca no controle selecionado, com texto escuro.
-    positions = [64, 240, 416, 592, 768]
+    if m.selectedControl > lastControl() then m.selectedControl = lastControl()
+    positions = [64, 240, 416, 592, 768, 944]
     m.controlFocus.translation = [positions[m.selectedControl], 958]
     for index = 0 to m.controlLabels.count() - 1
         if index = m.selectedControl then
@@ -702,6 +720,8 @@ sub runSelectedControl()
         cycleAudioTrack()
     else if m.selectedControl = 4 then
         cycleSubtitleTrack()
+    else if m.selectedControl = 5 then
+        cycleSource()
     end if
     showOsd()
 end sub
@@ -1033,6 +1053,8 @@ end sub
 ' Procura na lista atual o mesmo canal em HD (ou SD) e pede a troca.
 function tryLowerQualityChannel() as Boolean
     if not isLivePlayback() then return false
+    ' Linha agrupada (ChannelGroups): as outras qualidades estao nas fontes.
+    if hasSources() then return tryLowerQualitySource()
     queue = m.top.liveQueue
     if queue = invalid or queue.count() < 2 then return false
     if m.qualityTried = invalid then m.qualityTried = {}
@@ -1054,6 +1076,90 @@ function tryLowerQualityChannel() as Boolean
                         return true
                     end if
                 end if
+            end if
+        end for
+    end for
+    return false
+end function
+
+' ---------- Fontes do mesmo canal (ChannelGroups, Android 2.17.75) ----------
+function currentSources() as Dynamic
+    queue = m.top.liveQueue
+    if queue = invalid or m.top.liveIndex < 0 or m.top.liveIndex >= queue.count() then return invalid
+    row = queue[m.top.liveIndex]
+    if row = invalid or row.sources = invalid or row.sources.count() < 2 then return invalid
+    if not channelRowHasId(row, m.top.contentId) then return invalid
+    return row.sources
+end function
+
+function hasSources() as Boolean
+    return isLivePlayback() and m.catchupIndex < 0 and currentSources() <> invalid
+end function
+
+function lastControl() as Integer
+    if hasSources() then return 5
+    return 4
+end function
+
+function currentSourceIndex(sources as Object) as Integer
+    for index = 0 to sources.count() - 1
+        if sources[index].id = m.top.contentId then return index
+    end for
+    return 0
+end function
+
+' Botao Fonte: "FHD 1/3" (qualidade da fonte atual e posicao).
+sub renderSourceControl()
+    sources = currentSources()
+    if sources = invalid then
+        m.controlLabels[5].text = "Fonte"
+        return
+    end if
+    labels = channelSourceLabels(sources)
+    index = currentSourceIndex(sources)
+    m.controlLabels[5].text = labels[index] + " " + safeTrim(str(index + 1)) + "/" + safeTrim(str(sources.count()))
+end sub
+
+sub cycleSource()
+    sources = currentSources()
+    if sources = invalid then return
+    index = currentSourceIndex(sources) + 1
+    if index >= sources.count() then index = 0
+    m.top.channelRequested = { item: sources[index], index: m.top.liveIndex }
+end sub
+
+function trySourceFallback() as Boolean
+    sources = currentSources()
+    if sources = invalid then return false
+    if m.sourceTried = invalid then m.sourceTried = {}
+    m.sourceTried[safeTrim(m.top.contentId)] = true
+    nextSource = nextUntriedSource(sources, m.top.contentId, m.sourceTried)
+    if nextSource = invalid then return false
+    m.sourceTried[safeTrim(nextSource.id)] = true
+    m.sourcePending = true
+    m.hint.text = "Esta fonte não abriu. Tentando outra fonte…"
+    showOsd()
+    m.top.channelRequested = { item: nextSource, index: m.top.liveIndex }
+    return true
+end function
+
+' TV sem H.265: procura HD, depois SD, depois qualquer outra entre as fontes.
+function tryLowerQualitySource() as Boolean
+    sources = currentSources()
+    if m.sourceTried = invalid then m.sourceTried = {}
+    m.sourceTried[safeTrim(m.top.contentId)] = true
+    current = invalid
+    for each source in sources
+        if source.id = m.top.contentId then current = source
+    end for
+    for each wanted in ["hd", "sd", ""]
+        for each candidate in sources
+            if m.sourceTried[safeTrim(candidate.id)] <> true and candidate.title <> invalid and channelQuality(candidate.title) = wanted then
+                m.sourceTried[safeTrim(candidate.id)] = true
+                m.sourcePending = true
+                if current <> invalid then m.qualityNotice = "Versão " + channelQualityLabel(current.title) + " não suportada nesta TV. Exibindo " + candidate.title + "."
+                m.top.channelRequested = { item: candidate, index: m.top.liveIndex }
+                return true
             end if
         end for
     end for
@@ -1217,6 +1323,7 @@ sub onOpenTimeout()
 end sub
 
 sub showOpenError()
+    if isLivePlayback() and m.catchupIndex < 0 and trySourceFallback() then return
     m.stallTimer.control = "stop"
     m.retryTimer.control = "stop"
     m.openTimer.control = "stop"

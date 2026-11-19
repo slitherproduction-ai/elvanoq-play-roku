@@ -68,6 +68,22 @@ sub init()
         label.font = appFont(22, "medium")
         label.color = "0xF4F8FFFF"
     end for
+    ' "N fontes": qualidades do mesmo canal numa linha (ChannelGroups).
+    m.sourceLabels = []
+    for each label in m.channelLabels
+        count = CreateObject("roSGNode", "Label")
+        count.translation = [1060, label.translation[1]]
+        count.width = 140
+        count.height = 40
+        count.horizAlign = "right"
+        count.vertAlign = "center"
+        count.font = appFont(18, "medium")
+        count.color = "0x9AA6BDFF"
+        count.visible = false
+        m.top.appendChild(count)
+        i18nWalk(count, true)
+        m.sourceLabels.push(count)
+    end for
     m.top.findNode("title").font = appFont(40, "bold")
     m.top.findNode("title").color = "0xF4F8FFFF"
     m.top.findNode("subtitle").font = appFont(20, "regular")
@@ -266,6 +282,9 @@ sub renderGuide()
         for each heart in m.favHearts
             heart.visible = false
         end for
+        for each count in m.sourceLabels
+            count.visible = false
+        end for
         updateFocus()
         m.previewTitle.text = ""
         m.epgNow.text = ""
@@ -280,9 +299,18 @@ sub renderGuide()
         if itemIndex < m.visibleChannels.count() then
             channel = m.visibleChannels[itemIndex]
             ' Favorito: coracao na frente do nome (imagem; a fonte nao tem o simbolo).
-            m.channelLabels[index].text = channel.title
+            many = channel.sources <> invalid
+            if many then
+                m.channelLabels[index].text = channel.group_title
+                m.channelLabels[index].width = 410
+                m.sourceLabels[index].text = safeTrim(str(channel.sources.count())) + " fontes"
+            else
+                m.channelLabels[index].text = channel.title
+                m.channelLabels[index].width = 560
+            end if
+            m.sourceLabels[index].visible = many
             m.channelLabels[index].color = "0xF4F8FFFF"
-            m.favHearts[index].visible = isFavorite(channel.id)
+            m.favHearts[index].visible = isRowFavorite(channel)
             if channel.logo <> invalid and channel.logo <> "" then
                 m.channelLogos[index].uri = channel.logo
                 m.channelLogos[index].visible = true
@@ -295,6 +323,7 @@ sub renderGuide()
             m.channelLogos[index].uri = ""
             m.channelLogos[index].visible = false
             m.favHearts[index].visible = false
+            m.sourceLabels[index].visible = false
         end if
     end for
     updateSelection()
@@ -398,9 +427,13 @@ sub updateSelection()
     if m.visibleChannels.count() = 0 then return
     updateFocus()
     selected = m.visibleChannels[m.selectedIndex]
-    m.previewTitle.text = selected.title
+    if selected.group_title <> invalid then
+        m.previewTitle.text = selected.group_title
+    else
+        m.previewTitle.text = selected.title
+    end if
     favoriteHint = ""
-    if isFavorite(selected.id) then favoriteHint = "  •  Favorito"
+    if isRowFavorite(selected) then favoriteHint = "  •  Favorito"
     m.previewHint.text = "→ prévia  •  OK tela cheia  •  * favorito" + favoriteHint
     hasArchive = channelHasArchive(selected)
     m.archiveBadge.visible = hasArchive
@@ -534,6 +567,27 @@ sub toggleFavorite()
     if m.searchFocus or m.visibleChannels.count() = 0 then return
     m.localState = loadLocalState()
     selected = m.visibleChannels[m.selectedIndex]
+    ' Linha agrupada: favorita se alguma fonte for; desmarcar tira todas.
+    if selected.sources <> invalid then
+        if isRowFavorite(selected) then
+            for each source in selected.sources
+                if isFavorite(source.id) then
+                    m.localState.favorites = removeLocalItem(m.localState.favorites, source.id)
+                    if m.lazy then
+                        kept = []
+                        for each channel in m.favoriteChannels
+                            if channel.id <> source.id then kept.push(channel)
+                        end for
+                        m.favoriteChannels = kept
+                    end if
+                end if
+            end for
+            saveLocalState(m.localState)
+            renderGuide()
+            return
+        end if
+        selected = selected.sources[0]
+    end if
     if isFavorite(selected.id) then
         m.localState.favorites = removeLocalItem(m.localState.favorites, selected.id)
         if m.lazy then
@@ -565,6 +619,14 @@ sub toggleFavorite()
     end if
     renderGuide()
 end sub
+
+function isRowFavorite(row as Object) as Boolean
+    if row.sources = invalid then return isFavorite(row.id)
+    for each source in row.sources
+        if isFavorite(source.id) then return true
+    end for
+    return false
+end function
 
 function isFavorite(itemId as String) as Boolean
     for each item in m.localState.favorites
@@ -674,7 +736,7 @@ end function
 ' Canais da categoria aberta filtrados pelo nome ou pelo programa atual.
 sub filterChannels()
     if m.channelQuery = "" then
-        m.visibleChannels = m.categoryChannels
+        m.visibleChannels = groupChannelRows(m.categoryChannels)
         return
     end if
     needle = lcase(m.channelQuery)
@@ -690,7 +752,7 @@ sub filterChannels()
         end if
         if matched then found.push(channel)
     end for
-    m.visibleChannels = found
+    m.visibleChannels = groupChannelRows(found)
 end sub
 
 sub renderSearchBoxes()
@@ -733,7 +795,7 @@ sub updateEpgProgress(programme as Dynamic)
     if programme.startSec = invalid or programme.stopSec = invalid then return
     total = programme.stopSec - programme.startSec
     if total <= 0 then return
-    elapsed = CreateObject("roDateTime").AsSeconds() - programme.startSec
+    elapsed = serverNowSeconds() - programme.startSec
     if elapsed < 0 then elapsed = 0
     if elapsed > total then elapsed = total
     bar.width = int(556 * elapsed / total)
@@ -744,7 +806,7 @@ sub returnToChannel(payload as Object)
     if payload = invalid or payload.id = invalid then return
     if m.visibleChannels = invalid then return
     for index = 0 to m.visibleChannels.count() - 1
-        if m.visibleChannels[index].id = payload.id then
+        if channelRowHasId(m.visibleChannels[index], payload.id) then
             m.selectedIndex = index
             if index < m.channelOffset or index >= m.channelOffset + m.rows then
                 m.channelOffset = index - int(m.rows / 2)

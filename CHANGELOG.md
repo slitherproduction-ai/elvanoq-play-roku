@@ -2,6 +2,10 @@
 
 ## 1.1.10 (build 10)
 
+- **Qualidades do mesmo canal numa linha** (19/11; Android 2.17.75): na TV ao Vivo, canais da mesma categoria cujo nome, sem as marcas de qualidade (4K, FHD, HD, SD, H265, ALT, Backup, Opção N, ᴴᴰ…), é igual viram uma linha com o nome limpo e "N fontes" (`source/ChannelGroups.brs`; listas de até 3000 canais). Coração vale para o grupo. No player, o 6º botão "Fonte" (só ao vivo com mais de uma fonte) mostra "FHD 1/3" e troca de fonte; se a fonte não abre, a próxima é tentada sozinha; TV sem H.265 passa para HD/SD entre as fontes. ▲/▼ trocam de canal, não de qualidade.
+- **Erros da lista com motivo:** lista vencida (com a data), bloqueada, usuário recusado, HTTP 401/403, servidor fora do ar (5xx) e resposta que não é uma lista.
+- **Hora do servidor no guia** (`source/ServerClock.brs`, `m.global.clockOffset`): com o relógio do aparelho errado, o guia usa a hora do servidor (cabeçalho `Date` de duas respostas que concordam ou `timestamp_now`; só a partir de 2 min).
+
 - **Novidades para você sem versões repetidas** (mesma regra do `dedupeTitleVariants` do Android): o agrupamento passa a ignorar marcações entre colchetes/parênteses que são só versão, qualidade ou ano (`[L]`, `[D]`, `(DUB)`, `(Legendado)`, `[Nacional]`, `(Dual)`, `(2024)`, `[4K]`…), palavras técnicas fora delas (FHD, 4K, HDR, HEVC, Dublado, Legendado, Dual…), acentos, maiúsculas e pontuação. Antes só caíam DUB/LEG/HD soltos, e "Filme [L]" e "Filme" apareciam como dois títulos. Entre as versões fica a Dublada (depois sem marca, Nacional e Legendada), na posição da mais nova. Trechos que fazem parte do nome continuam, como "Duna (Parte Dois)".
 
 ## 1.1.9 (build 9)

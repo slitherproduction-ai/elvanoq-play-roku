@@ -30,6 +30,8 @@
   <script type="text/brightscript" uri="pkg:/source/ListPrefs.brs" />
   <script type="text/brightscript" uri="pkg:/source/Catchup.brs" />
   <script type="text/brightscript" uri="pkg:/source/LocalState.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ServerClock.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ChannelGroups.brs" />
   <children>
     <Rectangle width="1920" height="1080" color="0x070B14FF" />
     <Label id="title" translation="[64,64]" text="TV ao Vivo" width="700" height="52" />
