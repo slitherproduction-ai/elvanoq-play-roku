@@ -32,7 +32,7 @@ jobs:
           {
           git clone --depth 1 --branch "$BRS_ENGINE_TAG" https://github.com/lvcabral/brs-engine.git brs-engine
           cd brs-engine
-          npm ci --no-audit --no-fund
+          npm install --no-audit --no-fund
           npm run release -w brs-engine
           npm run release -w brs-scenegraph
           mkdir -p ../engine-out/lib ../engine-out/assets
