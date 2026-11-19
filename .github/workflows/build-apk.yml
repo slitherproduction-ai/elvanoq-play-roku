@@ -34,6 +34,7 @@ jobs:
           cd brs-engine
           npm install --no-audit --no-fund
           npm run release -w brs-engine
+          mkdir -p packages/node/bin packages/node/assets
           npm run release -w brs-scenegraph
           mkdir -p ../engine-out/lib ../engine-out/assets
           cp packages/browser/lib/brs.api.js packages/browser/lib/brs.worker.js packages/browser/lib/brs-sg.js ../engine-out/lib/
