@@ -29,7 +29,7 @@
       <Label id="pageSubtitle" translation="[64,118]" text="Conteúdo e sistema desta TV" width="1100" height="30" />
       <Label id="deviceInfo" translation="[944,124]" width="912" height="28" horizAlign="right" />
       <Label id="groupLabel0" translation="[72,176]" text="CONTEÚDO" width="600" height="24" />
-      <Label id="groupLabel1" translation="[72,468]" text="SISTEMA" width="600" height="24" />
+      <Label id="groupLabel1" translation="[72,554]" text="SISTEMA" width="600" height="24" />
       <RoundRect id="rowBg0" translation="[64,210]" width="1100" height="76" color="0x0D1422B8" radius="16" borderColor="0xBEDEFF1A" />
       <Poster id="rowIcon0" translation="[92,231]" width="34" height="34" blendColor="0x00D7FFFF" />
       <Label id="rowTitle0" translation="[146,219]" width="560" height="34" />
@@ -48,12 +48,12 @@
       <Label id="rowSub2" translation="[146,425]" width="560" height="24" />
       <Label id="rowMeta2" translation="[700,382]" width="394" height="76" horizAlign="right" vertAlign="center" />
       <Poster translation="[1114,409]" width="22" height="22" uri="pkg:/images/icon_chevron.png" blendColor="0x8894A8FF" />
-      <RoundRect id="rowBg3" translation="[64,502]" width="1100" height="76" color="0x0D1422B8" radius="16" borderColor="0xBEDEFF1A" />
-      <Poster id="rowIcon3" translation="[92,523]" width="34" height="34" blendColor="0x00D7FFFF" />
-      <Label id="rowTitle3" translation="[146,511]" width="560" height="34" />
-      <Label id="rowSub3" translation="[146,545]" width="560" height="24" />
-      <Label id="rowMeta3" translation="[700,502]" width="394" height="76" horizAlign="right" vertAlign="center" />
-      <Poster translation="[1114,529]" width="22" height="22" uri="pkg:/images/icon_chevron.png" blendColor="0x8894A8FF" />
+      <RoundRect id="rowBg3" translation="[64,468]" width="1100" height="76" color="0x0D1422B8" radius="16" borderColor="0xBEDEFF1A" />
+      <Poster id="rowIcon3" translation="[92,489]" width="34" height="34" blendColor="0x00D7FFFF" />
+      <Label id="rowTitle3" translation="[146,477]" width="560" height="34" />
+      <Label id="rowSub3" translation="[146,511]" width="560" height="24" />
+      <Label id="rowMeta3" translation="[700,468]" width="394" height="76" horizAlign="right" vertAlign="center" />
+      <Poster translation="[1114,495]" width="22" height="22" uri="pkg:/images/icon_chevron.png" blendColor="0x8894A8FF" />
       <RoundRect id="rowBg4" translation="[64,588]" width="1100" height="76" color="0x0D1422B8" radius="16" borderColor="0xBEDEFF1A" />
       <Poster id="rowIcon4" translation="[92,609]" width="34" height="34" blendColor="0x00D7FFFF" />
       <Label id="rowTitle4" translation="[146,597]" width="560" height="34" />
@@ -66,6 +66,12 @@
       <Label id="rowSub5" translation="[146,717]" width="560" height="24" />
       <Label id="rowMeta5" translation="[700,674]" width="394" height="76" horizAlign="right" vertAlign="center" />
       <Poster translation="[1114,701]" width="22" height="22" uri="pkg:/images/icon_chevron.png" blendColor="0x8894A8FF" />
+      <RoundRect id="rowBg6" translation="[64,760]" width="1100" height="76" color="0x0D1422B8" radius="16" borderColor="0xBEDEFF1A" />
+      <Poster id="rowIcon6" translation="[92,781]" width="34" height="34" blendColor="0x00D7FFFF" />
+      <Label id="rowTitle6" translation="[146,769]" width="560" height="34" />
+      <Label id="rowSub6" translation="[146,803]" width="560" height="24" />
+      <Label id="rowMeta6" translation="[700,760]" width="394" height="76" horizAlign="right" vertAlign="center" />
+      <Poster translation="[1114,787]" width="22" height="22" uri="pkg:/images/icon_chevron.png" blendColor="0x8894A8FF" />
       <RoundRect translation="[1204,210]" width="652" height="640" color="0x0D1422B8" radius="16" borderColor="0xBEDEFF1A" />
       <Poster id="detailIcon" translation="[1252,254]" width="64" height="64" blendColor="0x00D7FFFF" />
       <Label id="detailTitle" translation="[1252,344]" width="556" height="44" />

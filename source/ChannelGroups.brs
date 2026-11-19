@@ -84,6 +84,7 @@ end function
 ' ficam como estao para nao pesar na navegacao.
 function groupChannelRows(list as Object) as Object
     if list = invalid or list.count() < 2 or list.count() > 3000 then return list
+    if not joinQualitiesEnabled() then return list
     groups = {}
     order = []
     merged = false
