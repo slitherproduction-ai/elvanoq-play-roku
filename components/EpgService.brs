@@ -63,7 +63,7 @@ function parseXmltv(body)
     entries = {}
     cursor = 1
     total = 0
-    nowSec = CreateObject("roDateTime").AsSeconds()
+    nowSec = serverNowSeconds()
 
     while total < 3000
         startAt = instr(cursor, body, "<programme")
@@ -225,7 +225,7 @@ sub runShortEpg(result)
     listings = json.epg_listings
     if listings = invalid or type(listings) <> "roArray" then return
 
-    nowSec = CreateObject("roDateTime").AsSeconds()
+    nowSec = serverNowSeconds()
     programmes = []
     for each listing in listings
         if type(listing) = "roAssociativeArray" then
@@ -303,7 +303,7 @@ sub runArchiveEpg(result)
     listings = json.epg_listings
     if listings = invalid or type(listings) <> "roArray" then return
 
-    nowSec = CreateObject("roDateTime").AsSeconds()
+    nowSec = serverNowSeconds()
     days = m.top.archiveDays
     if days <= 0 then days = 1
     oldest = nowSec - days * 86400

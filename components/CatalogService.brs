@@ -188,24 +188,83 @@ function xtreamApi(credentials, action, categoryId)
     event = wait(25000, port)
     if event = invalid or type(event) <> "roUrlEvent" then
         transfer.AsyncCancel()
+        m.lastXtreamCode = 0
         return invalid
     end if
+    m.lastXtreamCode = event.GetResponseCode()
+    noteServerDateHeader(event)
     if event.GetResponseCode() < 200 or event.GetResponseCode() >= 300 then return invalid
     body = event.GetString()
     if body = invalid or body = "" then return invalid
     return ParseJson(body)
 end function
 
+' Hora do servidor (cabecalho Date) de cada resposta, para o guia (ServerClock).
+sub noteServerDateHeader(event as Object)
+    if m.clockSamples = invalid then m.clockSamples = []
+    headers = event.GetResponseHeaders()
+    if headers = invalid then return
+    serverSeconds = parseHttpDate(headers["date"])
+    if serverSeconds <= 0 then return
+    m.clockSamples.push(serverSeconds - CreateObject("roDateTime").AsSeconds())
+end sub
+
+' Motivo de a lista nao abrir (Android 2.17.75, listAccess.ts).
+function xtreamAccountProblem(info as Object) as String
+    status = lcase(safeTrim(info.status))
+    if status = "expired" then
+        until = ""
+        seconds = safeTrim(info.exp_date).ToInt()
+        if seconds > 0 then
+            dt = CreateObject("roDateTime")
+            dt.FromSeconds(seconds)
+            dt.ToLocalTime()
+            dd = safeTrim(str(dt.GetDayOfMonth()))
+            mm = safeTrim(str(dt.GetMonth()))
+            if len(dd) = 1 then dd = "0" + dd
+            if len(mm) = 1 then mm = "0" + mm
+            if m.global <> invalid and m.global.language = "en" then
+                until = safeTrim(str(dt.GetMonth())) + "/" + safeTrim(str(dt.GetDayOfMonth())) + "/" + safeTrim(str(dt.GetYear()))
+            else
+                until = dd + "/" + mm + "/" + safeTrim(str(dt.GetYear()))
+            end if
+        end if
+        if until <> "" then return "A lista venceu em " + until + ". Fale com a sua revenda para renovar."
+        return "A lista venceu. Fale com a sua revenda para renovar."
+    end if
+    if status = "banned" or status = "disabled" or status = "blocked" then return "A lista está bloqueada no servidor. Fale com a sua revenda."
+    if safeTrim(info.auth) <> "1" then return "A lista recusou o usuário e a senha. Confira os dados da lista ou fale com a sua revenda."
+    return ""
+end function
+
 sub loadXtreamCatalog(credentials, result)
+    m.clockSamples = []
     account = xtreamApi(credentials, "", "")
+    receivedAt = CreateObject("roDateTime").AsSeconds()
+    code = m.lastXtreamCode
+    if code = 401 or code = 403 then
+        result.message = "O servidor recusou o acesso (HTTP " + safeTrim(str(code)) + "). Confira o usuário e a senha da lista ou fale com a sua revenda."
+        return
+    end if
+    if code >= 500 then
+        result.message = "O servidor da lista está fora do ar ou sobrecarregado (HTTP " + safeTrim(str(code)) + "). Tente novamente em alguns minutos."
+        return
+    end if
+    if account = invalid and code >= 200 and code < 300 then
+        result.message = "O servidor respondeu algo que não é uma lista. Confira o endereço do servidor."
+        return
+    end if
     if account = invalid or type(account) <> "roAssociativeArray" or account.user_info = invalid then
         result.message = "Não foi possível conectar ao servidor da lista."
         return
     end if
-    if safeTrim(account.user_info.auth) <> "1" then
-        result.message = "Usuário ou senha da lista recusados pelo servidor."
+    problem = xtreamAccountProblem(account.user_info)
+    if problem <> "" then
+        result.message = problem
         return
     end if
+    timestampNow = invalid
+    if account.server_info <> invalid then timestampNow = account.server_info.timestamp_now
     liveExtension = "ts"
     formats = account.user_info.allowed_output_formats
     if formats <> invalid and type(formats) = "roArray" then
@@ -221,6 +280,7 @@ sub loadXtreamCatalog(credentials, result)
     liveCategories = xtreamCategoryList(credentials, "get_live_categories")
     movieCategories = xtreamCategoryList(credentials, "get_vod_categories")
     seriesCategories = xtreamCategoryList(credentials, "get_series_categories")
+    result.clockOffset = computeClockOffset(m.clockSamples, timestampNow, receivedAt)
     if liveCategories.count() = 0 and movieCategories.count() = 0 and seriesCategories.count() = 0 then
         result.message = "O servidor não retornou categorias."
         return

@@ -1173,6 +1173,8 @@ sub onCatalogResult()
     if result.ok <> true then return
     m.categories = result.categories
     m.lazy = (result.lazy = true)
+    ' Hora do servidor para o guia quando o relogio do aparelho esta errado (ServerClock).
+    if result.clockOffset <> invalid then m.global.clockOffset = result.clockOffset
     m.hiddenFilter = invalid
     m.categoryCache = {}
     m.categoryCacheOrder = []
