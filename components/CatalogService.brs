@@ -184,6 +184,7 @@ function xtreamApi(credentials, action, categoryId)
     transfer.SetUrl(url)
     transfer.SetPort(port)
     transfer.EnableEncodings(true)
+    m.lastXtreamCode = 0
     if transfer.AsyncGetToString() <> true then return invalid
     event = wait(25000, port)
     if event = invalid or type(event) <> "roUrlEvent" then
@@ -208,6 +209,54 @@ sub noteServerDateHeader(event as Object)
     if serverSeconds <= 0 then return
     m.clockSamples.push(serverSeconds - CreateObject("roDateTime").AsSeconds())
 end sub
+
+' Por que a lista nao abre (Android 2.17.77, connectionDiagnosis.ts). O codigo
+' negativo do roUrlTransfer diz se o nome nao foi encontrado (-6) ou se a
+' conexao falhou (-7, -28, 0 = sem resposta); o DNS publico do Google (HTTPS,
+' so o nome do servidor) confirma se o endereco existe.
+function xtreamConnectionProblem(host as String, code as Integer) as String
+    name = hostNameOf(host)
+    if name = "" then return ""
+    dns = publicDnsLookup(name)
+    if code = -6 then
+        if dns = "exists" then return "O DNS da sua internet não encontrou o servidor da lista, mas ele existe. Provável bloqueio da operadora. Troque o DNS do roteador (por exemplo 1.1.1.1 ou 8.8.8.8) e tente de novo."
+        if dns = "missing" then return "O endereço do servidor da lista não existe. Confira o endereço com a sua revenda."
+        return "Este aparelho está sem internet. Confira o Wi-Fi ou o cabo e tente de novo."
+    end if
+    if dns = "unavailable" then return "Este aparelho está sem internet. Confira o Wi-Fi ou o cabo e tente de novo."
+    if dns = "missing" then return "O endereço do servidor da lista não existe. Confira o endereço com a sua revenda."
+    return "O servidor da lista não respondeu. Ele pode estar fora do ar ou bloqueado pela operadora. Tente mais tarde ou fale com a sua revenda."
+end function
+
+function hostNameOf(url as String) as String
+    match = CreateObject("roRegex", "^[a-z]+://([^/:?#]+)", "i").Match(url)
+    if match.count() < 2 then return ""
+    return lcase(match[1])
+end function
+
+' "exists" | "missing" | "unavailable"
+function publicDnsLookup(name as String) as String
+    if CreateObject("roRegex", "^[0-9]{1,3}(\.[0-9]{1,3}){3}$", "").IsMatch(name) then return "exists"
+    transfer = CreateObject("roUrlTransfer")
+    port = CreateObject("roMessagePort")
+    transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
+    transfer.SetUrl("https://dns.google/resolve?name=" + transfer.Escape(name) + "&type=A")
+    transfer.SetPort(port)
+    if transfer.AsyncGetToString() <> true then return "unavailable"
+    event = wait(6000, port)
+    if event = invalid or type(event) <> "roUrlEvent" then
+        transfer.AsyncCancel()
+        return "unavailable"
+    end if
+    if event.GetResponseCode() <> 200 then return "unavailable"
+    body = ParseJson(event.GetString())
+    if body = invalid or type(body) <> "roAssociativeArray" then return "unavailable"
+    status = safeTrim(body.Status)
+    if status = "3" then return "missing"
+    if status <> "0" then return "unavailable"
+    if body.Answer <> invalid and type(body.Answer) = "roArray" and body.Answer.count() > 0 then return "exists"
+    return "missing"
+end function
 
 ' Motivo de a lista nao abrir (Android 2.17.75, listAccess.ts).
 function xtreamAccountProblem(info as Object) as String
@@ -253,6 +302,14 @@ sub loadXtreamCatalog(credentials, result)
     if account = invalid and code >= 200 and code < 300 then
         result.message = "O servidor respondeu algo que não é uma lista. Confira o endereço do servidor."
         return
+    end if
+    ' Sem resposta HTTP: diz se e bloqueio de DNS, endereco errado, servidor fora do ar ou sem internet.
+    if account = invalid and code <= 0 then
+        connection = xtreamConnectionProblem(credentials.host, code)
+        if connection <> "" then
+            result.message = connection
+            return
+        end if
     end if
     if account = invalid or type(account) <> "roAssociativeArray" or account.user_info = invalid then
         result.message = "Não foi possível conectar ao servidor da lista."
