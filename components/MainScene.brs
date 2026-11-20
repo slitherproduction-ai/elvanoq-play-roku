@@ -260,7 +260,7 @@ sub openStoreServerKeyboard()
     setStatusTone("waiting")
     dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
     dialog.title = "Servidor da lista"
-    dialog.message = "Digite o endereço do servidor (ex.: http://servidor.com:8080) ou o link completo da lista M3U."
+    dialog.message = ["Digite o endereço do servidor (ex.: http://servidor.com:8080) ou o link completo da lista M3U."]
     dialog.buttons = ["Continuar", "Cancelar"]
     dialog.text = "http://"
     dialog.observeField("buttonSelected", "onStoreServerKeyboardSelected")
@@ -725,7 +725,7 @@ sub openServerCodeKeyboard()
     setStatusTone("waiting")
     dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
     dialog.title = "Código do servidor"
-    dialog.message = "Digite o código recebido no Portal."
+    dialog.message = ["Digite o código recebido no Portal."]
     dialog.buttons = ["Continuar", "Cancelar"]
     dialog.observeField("buttonSelected", "onServerCodeKeyboardSelected")
     m.inputDialog = dialog
@@ -774,12 +774,12 @@ sub openCredentialKeyboard(stage as String)
     dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
     if stage = "username" then
         dialog.title = "Usuário da lista"
-        dialog.message = "Informe o usuário do seu acesso."
+        dialog.message = ["Informe o usuário do seu acesso."]
         dialog.buttons = ["Continuar", "Cancelar"]
         dialog.observeField("buttonSelected", "onUsernameKeyboardSelected")
     else
         dialog.title = "Senha da lista"
-        dialog.message = "Informe a senha do seu acesso."
+        dialog.message = ["Informe a senha do seu acesso."]
         dialog.buttons = ["Conectar", "Cancelar"]
         dialog.observeField("buttonSelected", "onPasswordKeyboardSelected")
         if dialog.textEditBox <> invalid then dialog.textEditBox.secureMode = true

@@ -226,10 +226,10 @@ sub onLiveSearchRequested()
     dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
     if request.column = "categories" then
         dialog.title = "Pesquisar categoria"
-        dialog.message = "Parte do nome da categoria"
+        dialog.message = ["Parte do nome da categoria"]
     else
         dialog.title = "Pesquisar canais"
-        dialog.message = "Nome do canal ou do programa"
+        dialog.message = ["Nome do canal ou do programa"]
     end if
     if request.text <> invalid then dialog.text = request.text
     dialog.buttons = ["Pesquisar", "Limpar", "Cancelar"]
@@ -266,7 +266,7 @@ end sub
 sub openSearchKeyboard()
     dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
     dialog.title = "Buscar no ELVANOQ Play"
-    dialog.message = "Filmes, séries e canais da sua lista"
+    dialog.message = ["Filmes, séries e canais da sua lista"]
     dialog.buttons = ["Buscar", "Cancelar"]
     dialog.observeField("buttonSelected", "onSearchKeyboardSelected")
     m.searchKeyboard = dialog
@@ -599,7 +599,7 @@ sub onBrowseSearchRequested(event as Object)
     else
         dialog.title = "Buscar filmes"
     end if
-    dialog.message = "Digite o nome do título ou de um ator"
+    dialog.message = ["Digite o nome do título ou de um ator"]
     dialog.buttons = ["Buscar", "Cancelar"]
     dialog.observeField("buttonSelected", "onBrowseSearchKeyboardSelected")
     m.browseSearchKeyboard = dialog
