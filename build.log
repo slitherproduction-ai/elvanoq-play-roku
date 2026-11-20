@@ -1,0 +1,14 @@
+== aapt2 compile
+== aapt2 link
+== javac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+== d8
+== zipalign + apksigner
+Signer #1 certificate DN: CN=ELVANOQ Roku Sim
+Signer #1 certificate SHA-256 digest: 121c76017012d9d7911e1294fa81bf499379812728ce8074ed65dedab088fdb1
+Signer #1 certificate SHA-1 digest: 65feac4ce614cfedc9c99a485f0f9ba88fdc6988
+package: name='com.elvanoq.rokusim' versionCode='5' versionName='1.0.0' platformBuildVersionName='14' platformBuildVersionCode='34' compileSdkVersion='34' compileSdkVersionCodename='14'
+sdkVersion:'21'
+targetSdkVersion:'34'
+-rw-r--r-- 1 runner runner 2094340 Nov 20 00:05 build/ELVANOQ-Roku-Sim.apk
