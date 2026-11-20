@@ -16,6 +16,7 @@ sub init()
     m.homeStatus = m.top.findNode("homeStatus")
     m.appVersion = m.top.findNode("appVersion")
     m.licenseTimer = m.top.findNode("licenseTimer")
+    m.codeLoginActive = false
     m.portalWatchdog = m.top.findNode("portalWatchdog")
     m.registerTimer = m.top.findNode("registerTimer")
     m.statusDot = m.top.findNode("statusDot")
@@ -260,7 +261,7 @@ sub openStoreServerKeyboard()
     setStatusTone("waiting")
     dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
     dialog.title = "Servidor da lista"
-    dialog.message = "Digite o endereço do servidor (ex.: http://servidor.com:8080) ou o link completo da lista M3U."
+    dialog.message = ["Digite o endereço do servidor (ex.: http://servidor.com:8080) ou o link completo da lista M3U."]
     dialog.buttons = ["Continuar", "Cancelar"]
     dialog.text = "http://"
     dialog.observeField("buttonSelected", "onStoreServerKeyboardSelected")
@@ -543,10 +544,14 @@ sub clearParentalSession()
 end sub
 
 sub onLicenseTimer()
+    ' Durante o login por código a TV já fica ativa no Portal depois do código; a consulta
+    ' periódica abriria o app por cima do teclado de usuário e senha.
+    if m.codeLoginActive = true then return
     requestPortal("roku-device-register")
 end sub
 
 sub onRegisterTimer()
+    if m.codeLoginActive = true then return
     requestPortal("roku-device-register")
 end sub
 
@@ -567,6 +572,8 @@ sub cancelPendingPortalRequest()
 end sub
 
 sub requestPortal(action as String)
+    ' O código do servidor é ação do usuário: não pode ser descartado por uma consulta automática em andamento.
+    if m.requestInFlight = true and action = "roku-server-code-resolve" then cancelPendingPortalRequest()
     if m.requestInFlight = true then return
     m.requestInFlight = true
     m.portalWatchdog.control = "stop"
@@ -606,6 +613,8 @@ sub onPortalResult(event as Object)
         handleServerCodeResult(result)
         return
     end if
+    ' Resposta de uma consulta automática que chegou durante o login por código: ignora.
+    if m.codeLoginActive = true then return
     if result.action = "roku-playlist-sync" then
         if result.ok = true and m.appShell <> invalid then
             m.playlistSynced = true
@@ -721,11 +730,12 @@ sub onUserDataResult()
 end sub
 
 sub openServerCodeKeyboard()
+    m.codeLoginActive = true
     m.status.text = "Informe o código do servidor para continuar."
     setStatusTone("waiting")
     dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
     dialog.title = "Código do servidor"
-    dialog.message = "Digite o código recebido no Portal."
+    dialog.message = ["Digite o código recebido no Portal."]
     dialog.buttons = ["Continuar", "Cancelar"]
     dialog.observeField("buttonSelected", "onServerCodeKeyboardSelected")
     m.inputDialog = dialog
@@ -738,11 +748,13 @@ sub onServerCodeKeyboardSelected()
     m.top.dialog = invalid
     m.inputDialog = invalid
     if dialog = invalid or dialog.buttonSelected <> 0 then
+        m.codeLoginActive = false
         restoreActivationFocus()
         return
     end if
     code = normalizeServerCode(dialog.text)
     if code = "" then
+        m.codeLoginActive = false
         m.status.text = "Código inválido. Confira o código e tente novamente."
         setStatusTone("error")
         restoreActivationFocus()
@@ -756,14 +768,22 @@ end sub
 
 sub handleServerCodeResult(result as Object)
     if result.ok <> true then
-        m.status.text = "Não foi possível validar este código. Tente novamente."
+        m.codeLoginActive = false
+        if result.message <> invalid and result.message <> "" and result.message <> "Não foi possível consultar o Portal." then
+            m.status.text = result.message
+        else
+            m.status.text = "Não foi possível validar este código. Tente novamente."
+        end if
         setStatusTone("error")
+        restoreActivationFocus()
         return
     end if
     host = serverHostFromPayload(result.payload)
     if host = "" then
+        m.codeLoginActive = false
         m.status.text = "O Portal não retornou um servidor compatível."
         setStatusTone("error")
+        restoreActivationFocus()
         return
     end if
     m.resolvedHost = host
@@ -774,12 +794,12 @@ sub openCredentialKeyboard(stage as String)
     dialog = CreateObject("roSGNode", "StandardKeyboardDialog")
     if stage = "username" then
         dialog.title = "Usuário da lista"
-        dialog.message = "Informe o usuário do seu acesso."
+        dialog.message = ["Informe o usuário do seu acesso."]
         dialog.buttons = ["Continuar", "Cancelar"]
         dialog.observeField("buttonSelected", "onUsernameKeyboardSelected")
     else
         dialog.title = "Senha da lista"
-        dialog.message = "Informe a senha do seu acesso."
+        dialog.message = ["Informe a senha do seu acesso."]
         dialog.buttons = ["Conectar", "Cancelar"]
         dialog.observeField("buttonSelected", "onPasswordKeyboardSelected")
         if dialog.textEditBox <> invalid then dialog.textEditBox.secureMode = true
@@ -798,9 +818,11 @@ sub onUsernameKeyboardSelected()
             showStoreConnect("Conexão cancelada.", "waiting")
             return
         end if
+        m.codeLoginActive = false
         m.status.text = "Login por código cancelado."
         setStatusTone("waiting")
         restoreActivationFocus()
+        requestPortal("roku-device-register")
         return
     end if
     m.manualUsername = safeTrim(dialog.text)
@@ -816,9 +838,11 @@ sub onPasswordKeyboardSelected()
             showStoreConnect("Conexão cancelada.", "waiting")
             return
         end if
+        m.codeLoginActive = false
         m.status.text = "Login por código cancelado."
         setStatusTone("waiting")
         restoreActivationFocus()
+        requestPortal("roku-device-register")
         return
     end if
     password = dialog.text
@@ -829,6 +853,7 @@ sub onPasswordKeyboardSelected()
         connectStorePlaylist(playlist, true)
         return
     end if
+    m.codeLoginActive = false
     setActivationVisible(false)
     openAppShell()
     if m.appShell <> invalid then m.appShell.callFunc("applyPlaylist", { display_name: "Acesso por código", server_code: m.serverCodeInput, playlist: playlist })
@@ -839,6 +864,12 @@ end sub
 
 function serverHostFromPayload(payload as Object) as String
     if payload = invalid or type(payload) <> "roAssociativeArray" then return ""
+    ' O portal-control responde { ok, state, payload: { server: { code, host } } }; o relay pode
+    ' entregar esse objeto inteiro ou só o payload, então os dois formatos são aceitos.
+    if payload.payload <> invalid and type(payload.payload) = "roAssociativeArray" then
+        nested = serverHostFromPayload(payload.payload)
+        if nested <> "" then return nested
+    end if
     value = ""
     if payload.host <> invalid then value = payload.host
     if value = "" and payload.data <> invalid and type(payload.data) = "roAssociativeArray" and payload.data.host <> invalid then value = payload.data.host
