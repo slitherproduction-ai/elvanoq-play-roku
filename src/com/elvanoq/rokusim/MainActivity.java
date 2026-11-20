@@ -502,7 +502,7 @@ public class MainActivity extends Activity {
 
     private void tips() {
         String msg = "• O simulador roda o código do canal (BrightScript e SceneGraph) num interpretador, o brs-engine. Ele é muito fiel, mas não é a Roku: confira o resultado final no aparelho antes de enviar à loja.\n\n"
-            + "• Baixar do GitHub monta o pacote igual ao ZIP do workflow (manifest, source, components, images, fonts). Assim, um arquivo que ficou de fora do ZIP também falta aqui, e a lista de avisos mostra o caminho pkg:/ que não foi achado.\n\n"
+            + "• Baixar do GitHub monta o pacote igual ao ZIP do workflow (manifest, source, components, images, fonts, locale). Assim, um arquivo que ficou de fora do ZIP também falta aqui, e a lista de avisos mostra o caminho pkg:/ que não foi achado.\n\n"
             + "• Dá para testar a branch de um PR antes do merge: toque em Branch e escolha.\n\n"
             + "• Todas as requisições do canal passam pelo servidor do simulador, com o User-Agent da Roku e sem CORS (como na Roku). O log mostra cada chamada com as senhas mascaradas; imagens e segmentos de vídeo aparecem somados a cada 15 s.\n\n"
             + "• Vídeo: HLS (.m3u8) e MP4 tocam. TS direto (.ts) não toca no navegador; o canal deve trocar para HLS sozinho, como faz quando a Roku não abre o formato.\n\n"

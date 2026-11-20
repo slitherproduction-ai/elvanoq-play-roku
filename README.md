@@ -11,7 +11,7 @@ Roda o **próprio código do canal** (BrightScript + SceneGraph) no [brs-engine]
   e uma Roku antiga com OS 14.6 para ver o aviso de firmware mínimo (`rsg_version=1.3` exige 15.1).
   Cada um com o código do modelo, firmware e resolução da interface (720p/1080p) que o `roDeviceInfo` devolve.
 - **Canal direto do GitHub**: baixa qualquer branch (inclusive a de um PR) e monta o pacote **igual ao ZIP do workflow**
-  (`manifest source components images fonts`), ou o repositório inteiro. Também importa o ZIP de sideload ou o artefato
+  (`manifest source components images fonts locale`), ou o repositório inteiro. Também importa o ZIP de sideload ou o artefato
   do Actions (zip dentro de zip), pelo seletor ou por "Abrir com".
 - **Conferência do pacote**: manifest (version_name × major.minor.build, ícones e splash), Main(), XML dos componentes,
   scripts que faltam e todo caminho `pkg:/…` escrito no código que não está no pacote.

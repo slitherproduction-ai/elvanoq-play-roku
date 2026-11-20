@@ -38,7 +38,7 @@ final class Sim {
         "ZIP importado (pacote de sideload)"
     };
     static final String[] PACK_LABELS = {
-        "Igual ao ZIP do workflow: manifest, source, components, images, fonts",
+        "Igual ao ZIP do workflow: manifest, source, components, images, fonts, locale",
         "Repositório inteiro (menos tests, .github e .md)"
     };
     static final String[] BROWSER_LABELS = {

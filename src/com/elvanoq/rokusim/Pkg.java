@@ -41,7 +41,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 final class Pkg {
     private Pkg() {}
 
-    private static final String[] WORKFLOW_DIRS = {"source/", "components/", "images/", "fonts/"};
+    private static final String[] WORKFLOW_DIRS = {"source/", "components/", "images/", "fonts/", "locale/"};
 
     static File file(Context c) { return new File(new File(c.getFilesDir(), "pkg"), "current.zip"); }
 
