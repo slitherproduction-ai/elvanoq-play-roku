@@ -76,6 +76,7 @@ end sub
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
+    if m.problemDialog <> invalid then return m.problemDialog.callFunc("handleKey", { key: key })
     if m.playerView.visible then return m.playerView.callFunc("handleKey", { key: key, press: press })
     if m.detailView.visible then return m.detailView.callFunc("handleKey", { key: key, press: press })
     if m.catchupView.visible then return isTrue(m.catchupView.callFunc("handleKey", { key: key, press: press }))
@@ -1157,6 +1158,7 @@ sub applyPlaylist(payload as Object)
 end sub
 
 sub loadCatalog(playlist as Object)
+    m.lastPlaylist = playlist
     service = CreateObject("roSGNode", "CatalogService")
     service.playlist = playlist
     service.observeField("result", "onCatalogResult")
@@ -1170,7 +1172,11 @@ sub onCatalogResult()
     state = { ok: result.ok = true, message: "" }
     if result.message <> invalid then state.message = result.message
     m.top.catalogState = state
-    if result.ok <> true then return
+    if result.ok <> true then
+        ' A lista nao abriu: janela com o motivo e o que fazer (canvas, tela 4).
+        if m.top.storeEdition <> true then showProblem(state.message)
+        return
+    end if
     m.categories = result.categories
     m.lazy = (result.lazy = true)
     ' Hora do servidor para o guia quando o relogio do aparelho esta errado (ServerClock).
@@ -1198,6 +1204,30 @@ sub onCatalogResult()
     if result.epgUrl <> invalid and result.epgUrl <> "" then loadEpg(result.epgUrl)
     pushSectionCatalog()
     tryDeepLink()
+end sub
+
+sub showProblem(message as String)
+    closeProblem()
+    dialog = CreateObject("roSGNode", "ProblemDialog")
+    dialog.message = message
+    dialog.observeField("action", "onProblemAction")
+    m.top.appendChild(dialog)
+    m.problemDialog = dialog
+    m.top.setFocus(true)
+end sub
+
+sub closeProblem()
+    if m.problemDialog = invalid then return
+    m.problemDialog.unobserveField("action")
+    m.top.removeChild(m.problemDialog)
+    m.problemDialog = invalid
+end sub
+
+sub onProblemAction()
+    if m.problemDialog = invalid then return
+    action = m.problemDialog.action
+    closeProblem()
+    if action = "retry" and m.lastPlaylist <> invalid then loadCatalog(m.lastPlaylist)
 end sub
 
 sub loadEpg(epgUrl as String)
