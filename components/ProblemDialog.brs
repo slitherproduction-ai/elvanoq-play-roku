@@ -36,7 +36,7 @@ sub build()
     top = 170 + Int(shift / 2)
     card = pdRect(m.content, 400, top, 1120, 742 - shift, 32, "0x0E1524FF")
     card.borderColor = "0x8894A838"
-    box = pdRect(m.content, 464, top + 64, 96, 96, 28, "0xF5B83D24")
+    pdRect(m.content, 464, top + 64, 96, 96, 28, "0xF5B83D24")
     icon = m.content.createChild("Poster")
     icon.uri = "pkg:/images/icon_warning.png"
     icon.translation = [488, top + 88]
