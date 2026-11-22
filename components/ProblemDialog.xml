@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Janela "A lista nao abriu" (canvas "ELVANOQ Play TV", tela 4), 1920x1080:
+     motivo, o que foi verificado, o que fazer e as acoes. Esquerda/direita
+     escolhem, OK confirma, Voltar fecha. action: "retry" | "close". -->
+<component name="ProblemDialog" extends="Group">
+  <interface>
+    <field id="message" type="string" onChange="build" />
+    <field id="action" type="string" alwaysNotify="true" />
+    <function name="handleKey" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/components/ProblemDialog.brs" />
+  <script type="text/brightscript" uri="pkg:/source/ListProblem.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
+  <script type="text/brightscript" uri="pkg:/source/I18n.brs" />
+  <children>
+    <Rectangle width="1920" height="1080" color="0x04070DED" />
+    <Group id="content" />
+  </children>
+</component>
