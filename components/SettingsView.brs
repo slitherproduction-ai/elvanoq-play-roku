@@ -92,6 +92,7 @@ end sub
 ' Historico exibido em Sobre (o mesmo do CHANGELOG.md).
 function appHistory() as Object
     return [
+        ["1.1.11", "Correção: o app não fecha mais depois de entrar em listas muito grandes."],
         ["1.1.10", "Novidades para você sem filmes repetidos: versões dublada e legendada aparecem uma vez só."],
         ["1.1.9", "Novidades para você igual ao Android: os filmes adicionados mais recentemente na lista inteira."],
         ["1.1.8", "Novo visual na TV: menu com ícones na Início, destaque que acompanha o título em foco, faixa do título acima da grade e player com relógio e capa na abertura."],

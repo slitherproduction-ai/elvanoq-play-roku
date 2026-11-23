@@ -439,6 +439,7 @@ sub startRecentTitles()
     end if
     service = CreateObject("roSGNode", "CatalogService")
     service.mode = "recent"
+    service.searchToken = m.searchToken
     service.xtream = m.xtream
     service.categoryNames = m.categoryNames
     service.observeField("result", "onRecentTitlesResult")
