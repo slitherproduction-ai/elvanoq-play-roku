@@ -1,5 +1,10 @@
 # Changelog — ELVANOQ Play Roku
 
+## 1.1.11 (build 11)
+
+- **O app fechava logo depois de entrar em listas muito grandes** (EXIT_BRIGHTSCRIPT_CRASH, visto no ELVANOQ Roku Sim com a lista `ftspl26`): as Novidades da 1.1.9 baixam a lista completa de filmes para o `cachefs:`, e numa lista maior que o espaço livre a gravação falhava com ENOSPC e encerrava o canal. Agora o download só acontece com o cache tendo pelo menos 64 MB no total e 48 MB livres (`recentCacheHasRoom`, por `roFileSystem.GetVolumeInfo`); sem espaço, as Novidades ficam com a categoria de lançamentos, como antes da 1.1.9. O arquivo passa a ser o mesmo da Busca (`searchCachePath`), para não guardar duas cópias, e os arquivos antigos `elvanoq-recentes-*` são apagados. Reproduzido e conferido no simulador com uma lista de 140 mil filmes (37 MB): antes encerrava, agora abre a Início.
+- No simulador (cache de 32 MB), as Novidades usam sempre a categoria de lançamentos.
+
 ## 1.1.10 (build 10)
 
 - **Entrar com código do servidor volta a pedir usuário e senha:** a resposta do Portal traz o servidor em `payload.server.host`, que o app não lia ("O Portal não retornou um servidor compatível"). Além disso, o código já ativa a TV no Portal, e a consulta automática de licença (a cada minuto) abria a Início vazia por cima do teclado. Agora o app lê os dois formatos de resposta, pausa a consulta durante o login por código e não descarta o código quando outra consulta está em andamento; erros do Portal aparecem com a mensagem dele.

@@ -23,7 +23,7 @@ sub runTask()
         if m.top.mode = "category" then
             loadXtreamCategoryItems(credentials, m.top.kind, m.top.categoryId, m.top.categoryName, result)
         else if m.top.mode = "recent" then
-            loadRecentTitles(credentials, m.top.categoryNames, result)
+            loadRecentTitles(credentials, m.top.categoryNames, m.top.searchToken, result)
         else
             searchXtream(credentials, m.top.query, m.top.categoryNames, m.top.searchToken, m.top.kinds, m.top.titles, result)
         end if
@@ -475,7 +475,11 @@ end sub
 ' com menos de 60 filmes, completa com series na ordem do servidor. A lista
 ' completa e baixada para o cache e lida em blocos de 256 KB (como a Busca);
 ' so os 60 escolhidos viram itens. A Inicio agrupa as versoes e mostra 30.
-sub loadRecentTitles(credentials, categoryNames, result)
+' A lista completa pode passar de dezenas de MB. O arquivo e o mesmo da Busca
+' (searchCachePath), para nao guardar duas copias, e so e baixado com espaco de
+' sobra no cache: sem espaco a gravacao falha e, no simulador, encerra o canal
+' (ENOSPC). Sem espaco, a Inicio fica com a semente de lancamentos.
+sub loadRecentTitles(credentials, categoryNames, token, result)
     result.items = []
     wanted = 60
     movieNames = {}
@@ -484,27 +488,32 @@ sub loadRecentTitles(credentials, categoryNames, result)
     if categoryNames <> invalid and categoryNames.series <> invalid then seriesNames = categoryNames.series
     liveExtension = "ts"
     if credentials.liveExtension <> invalid then liveExtension = credentials.liveExtension
-    path = "cachefs:/elvanoq-recentes-movies.json"
-    DeleteFile(path)
+    if token = invalid or token = "" then token = "recentes"
+    cleanupSearchCache(token)
+    DeleteFile("cachefs:/elvanoq-recentes-movies.json")
+    DeleteFile("cachefs:/elvanoq-recentes-series.json")
+    path = searchCachePath(token, "movies")
+    fileSystem = CreateObject("roFileSystem")
+    if not fileSystem.Exists(path) and not recentCacheHasRoom() then
+        result.message = "Sem espaço no cache para a lista completa."
+        return
+    end if
     if not ensureSearchFile(credentials, "movies", path) then
         result.message = "Não foi possível consultar o servidor da lista."
         return
     end if
     top = []
     scanRecentFile(path, movieNames, top, wanted, true)
-    DeleteFile(path)
     for each entry in top
         item = searchItemFromPart(entry.part, "movies", credentials, liveExtension, movieNames)
         if item <> invalid then result.items.push(item)
     end for
     top = invalid
     if result.items.count() < wanted then
-        path = "cachefs:/elvanoq-recentes-series.json"
-        DeleteFile(path)
-        if ensureSearchFile(credentials, "series", path) then
+        path = searchCachePath(token, "series")
+        if (fileSystem.Exists(path) or recentCacheHasRoom()) and ensureSearchFile(credentials, "series", path) then
             fill = []
             scanRecentFile(path, seriesNames, fill, wanted - result.items.count(), false)
-            DeleteFile(path)
             for each entry in fill
                 item = searchItemFromPart(entry.part, "series", credentials, liveExtension, seriesNames)
                 if item <> invalid then result.items.push(item)
@@ -513,6 +522,17 @@ sub loadRecentTitles(credentials, categoryNames, result)
     end if
     result.ok = true
 end sub
+
+' Cache com pelo menos 64 MB no total e 48 MB livres. Sem informacao do volume,
+' nao arrisca.
+function recentCacheHasRoom() as Boolean
+    info = CreateObject("roFileSystem").GetVolumeInfo("cachefs:")
+    if info = invalid or type(info) <> "roAssociativeArray" then return false
+    if info.blocks = invalid or info.blocksize = invalid or info.freeblocks = invalid then return false
+    total = Cdbl(info.blocks) * Cdbl(info.blocksize)
+    free = Cdbl(info.freeblocks) * Cdbl(info.blocksize)
+    return total >= 67108864# and free >= 50331648#
+end function
 
 ' byAdded = true: guarda os `limit` mais novos (estavel, como o topItems do
 ' Android). byAdded = false: os primeiros `limit` na ordem do arquivo.
