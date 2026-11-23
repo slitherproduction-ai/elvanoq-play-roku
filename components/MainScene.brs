@@ -2,6 +2,7 @@ sub init()
     i18nAttach(m.top)
     clearParentalSession()
     m.playlistSynced = false
+    m.manualSession = false
     m.codeCard = m.top.findNode("codeCard")
     m.serverCodeButton = m.top.findNode("serverCodeButton")
     m.serverCodeButtonText = m.top.findNode("serverCodeButtonText")
@@ -338,6 +339,7 @@ sub onStoreDisconnect()
     m.resolvedHost = ""
     m.serverCodeInput = ""
     m.playlistSynced = false
+    m.manualSession = false
     m.appShell.callFunc("stopPlayback")
     m.top.removeChild(m.appShell)
     m.appShell = invalid
@@ -572,6 +574,7 @@ sub cancelPendingPortalRequest()
 end sub
 
 sub requestPortal(action as String)
+    if action = "roku-playlist-sync" and m.manualSession = true then return
     ' O código do servidor é ação do usuário: não pode ser descartado por uma consulta automática em andamento.
     if m.requestInFlight = true and action = "roku-server-code-resolve" then cancelPendingPortalRequest()
     if m.requestInFlight = true then return
@@ -616,9 +619,20 @@ sub onPortalResult(event as Object)
     ' Resposta de uma consulta automática que chegou durante o login por código: ignora.
     if m.codeLoginActive = true then return
     if result.action = "roku-playlist-sync" then
-        if result.ok = true and m.appShell <> invalid then
-            m.playlistSynced = true
-            m.appShell.callFunc("applyPlaylist", result.payload)
+        ' Uma resposta atrasada nunca substitui as credenciais digitadas.
+        if m.manualSession = true then return
+        if result.ok = true then
+            payload = result.payload
+            if payload <> invalid and type(payload) = "roAssociativeArray" and payload.playlist <> invalid then
+                m.playlistSynced = true
+                setActivationVisible(false)
+                openAppShell()
+                if m.appShell <> invalid then m.appShell.callFunc("applyPlaylist", result.payload)
+            else
+                setActivationVisible(true)
+                m.status.text = "Nenhuma lista no Portal. Adicione pelo QR code ou entre com o código do servidor."
+                setStatusTone("waiting")
+            end if
         end if
         return
     end if
@@ -627,7 +641,7 @@ sub onPortalResult(event as Object)
         return
     end if
     showActivationState(result.state, result.message)
-    if result.action = "roku-license-status" and result.state = "active" and m.playlistSynced <> true then requestPortal("roku-playlist-sync")
+    if result.action = "roku-license-status" and result.state = "active" and m.playlistSynced <> true and m.manualSession <> true then requestPortal("roku-playlist-sync")
 end sub
 
 sub showActivationState(state as String, message as String)
@@ -638,6 +652,12 @@ sub showActivationState(state as String, message as String)
     end if
     if state = "active" then
         m.licenseTimer.control = "start"
+        if m.manualSession <> true and m.playlistSynced <> true then
+            setActivationVisible(true)
+            m.status.text = "Licença ativa. Entre com o código do servidor ou adicione sua lista pelo QR code."
+            setStatusTone("active")
+            return
+        end if
         setActivationVisible(false)
         m.homeStatus.visible = false
         firstOpen = (m.appShell = invalid)
@@ -854,6 +874,8 @@ sub onPasswordKeyboardSelected()
         return
     end if
     m.codeLoginActive = false
+    m.manualSession = true
+    m.playlistSynced = true
     setActivationVisible(false)
     openAppShell()
     if m.appShell <> invalid then m.appShell.callFunc("applyPlaylist", { display_name: "Acesso por código", server_code: m.serverCodeInput, playlist: playlist })
@@ -1217,3 +1239,4 @@ sub onMainLanguage()
     layoutActivationActions()
     layoutLanguagePill()
 end sub
+
