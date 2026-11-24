@@ -3,6 +3,8 @@ sub init()
     clearParentalSession()
     m.playlistSynced = false
     m.manualSession = false
+    m.catalogAuthenticated = false
+    m.catalogAuthPending = false
     m.codeCard = m.top.findNode("codeCard")
     m.serverCodeButton = m.top.findNode("serverCodeButton")
     m.serverCodeButtonText = m.top.findNode("serverCodeButtonText")
@@ -305,6 +307,8 @@ sub connectStorePlaylist(playlist as Object, isNew as Boolean)
     m.storePlaylist = playlist
     m.storeIsNew = isNew
     m.retryPlaylist = invalid
+    m.catalogAuthenticated = false
+    m.catalogAuthPending = true
     setActivationVisible(false)
     openAppShell()
     if m.appShell = invalid then return
@@ -312,9 +316,34 @@ sub connectStorePlaylist(playlist as Object, isNew as Boolean)
 end sub
 
 sub onStoreCatalogState()
-    if not m.storeEdition or m.appShell = invalid then return
+    if m.appShell = invalid then return
     state = m.appShell.catalogState
     if state = invalid then return
+    if m.storeEdition and m.catalogAuthPending = true then
+        m.catalogAuthPending = false
+        m.catalogAuthenticated = (state.ok = true)
+        if m.catalogAuthenticated then openAppShell()
+    end if
+    if not m.storeEdition then
+        if m.catalogAuthPending <> true then return
+        m.catalogAuthPending = false
+        m.codeLoginActive = false
+        if state.ok = true then
+            m.catalogAuthenticated = true
+            setActivationVisible(false)
+            m.homeStatus.visible = false
+            openAppShell()
+        else
+            m.catalogAuthenticated = false
+            m.appShell.visible = false
+            setActivationVisible(true)
+            m.status.text = "Não foi possível autenticar a lista. Confira usuário e senha e tente novamente."
+            if state.message <> invalid and state.message <> "" then m.status.text = state.message
+            setStatusTone("error")
+            restoreActivationFocus()
+        end if
+        return
+    end if
     if state.ok = true then
         if m.storeIsNew = true and m.storePlaylist <> invalid then saveStorePlaylist(m.storePlaylist)
         m.storeIsNew = false
@@ -340,6 +369,8 @@ sub onStoreDisconnect()
     m.serverCodeInput = ""
     m.playlistSynced = false
     m.manualSession = false
+    m.catalogAuthenticated = false
+    m.catalogAuthPending = false
     m.appShell.callFunc("stopPlayback")
     m.top.removeChild(m.appShell)
     m.appShell = invalid
@@ -604,6 +635,8 @@ sub onPortalResult(event as Object)
         showActivationState("error", "Não foi possível validar a resposta do Portal.")
         return
     end if
+    ' Licença e sincronização não podem interromper credenciais/autenticação em andamento.
+    if m.codeLoginActive = true and result.action <> "roku-server-code-resolve" then return
     if result.action = "roku-device-register" then
         if result.ok <> true then
             showActivationState(result.state, result.message)
@@ -625,6 +658,10 @@ sub onPortalResult(event as Object)
             payload = result.payload
             if payload <> invalid and type(payload) = "roAssociativeArray" and payload.playlist <> invalid then
                 m.playlistSynced = true
+                m.catalogAuthenticated = false
+                m.catalogAuthPending = true
+                m.status.text = "Validando a lista vinculada no servidor IPTV…"
+                setStatusTone("connecting")
                 setActivationVisible(false)
                 openAppShell()
                 if m.appShell <> invalid then m.appShell.callFunc("applyPlaylist", result.payload)
@@ -652,10 +689,15 @@ sub showActivationState(state as String, message as String)
     end if
     if state = "active" then
         m.licenseTimer.control = "start"
-        if m.manualSession <> true and m.playlistSynced <> true then
+        if m.catalogAuthenticated <> true then
             setActivationVisible(true)
-            m.status.text = "Licença ativa. Entre com o código do servidor ou adicione sua lista pelo QR code."
-            setStatusTone("active")
+            if m.catalogAuthPending = true then
+                m.status.text = "Validando o acesso no servidor IPTV…"
+                setStatusTone("connecting")
+            else
+                m.status.text = "Licença ativa. Entre com o código do servidor ou adicione sua lista pelo QR code."
+                setStatusTone("active")
+            end if
             return
         end if
         setActivationVisible(false)
@@ -873,9 +915,13 @@ sub onPasswordKeyboardSelected()
         connectStorePlaylist(playlist, true)
         return
     end if
-    m.codeLoginActive = false
+    m.codeLoginActive = true
     m.manualSession = true
     m.playlistSynced = true
+    m.catalogAuthenticated = false
+    m.catalogAuthPending = true
+    m.status.text = "Validando usuário e senha no servidor IPTV…"
+    setStatusTone("connecting")
     setActivationVisible(false)
     openAppShell()
     if m.appShell <> invalid then m.appShell.callFunc("applyPlaylist", { display_name: "Acesso por código", server_code: m.serverCodeInput, playlist: playlist })
@@ -1058,6 +1104,12 @@ end sub
 
 sub openAppShell()
     if m.appShell <> invalid then
+        if m.catalogAuthenticated <> true then
+            m.appShell.visible = false
+            setActivationVisible(true)
+            restoreActivationFocus()
+            return
+        end if
         m.appShell.visible = true
         signalLaunch()
         if m.top.dialog = invalid and not m.appShell.isInFocusChain() then m.appShell.setFocus(true)
@@ -1070,7 +1122,14 @@ sub openAppShell()
     m.appShell.storeEdition = (m.storeEdition = true)
     m.appShell.observeField("catalogState", "onStoreCatalogState")
     m.appShell.observeField("disconnectRequested", "onStoreDisconnect")
+    m.appShell.visible = false
     m.top.appendChild(m.appShell)
+    if m.catalogAuthenticated <> true then
+        setActivationVisible(true)
+        restoreActivationFocus()
+        return
+    end if
+    m.appShell.visible = true
     m.appShell.setFocus(true)
     if m.pendingDeepLink <> invalid then
         m.appShell.deepLink = m.pendingDeepLink
