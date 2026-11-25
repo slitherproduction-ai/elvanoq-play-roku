@@ -1173,8 +1173,9 @@ end sub
 sub onCatalogResult()
     result = m.catalogService.result
     if result = invalid then return
-    state = { ok: result.ok = true, message: "" }
+    state = { ok: result.ok = true, message: "", counts: "" }
     if result.message <> invalid then state.message = result.message
+    if result.ok = true then state.counts = welcomeCounts(result)
     m.top.catalogState = state
     if result.ok <> true then
         ' A lista nao abriu: janela com o motivo e o que fazer (canvas, tela 4).
@@ -1482,4 +1483,33 @@ end sub
 function remoteKey(params as Object) as Boolean
     if params = invalid or params.key = invalid then return false
     return onKeyEvent(params.key, true)
+end function
+
+' Totais mostrados no fim do "Bem-vindo de volta".
+function welcomeCounts(result as Object) as String
+    if result.lazy = true then
+        live = 0
+        vod = 0
+        if result.liveCategories <> invalid then live = result.liveCategories.count()
+        if result.movieCategories <> invalid then vod = vod + result.movieCategories.count()
+        if result.seriesCategories <> invalid then vod = vod + result.seriesCategories.count()
+        if live + vod = 0 then return ""
+        return formatThousands(live) + " " + i18nTr("categorias de canais") + " · " + formatThousands(vod) + " " + i18nTr("de filmes e séries")
+    end if
+    if result.channels = invalid or result.channels.count() = 0 then return ""
+    channels = 0
+    for each item in result.channels
+        if item.type = "live" then channels = channels + 1
+    end for
+    return formatThousands(channels) + " " + i18nTr("canais") + " · " + formatThousands(result.channels.count() - channels) + " " + i18nTr("filmes e séries")
+end function
+
+function formatThousands(value as Integer) as String
+    text = value.ToStr()
+    out = ""
+    while len(text) > 3
+        out = "." + right(text, 3) + out
+        text = left(text, len(text) - 3)
+    end while
+    return text + out
 end function

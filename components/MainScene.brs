@@ -153,6 +153,7 @@ sub init()
     end if
     m.status.text = "Conectando ao Portal para ativação…"
     setStatusTone("connecting")
+    startWelcomeBack()
     requestPortal("roku-device-register")
     m.registerTimer.control = "start"
     m.licenseTimer.control = "start"
@@ -334,11 +335,13 @@ sub onStoreCatalogState()
             m.catalogAuthenticated = true
             setActivationVisible(false)
             m.homeStatus.visible = false
+            finishWelcomeBack(state.counts)
             openAppShell()
             if m.top.dialog = invalid then m.appShell.setFocus(true)
         else
             m.catalogAuthenticated = false
             m.appShell.visible = false
+            endWelcomeBack()
             setActivationVisible(true)
             m.status.text = "Não foi possível autenticar a lista. Confira usuário e senha e tente novamente."
             if state.message <> invalid and state.message <> "" then m.status.text = state.message
@@ -402,6 +405,8 @@ end sub
 
 function onKeyEvent(key as String, press as Boolean) as Boolean
     if not press then return false
+    ' Bem-vindo de volta: espera sozinho; Voltar sai do app.
+    if welcomeActive() then return key <> "back"
     if m.languageOverlay <> invalid and m.languageOverlay.visible then
         handleLanguageKey(key)
         return true
@@ -676,16 +681,20 @@ sub onPortalResult(event as Object)
                 m.playlistSynced = true
                 m.catalogAuthenticated = false
                 m.catalogAuthPending = true
+                welcomeStep(2)
                 m.status.text = "Validando a lista vinculada no servidor IPTV…"
                 setStatusTone("connecting")
                 setActivationVisible(false)
                 openAppShell()
                 if m.appShell <> invalid then m.appShell.callFunc("applyPlaylist", result.payload)
             else
+                endWelcomeBack()
                 setActivationVisible(true)
                 m.status.text = "Nenhuma lista no Portal. Adicione pelo QR code ou entre com o código do servidor."
                 setStatusTone("waiting")
             end if
+        else
+            endWelcomeBack()
         end if
         return
     end if
@@ -707,6 +716,13 @@ sub showActivationState(state as String, message as String)
         m.lastLicenseOkAt = 0
     end if
     m.licenseState = state
+    if welcomeActive() then
+        if state = "active" then
+            welcomeStep(1)
+        else if m.appShell = invalid or m.appShell.visible <> true then
+            endWelcomeBack()
+        end if
+    end if
     m.expiredOverlay.visible = (state = "expired")
     if state = "expired" then
         m.top.findNode("expiredCode").text = m.deviceCodeValue
@@ -732,9 +748,7 @@ sub showActivationState(state as String, message as String)
         end if
         setActivationVisible(false)
         m.homeStatus.visible = false
-        firstOpen = (m.appShell = invalid)
         openAppShell()
-        if firstOpen then showWelcomeBack()
         return
     end if
     if (state = "expired" or state = "blocked") and m.appShell <> invalid and m.appShell.visible then
@@ -1088,54 +1102,49 @@ sub updateActivationClock()
     layoutLanguagePill()
 end sub
 
-' "Bem-vindo de volta": na primeira abertura com lista salva, por 1,2 s, por
-' cima da Inicio que ja carrega por baixo. Entra sozinho, sem apertar nada.
-sub showWelcomeBack()
-    if m.welcomeShown = true then return
-    m.welcomeShown = true
-    section = CreateObject("roRegistrySection", "ELVANOQPlay")
-    raw = section.Read("playlist_metadata")
+'---------- "Bem-vindo de volta" (WelcomeBack) ----------
+' TV licenciada com lista salva abre nesta tela enquanto confere licenca (0),
+' servidor (1) e catalogo (2); pronto (3) esmaece para a Inicio. Qualquer falha
+' some com ela e a ativacao continua como antes.
+sub startWelcomeBack()
+    raw = CreateObject("roRegistrySection", "ELVANOQPlay").Read("playlist_metadata")
     if raw = invalid or raw = "" then return
     metadata = ParseJson(raw)
     if metadata = invalid or type(metadata) <> "roAssociativeArray" then return
     name = ""
     if metadata.display_name <> invalid then name = safeTrim(metadata.display_name)
-    if name = "" then name = "Minha lista"
-    overlay = m.top.findNode("welcomeOverlay")
-    ' Traz o aviso para a frente da AppShell recem-criada.
-    m.top.removeChild(overlay)
-    m.top.appendChild(overlay)
-    status = m.top.findNode("welcomeStatus")
-    status.font = appFont(22, "regular")
-    status.color = "0xC9D2E3FF"
-    title = m.top.findNode("welcomeTitle")
-    title.font = appFont(66, "bold")
-    title.color = "0xF4F8FFFF"
-    subtitle = m.top.findNode("welcomeSubtitle")
-    subtitle.font = appFont(27, "regular")
-    subtitle.color = "0xC9D2E3FF"
-    initial = m.top.findNode("welcomeInitial")
-    initial.font = appFont(34, "bold")
-    initial.color = "0x00D7FFFF"
-    initial.text = ucase(left(name, 1))
-    nameLabel = m.top.findNode("welcomeName")
-    nameLabel.font = appFont(30, "bold")
-    nameLabel.color = "0xF4F8FFFF"
-    nameLabel.text = name
-    info = m.top.findNode("welcomeInfo")
-    info.font = appFont(20, "regular")
-    info.color = "0x9AA6BDFF"
-    m.top.findNode("welcomeBar").width = 0
-    overlay.visible = true
-    animation = m.top.findNode("welcomeAnimation")
-    animation.observeField("state", "onWelcomeAnimation")
-    animation.control = "start"
+    m.welcome = m.top.findNode("welcomeBack")
+    m.welcome.observeField("timedOut", "onWelcomeTimeout")
+    m.welcome.listName = name
+    ' Por cima de tudo da tela de ativacao (rodape de versao incluso).
+    m.top.removeChild(m.welcome)
+    m.top.appendChild(m.welcome)
+    m.welcome.command = "start"
 end sub
 
-sub onWelcomeAnimation()
-    animation = m.top.findNode("welcomeAnimation")
-    if animation.state <> "stopped" then return
-    m.top.findNode("welcomeOverlay").visible = false
+function welcomeActive() as Boolean
+    return m.welcome <> invalid and m.welcome.active = true
+end function
+
+sub welcomeStep(stage as Integer)
+    if welcomeActive() and stage > m.welcome.stage then m.welcome.stage = stage
+end sub
+
+sub finishWelcomeBack(counts as Dynamic)
+    if not welcomeActive() then return
+    if counts <> invalid then m.welcome.counts = counts
+    ' Fica por cima da AppShell (criada depois) enquanto esmaece.
+    m.top.removeChild(m.welcome)
+    m.top.appendChild(m.welcome)
+    m.welcome.command = "finish"
+end sub
+
+sub endWelcomeBack()
+    if welcomeActive() then m.welcome.command = "hide"
+end sub
+
+sub onWelcomeTimeout()
+    endWelcomeBack()
 end sub
 
 sub openAppShell()
