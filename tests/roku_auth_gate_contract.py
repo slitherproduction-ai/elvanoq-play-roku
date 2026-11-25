@@ -31,7 +31,8 @@ result = routine('onStoreCatalogState')
 assert 'if m.catalogAuthPending <> true then return' in result
 assert 'if state.ok = true then\n            m.catalogAuthenticated = true' in result
 assert 'else\n            m.catalogAuthenticated = false\n            m.appShell.visible = false' in result
-assert scene.count('m.catalogAuthenticated = true') == 1
+# So uma atribuicao (as comparacoes "or m.catalogAuthenticated = true then" nao contam).
+assert len(re.findall(r'^\s*m\.catalogAuthenticated = true\s*$', scene, re.M)) == 1
 portal = routine('onPortalResult')
 assert portal.index('if m.codeLoginActive = true and result.action <> "roku-server-code-resolve" then return') < portal.index('if result.action = "roku-device-register" then')
 assert 'if safeTrim(info.auth) <> "1" then return' in catalog

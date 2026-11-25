@@ -1477,3 +1477,9 @@ end sub
 sub onDeviceCodeChanged()
     m.playerView.deviceCode = m.top.deviceCode
 end sub
+
+' Tecla repassada pela MainScene quando o foco ficou fora da AppShell.
+function remoteKey(params as Object) as Boolean
+    if params = invalid or params.key = invalid then return false
+    return onKeyEvent(params.key, true)
+end function
