@@ -19,6 +19,7 @@
     <field id="channelRequested" type="assocarray" alwaysNotify="true" />
     <field id="favoriteRequested" type="assocarray" alwaysNotify="true" />
     <field id="closeRequested" type="boolean" alwaysNotify="true" />
+    <field id="deviceCode" type="string" value="" />
     <function name="handleKey" />
     <function name="stopPlayback" />
   </interface>
@@ -43,6 +44,8 @@
     <Timer id="openTimer" duration="12" repeat="false" />
     <!-- Barra de tempo: aplica o salto acumulado 0,6 s depois do ultimo toque -->
     <Timer id="seekTimer" duration="0.6" repeat="false" />
+    <!-- Diagnostico anonimo de reproducao: envio em lote, no maximo 1 por minuto -->
+    <Timer id="telTimer" duration="15" repeat="false" />
 
     <!-- Abertura: ate o primeiro quadro, a capa (ja em cache da tela anterior)
          com veu, titulo e uma linha fina animada, no lugar de "Carregando". -->

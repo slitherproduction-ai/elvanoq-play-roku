@@ -1,5 +1,9 @@
 # Changelog — ELVANOQ Play Roku
 
+## 1.1.14 (build 14)
+
+- **Diagnóstico anônimo de reprodução** (mesmo do LG/Samsung/Whale; `components/TelemetryService`): o player registra travamentos (`stall`), falhas de abertura (`open_fail`, por erro do Video ou abertura sem resposta), troca de formato HLS↔TS (`format_switch`), troca de fonte/qualidade (`source_switch`, incluindo TV sem H.265), carregamentos de 2 s ou mais no meio do vídeo (`buffering`), recuperação (`recovered`) e tela de erro (`fatal`). Vai em lote (no máximo 1 envio por minuto, até 25 eventos, 30 por conteúdo) para a função `tv-telemetry` do Supabase e aparece no Portal. Só o host do servidor (sem usuário, senha nem caminho), o canal, o formato e o código da TV (em hash no servidor); apagado depois de 7 dias. Falha em silêncio. Conferido no simulador: o lote sai com host `iptv.teste.com:8080`, formato `ts` e versão 1.1.14.
+
 ## 1.1.13 (build 13)
 
 - **Cancelar o login por código retoma a lista do Portal na hora** (paridade com a LG/Samsung de 25/11, "resume portal playlist after cancelled server-code login"): cancelar em qualquer etapa (código, usuário ou senha) passa pelo mesmo `cancelServerCodeLogin`, que limpa o código e o servidor digitados, marca a lista do Portal para ser buscada de novo e consulta a licença na hora. Antes, cancelar já no código só devolvia o foco e a TV esperava a consulta automática do minuto seguinte. "Verificar ativação" também volta a buscar a lista vinculada, e a mensagem com a licença ativa passa a ser "Licença ativa. Buscando sua lista no Portal…".

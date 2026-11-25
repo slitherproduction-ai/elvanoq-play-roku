@@ -110,6 +110,7 @@ sub init()
     m.timelineKnob = m.top.findNode("timelineKnob")
     m.seekTimer = m.top.findNode("seekTimer")
     m.seekTimer.observeField("fire", "onSeekTimerFired")
+    telInit()
     m.seekClock = CreateObject("roTimespan")
     m.seekFocus = false
     m.seekTarget = -1
@@ -136,6 +137,7 @@ sub onStreamChanged()
     m.liveRetries = 0
     m.formatFallbackTried = false
     m.hasPlayed = false
+    telStartSession()
     ' Troca automatica de fonte em andamento mantem as fontes ja tentadas.
     if m.sourcePending = true then
         m.sourcePending = false
@@ -297,6 +299,7 @@ sub onVideoState()
     state = m.video.state
     if state = "playing" or state = "error" or state = "finished" or state = "stopped" then hideOpeningCover()
     if m.video.state = "error" then print "ELVANOQ video error code="; m.video.errorCode; " retry="; m.liveRetries
+    telOnVideoState(state)
     ' Rever programa: erro passa para o proximo formato; sem nenhum, avisa (nao cai para o ao vivo).
     if m.catchupIndex >= 0 and m.video.state = "error" then
         if tryNextCatchupUrl() then return
@@ -343,6 +346,7 @@ sub onVideoState()
         return
     end if
     if m.video.state = "playing" then
+        telOnPlaying()
         m.hasPlayed = true
         m.openTimer.control = "stop"
         m.openAttempts = 0
@@ -959,6 +963,8 @@ sub onRetryTimer()
         reopenCurrentContent()
         return
     end if
+    m.telReopening = true
+    m.telLoadAt = m.telClock.TotalMilliseconds()
     m.video.control = "stop"
     m.video.content = m.currentContent
     m.video.control = "play"
@@ -991,6 +997,8 @@ function tryAlternateFormat() as Boolean
     end if
     if alternate = "" then return false
     m.formatFallbackTried = true
+    telEvent("format_switch", 0, m.liveRetries + m.openAttempts, "para " + alternateFormat)
+    m.telReopening = true
     content = CreateObject("roSGNode", "ContentNode")
     content.url = alternate
     content.title = m.currentContent.title
@@ -1071,6 +1079,7 @@ function tryLowerQualityChannel() as Boolean
                     if channelBaseName(candidate.title) = baseName and channelQuality(candidate.title) = wanted then
                         m.qualityTried[safeTrim(index)] = true
                         m.qualityFallbackPending = true
+                        telEvent("source_switch", 0, 0, "sem H.265: " + candidate.title)
                         m.top.channelRequested = { item: candidate, index: index }
                         m.qualityNotice = "Versão " + channelQualityLabel(current.title) + " não suportada nesta TV. Exibindo " + candidate.title + "."
                         return true
@@ -1136,6 +1145,7 @@ function trySourceFallback() as Boolean
     nextSource = nextUntriedSource(sources, m.top.contentId, m.sourceTried)
     if nextSource = invalid then return false
     m.sourceTried[safeTrim(nextSource.id)] = true
+    if nextSource.title <> invalid then telEvent("source_switch", 0, m.liveRetries, nextSource.title) else telEvent("source_switch", 0, m.liveRetries, "")
     m.sourcePending = true
     m.hint.text = "Esta fonte não abriu. Tentando outra fonte…"
     showOsd()
@@ -1157,6 +1167,7 @@ function tryLowerQualitySource() as Boolean
             if m.sourceTried[safeTrim(candidate.id)] <> true and candidate.title <> invalid and channelQuality(candidate.title) = wanted then
                 m.sourceTried[safeTrim(candidate.id)] = true
                 m.sourcePending = true
+                telEvent("source_switch", 0, 0, "sem H.265: " + candidate.title)
                 if current <> invalid then m.qualityNotice = "Versão " + channelQualityLabel(current.title) + " não suportada nesta TV. Exibindo " + candidate.title + "."
                 m.top.channelRequested = { item: candidate, index: m.top.liveIndex }
                 return true
@@ -1239,7 +1250,11 @@ sub onStallTick()
         m.lastGoodPos = position
         m.lastProgressAt = now
         m.stallArmed = true
-        if m.stallAttempts > 0 then m.stallAttempts = 0
+        if m.stallAttempts > 0 then
+            telEvent("recovered", telSince(m.telStallSince), m.stallAttempts, "stall")
+            m.stallAttempts = 0
+        end if
+        m.telStallSince = -1
         return
     end if
     ' So arma depois que o video comecou a andar (Android 2.17.25): um servidor
@@ -1256,6 +1271,8 @@ sub onStallTick()
         return
     end if
     m.stallAttempts = m.stallAttempts + 1
+    if m.telStallSince < 0 then m.telStallSince = m.telClock.TotalMilliseconds() - (now - m.lastProgressAt) * 1000
+    telEvent("stall", (now - m.lastProgressAt) * 1000, m.stallAttempts, "")
     m.lastProgressAt = now
     m.hint.text = "O sinal parou de chegar. Reconectando…"
     showOsd()
@@ -1300,6 +1317,7 @@ sub onOpenTimeout()
     end if
     if state <> "buffering" and state <> "none" then return
     print "ELVANOQ open timeout state="; state; " attempts="; m.openAttempts
+    telFailed("timeout", m.openAttempts)
     if m.catchupIndex >= 0 then
         if tryNextCatchupUrl() then return
         m.stallTimer.control = "stop"
@@ -1340,6 +1358,8 @@ sub reopenCurrentContent()
     ' Filme/episodio: volta ao ultimo ponto que avancou de fato.
     if not isLivePlayback() and m.lastGoodPos > 0 then m.currentContent.PlayStart = m.lastGoodPos
     m.lastProgressPos = -1
+    m.telReopening = true
+    m.telLoadAt = m.telClock.TotalMilliseconds()
     m.video.control = "stop"
     m.video.content = m.currentContent
     m.video.control = "play"
@@ -1360,6 +1380,7 @@ end sub
 
 sub showPlayerError(title as String, message as String, canRetry as Boolean)
     hideOpeningCover()
+    telEvent("fatal", 0, m.liveRetries + m.openAttempts + m.stallAttempts, title + ": " + message)
     m.errorRetryAllowed = canRetry
     m.top.findNode("errorTitle").text = title
     m.top.findNode("errorMessage").text = message
@@ -1399,3 +1420,130 @@ function tryNextCatchupUrl() as Boolean
     armOpenTimeout()
     return true
 end function
+
+' ---------- Diagnostico anonimo de reproducao (LG/Samsung/Whale 1.2.x) ----------
+' Travamentos, falhas de abertura, trocas de formato/fonte, carregamentos de 2 s
+' ou mais no meio do video, recuperacoes e telas de erro vao em lote (no maximo
+' 1 envio por minuto, ate 25 eventos, 30 por conteudo) para o Portal. So o host
+' do servidor (sem usuario, senha nem caminho), canal, formato e o codigo da TV
+' (em hash no servidor). Apagado depois de 7 dias. Falha em silencio.
+
+sub telInit()
+    m.telClock = CreateObject("roTimespan")
+    m.telQueue = []
+    m.telLastSent = -60000
+    m.telTimer = m.top.findNode("telTimer")
+    m.telTimer.observeField("fire", "onTelTimer")
+    m.telVersion = CreateObject("roAppInfo").GetValue("version_name")
+    m.telHostRegex = CreateObject("roRegex", "^[a-z]+://(?:[^/?#@]*@)?([^/?#]+)", "i")
+    telStartSession()
+end sub
+
+sub telStartSession()
+    m.telSession = { count: 0, buffering: 0 }
+    m.telWaitAt = -1
+    m.telFailSince = -1
+    m.telStallSince = -1
+    m.telReopening = false
+    if m.telClock <> invalid then m.telLoadAt = m.telClock.TotalMilliseconds() else m.telLoadAt = 0
+end sub
+
+function telSince(mark as Dynamic) as Integer
+    if mark = invalid or mark < 0 then return 0
+    return m.telClock.TotalMilliseconds() - mark
+end function
+
+function telHost(url as String) as String
+    match = m.telHostRegex.Match(url)
+    if match.count() < 2 then return ""
+    return lcase(match[1])
+end function
+
+function telFormat(url as String) as String
+    format = streamFormatForUrl(url)
+    if format = "hls" or format = "mp4" or format = "mkv" then return format
+    path = lcase(url)
+    queryAt = instr(1, path, "?")
+    if queryAt > 0 then path = left(path, queryAt - 1)
+    if right(path, 3) = ".ts" or instr(1, path, "/live/") > 0 or instr(1, path, "/timeshift/") > 0 then return "ts"
+    if format <> "" then return "other"
+    return ""
+end function
+
+function telContentType() as String
+    if m.catchupIndex <> invalid and m.catchupIndex >= 0 then return "catchup"
+    if isLivePlayback() then return "live"
+    episode = m.top.nextEpisode
+    if episode <> invalid and episode.url <> invalid and episode.url <> "" then return "episode"
+    if instr(1, lcase(safeTrim(m.top.contentId)), "episode") > 0 then return "episode"
+    return "movie"
+end function
+
+sub telEvent(event as String, durationMs as Dynamic, attempt as Dynamic, detail as String)
+    if m.telSession = invalid then return
+    if m.telSession.count >= 30 then return
+    if event = "buffering" then
+        if m.telSession.buffering >= 10 then return
+        m.telSession.buffering = m.telSession.buffering + 1
+    end if
+    m.telSession.count = m.telSession.count + 1
+    if m.telQueue.count() >= 25 then return
+    url = ""
+    if m.currentContent <> invalid and m.currentContent.url <> invalid then url = m.currentContent.url
+    if durationMs = invalid or durationMs < 0 then durationMs = 0
+    if attempt = invalid or attempt < 0 then attempt = 0
+    m.telQueue.push({ event: event, server_host: telHost(url), channel_id: safeTrim(m.top.contentId), channel_name: safeTrim(m.top.contentTitle), content_type: telContentType(), stream_format: telFormat(url), duration_ms: int(durationMs), attempt: int(attempt), detail: detail })
+    telSchedule()
+end sub
+
+sub telSchedule()
+    if m.telQueue.count() = 0 or m.telTimer.control = "start" then return
+    waitMs = m.telLastSent + 60000 - m.telClock.TotalMilliseconds()
+    if m.telQueue.count() < 10 and waitMs < 15000 then waitMs = 15000
+    if waitMs < 1000 then waitMs = 1000
+    m.telTimer.duration = waitMs / 1000
+    m.telTimer.control = "start"
+end sub
+
+sub onTelTimer()
+    m.telTimer.control = "stop"
+    if m.telQueue.count() = 0 then return
+    events = []
+    while m.telQueue.count() > 0 and events.count() < 25
+        events.push(m.telQueue.shift())
+    end while
+    m.telLastSent = m.telClock.TotalMilliseconds()
+    task = CreateObject("roSGNode", "TelemetryService")
+    task.payload = FormatJson({ action: "report", platform: "roku", app_version: m.telVersion, device_code: m.top.deviceCode, events: events })
+    task.control = "RUN"
+    m.telTask = task
+    telSchedule()
+end sub
+
+' Falha na abertura ou no meio do video (erro do Video ou abertura sem resposta).
+sub telFailed(reason as String, attempt as Dynamic)
+    now = m.telClock.TotalMilliseconds()
+    if m.telFailSince < 0 then m.telFailSince = m.telLoadAt
+    if m.hasPlayed = true then reason = reason + " depois de tocar"
+    telEvent("open_fail", now - m.telLoadAt, attempt, reason)
+end sub
+
+sub telOnVideoState(state as String)
+    if state = "error" then
+        telFailed("erro " + safeTrim(str(m.video.errorCode)), m.liveRetries)
+    else if state = "buffering" then
+        ' So conta o carregamento no meio do video (nao a abertura nem a reconexao).
+        if m.hasPlayed = true and m.telReopening <> true and m.telWaitAt < 0 then m.telWaitAt = m.telClock.TotalMilliseconds()
+    end if
+end sub
+
+sub telOnPlaying()
+    now = m.telClock.TotalMilliseconds()
+    if m.telWaitAt >= 0 then
+        if now - m.telWaitAt >= 2000 then telEvent("buffering", now - m.telWaitAt, 0, "")
+        m.telWaitAt = -1
+    end if
+    if m.telFailSince >= 0 and (m.liveRetries > 0 or m.openAttempts > 0 or m.formatFallbackTried = true) then telEvent("recovered", now - m.telFailSince, m.liveRetries + m.openAttempts, "open")
+    m.telFailSince = -1
+    m.telReopening = false
+end sub

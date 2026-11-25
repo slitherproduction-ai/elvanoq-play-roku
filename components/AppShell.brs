@@ -17,6 +17,9 @@ sub init()
     m.settingsView.observeField("hiddenChanged", "onHiddenCategoriesChanged")
     m.detailView = m.top.findNode("detailView")
     m.playerView = m.top.findNode("playerView")
+    ' Diagnostico anonimo de reproducao: o player envia junto o codigo da TV.
+    m.playerView.deviceCode = m.top.deviceCode
+    m.top.observeField("deviceCode", "onDeviceCodeChanged")
     m.moviesView.observeField("selectedItem", "onBrowseItemSelected")
     m.seriesView.observeField("selectedItem", "onBrowseItemSelected")
     m.liveTVView.observeField("playRequested", "onLivePlayRequested")
@@ -1470,3 +1473,7 @@ sub onCatchupProgrammeSelected()
     m.playerView.visible = true
 end sub
 
+
+sub onDeviceCodeChanged()
+    m.playerView.deviceCode = m.top.deviceCode
+end sub
