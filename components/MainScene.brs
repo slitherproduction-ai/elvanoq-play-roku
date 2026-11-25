@@ -335,6 +335,7 @@ sub onStoreCatalogState()
             setActivationVisible(false)
             m.homeStatus.visible = false
             openAppShell()
+            if m.top.dialog = invalid then m.appShell.setFocus(true)
         else
             m.catalogAuthenticated = false
             m.appShell.visible = false
@@ -405,7 +406,16 @@ function onKeyEvent(key as String, press as Boolean) as Boolean
         handleLanguageKey(key)
         return true
     end if
-    if m.appShell <> invalid and m.appShell.visible then return false
+    if m.appShell <> invalid and m.appShell.visible then
+        ' Tela inicial aberta mas o foco ficou na Scene (desde a 1.1.12 a AppShell abre
+        ' escondida ate a lista autenticar; em aparelho real o foco podia nao voltar):
+        ' devolve o foco para a AppShell e entrega esta mesma tecla para ela.
+        if m.top.dialog = invalid and not m.appShell.isInFocusChain() then
+            m.appShell.setFocus(true)
+            return m.appShell.callFunc("remoteKey", { key: key }) = true
+        end if
+        return false
+    end if
     ' Aviso de teste encerrado: OK verifica de novo; Voltar sai do app (Roku exige sair pela tela inicial).
     if m.expiredOverlay <> invalid and m.expiredOverlay.visible then
         if key = "back" then return false

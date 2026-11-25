@@ -11,6 +11,7 @@
     <function name="applyPlaylist" />
     <function name="releaseMemory" />
     <function name="stopPlayback" />
+    <function name="remoteKey" />
   </interface>
   <script type="text/brightscript" uri="pkg:/components/AppShell.brs" />
   <script type="text/brightscript" uri="pkg:/source/I18n.brs" />
