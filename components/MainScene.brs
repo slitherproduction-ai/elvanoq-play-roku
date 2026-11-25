@@ -2,6 +2,8 @@ sub init()
     i18nAttach(m.top)
     clearParentalSession()
     m.playlistSynced = false
+    m.lastLicenseOkAt = 0
+    m.licenseState = "pending"
     m.manualSession = false
     m.catalogAuthenticated = false
     m.catalogAuthPending = false
@@ -579,6 +581,7 @@ sub clearParentalSession()
 end sub
 
 sub onLicenseTimer()
+    if m.licenseState = "active" or m.catalogAuthenticated = true then return
     ' Durante o login por código a TV já fica ativa no Portal depois do código; a consulta
     ' periódica abriria o app por cima do teclado de usuário e senha.
     if m.codeLoginActive = true then return
@@ -586,6 +589,7 @@ sub onLicenseTimer()
 end sub
 
 sub onRegisterTimer()
+    if m.licenseState = "active" or m.catalogAuthenticated = true then return
     if m.codeLoginActive = true then return
     requestPortal("roku-device-register")
 end sub
@@ -684,13 +688,23 @@ sub onPortalResult(event as Object)
 end sub
 
 sub showActivationState(state as String, message as String)
+    now = CreateObject("roDateTime").AsSeconds()
+    if state = "offline" or state = "error" then
+        if m.licenseState = "active" and m.lastLicenseOkAt > 0 and now >= m.lastLicenseOkAt and now - m.lastLicenseOkAt <= 86400 then return
+    else if state = "active" then
+        m.lastLicenseOkAt = now
+    else
+        m.lastLicenseOkAt = 0
+    end if
+    m.licenseState = state
     m.expiredOverlay.visible = (state = "expired")
     if state = "expired" then
         m.top.findNode("expiredCode").text = m.deviceCodeValue
-        m.top.findNode("expiredInfo").text = "A ativação é verificada automaticamente a cada minuto."
+        m.top.findNode("expiredInfo").text = "Use Verificar ativação ou reabra o aplicativo após renovar."
     end if
     if state = "active" then
-        m.licenseTimer.control = "start"
+        m.licenseTimer.control = "stop"
+        m.registerTimer.control = "stop"
         if m.catalogAuthenticated <> true then
             setActivationVisible(true)
             if m.catalogAuthPending = true then
@@ -1311,3 +1325,10 @@ sub onMainLanguage()
     layoutLanguagePill()
 end sub
 
+
+
+' Explicit lifecycle notification from the main event loop, not a timer.
+sub onAppResumed()
+    if m.top.appResumed <> true or m.codeLoginActive = true then return
+    requestPortal("roku-license-status")
+end sub

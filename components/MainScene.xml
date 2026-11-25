@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="MainScene" extends="Scene">
   <interface>
+        <field id="appResumed" type="boolean" alwaysNotify="true" onChange="onAppResumed" />
     <field id="deepLink" type="assocarray" alwaysNotify="true" />
     <field id="memoryWarning" type="boolean" alwaysNotify="true" />
     <field id="memoryInfo" type="assocarray" />
@@ -149,3 +150,4 @@
     <Timer id="portalWatchdog" repeat="false" duration="20" />
   </children>
 </component>
+

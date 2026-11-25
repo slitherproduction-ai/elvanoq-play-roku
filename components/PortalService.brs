@@ -69,6 +69,18 @@ sub runTask()
         m.top.result = result
         return
     end if
+    if result.httpStatus = 429 or result.httpStatus >= 500 then
+        result.state = "offline"
+        result.message = portalHttpMessage(responseText, result.httpStatus)
+        m.top.result = result
+        return
+    end if
+    if result.httpStatus = 401 or result.httpStatus = 403 or result.httpStatus = 409 then
+        result.state = "blocked"
+        result.message = portalHttpMessage(responseText, result.httpStatus)
+        m.top.result = result
+        return
+    end if
     if result.httpStatus < 200 or result.httpStatus >= 300 or responseText = invalid or responseText = "" then
         result.message = portalHttpMessage(responseText, result.httpStatus)
         m.top.result = result
@@ -148,3 +160,4 @@ function portalText(value as Dynamic) as String
     if instr(1, t, "int") > 0 or instr(1, t, "float") > 0 or instr(1, t, "double") > 0 then return str(value).Trim()
     return ""
 end function
+

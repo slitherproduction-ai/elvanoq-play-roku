@@ -25,6 +25,8 @@ sub Main(args as Dynamic)
     deviceInfo = CreateObject("roDeviceInfo")
     deviceInfo.SetMessagePort(port)
     deviceInfo.EnableLowGeneralMemoryEvent(true)
+    deviceInfo.EnableAppFocusEvent(true)
+    appWasUnfocused = false
 
     while true
         message = wait(0, port)
@@ -40,6 +42,10 @@ sub Main(args as Dynamic)
         end if
         if messageType = "roDeviceInfoEvent" then
             info = message.GetInfo()
+            if info <> invalid and info.appFocused <> invalid then
+                if info.appFocused = true and appWasUnfocused then scene.appResumed = true
+                appWasUnfocused = (info.appFocused = false)
+            end if
             if info <> invalid and info.generalMemoryLevel <> invalid and info.generalMemoryLevel <> "normal" then scene.memoryWarning = true
         end if
     end while
@@ -48,3 +54,4 @@ end sub
 function memorySnapshot(monitor as Object) as Object
     return { limitKb: monitor.GetChannelMemoryLimit(), availableKb: monitor.GetChannelAvailableMemory(), usedPercent: monitor.GetMemoryLimitPercent() }
 end function
+
