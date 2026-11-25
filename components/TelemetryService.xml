@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Diagnostico anonimo de reproducao: envia um lote de eventos do player para a
+     funcao tv-telemetry (Supabase). Falha em silencio. -->
+<component name="TelemetryService" extends="Task">
+  <interface>
+    <field id="payload" type="string" />
+    <field id="status" type="integer" value="0" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/components/TelemetryService.brs" />
+</component>
