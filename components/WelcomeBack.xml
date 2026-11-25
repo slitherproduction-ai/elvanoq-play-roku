@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- "Bem-vindo de volta" (canvas aprovado em 2026-11-25, igual a LG/Samsung/MSX/Whale):
+     TV licenciada com lista salva abre nesta tela, centralizada no fundo do login,
+     enquanto confere licenca, servidor e catalogo. O anel avanca com as etapas
+     reais (step 0..3); cometa, orbita e satelite so giram. -->
+<component name="WelcomeBack" extends="Group">
+  <interface>
+    <field id="listName" type="string" value="" />
+    <field id="stage" type="integer" value="-1" onChange="onStage" />
+    <field id="counts" type="string" value="" />
+    <field id="command" type="string" value="" alwaysNotify="true" onChange="onCommand" />
+    <field id="active" type="boolean" value="false" />
+    <field id="finished" type="boolean" value="false" alwaysNotify="true" />
+    <field id="timedOut" type="boolean" value="false" alwaysNotify="true" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/components/WelcomeBack.brs" />
+  <script type="text/brightscript" uri="pkg:/source/I18n.brs" />
+  <script type="text/brightscript" uri="pkg:/source/Fonts.brs" />
+  <script type="text/brightscript" uri="pkg:/source/TextUtils.brs" />
+  <children>
+    <Group id="welcomeRoot">
+    <Rectangle width="1920" height="1080" color="0x070B14FF" />
+    <Poster uri="pkg:/images/elvanoq-login-tv-backdrop.jpg" width="1920" height="1080" />
+    <Poster uri="pkg:/images/welcome/center_shade.png" width="1920" height="1080" />
+
+    <Group id="ring" translation="[795,145]">
+      <Poster id="halo" uri="pkg:/images/welcome/halo.png" translation="[75,75]" width="180" height="180" scaleRotateCenter="[90,90]" opacity="0.35" />
+      <Poster uri="pkg:/images/welcome/ring_track.png" width="330" height="330" />
+      <Poster id="progress" uri="pkg:/images/welcome/progress_00.png" width="330" height="330" />
+      <Poster id="orbit" uri="pkg:/images/welcome/orbit.png" width="330" height="330" scaleRotateCenter="[165,165]" />
+      <Poster id="comet" uri="pkg:/images/welcome/comet.png" width="330" height="330" scaleRotateCenter="[165,165]" />
+      <Poster id="sat" uri="pkg:/images/welcome/sat.png" width="330" height="330" scaleRotateCenter="[165,165]" />
+      <Poster id="mark" uri="pkg:/images/welcome/mark.png" translation="[99,99]" width="132" height="132" scaleRotateCenter="[66,66]" />
+    </Group>
+
+    <Group id="texts" opacity="0">
+      <Label id="greeting" translation="[0,517]" width="1920" height="36" horizAlign="center" vertAlign="center" />
+      <Label id="title" translation="[0,560]" width="1920" height="100" horizAlign="center" vertAlign="center" text="Bem-vindo de volta" />
+      <Group id="chip" translation="[0,689]">
+        <RoundRect id="chipBg" width="480" height="78" radius="39" color="0x0B1A2ECC" borderColor="0x1E3654FF" />
+        <RoundRect id="initialBg" translation="[12,12]" width="54" height="54" radius="27" color="0x00D7FFFF" />
+        <Label id="initial" translation="[12,12]" width="54" height="54" horizAlign="center" vertAlign="center" />
+        <Label id="name" translation="[84,0]" height="78" vertAlign="center" />
+        <RoundRect id="chipDot" width="6" height="6" radius="3" color="0x4A5A73FF" />
+        <Label id="lic" height="78" vertAlign="center" text="TV licenciada" />
+      </Group>
+      <Label id="status" translation="[0,818]" width="1920" height="40" horizAlign="center" vertAlign="center" />
+      <Label id="countsLabel" translation="[0,866]" width="1920" height="34" horizAlign="center" vertAlign="center" />
+      <RoundRect id="dot0" translation="[0,926]" width="9" height="9" radius="4" color="0x24344DFF" />
+      <RoundRect id="dot1" translation="[0,926]" width="9" height="9" radius="4" color="0x24344DFF" />
+      <RoundRect id="dot2" translation="[0,926]" width="9" height="9" radius="4" color="0x24344DFF" />
+    </Group>
+
+    <Label id="tip" translation="[0,1000]" width="1920" height="34" horizAlign="center" vertAlign="center" opacity="0" />
+    </Group>
+
+    <Animation id="cometAnim" duration="1.6" repeat="true" easeFunction="inOutQuad">
+      <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[0.0, -6.2831853]" fieldToInterp="comet.rotation" />
+    </Animation>
+    <Animation id="orbitAnim" duration="9" repeat="true" easeFunction="linear">
+      <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[0.0, 6.2831853]" fieldToInterp="orbit.rotation" />
+    </Animation>
+    <Animation id="satAnim" duration="3.2" repeat="true" easeFunction="linear">
+      <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[0.0, -6.2831853]" fieldToInterp="sat.rotation" />
+    </Animation>
+    <Animation id="breathAnim" duration="2.8" repeat="true" easeFunction="inOutQuad">
+      <Vector2DFieldInterpolator key="[0.0, 0.5, 1.0]" keyValue="[[1.0, 1.0], [1.06, 1.06], [1.0, 1.0]]" fieldToInterp="mark.scale" />
+      <Vector2DFieldInterpolator key="[0.0, 0.5, 1.0]" keyValue="[[0.92, 0.92], [1.05, 1.05], [0.92, 0.92]]" fieldToInterp="halo.scale" />
+      <FloatFieldInterpolator key="[0.0, 0.5, 1.0]" keyValue="[0.35, 0.7, 0.35]" fieldToInterp="halo.opacity" />
+    </Animation>
+    <Animation id="introAnim" duration="1.1" repeat="false" easeFunction="outCubic">
+      <FloatFieldInterpolator key="[0.0, 0.2, 1.0]" keyValue="[0.0, 0.0, 1.0]" fieldToInterp="texts.opacity" />
+      <Vector2DFieldInterpolator key="[0.0, 0.2, 1.0]" keyValue="[[0.0, 24.0], [0.0, 24.0], [0.0, 0.0]]" fieldToInterp="texts.translation" />
+      <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[0.0, 1.0]" fieldToInterp="ring.opacity" />
+    </Animation>
+    <Animation id="tipAnim" duration="4" repeat="false" easeFunction="linear">
+      <FloatFieldInterpolator key="[0.0, 0.12, 0.88, 1.0]" keyValue="[0.0, 1.0, 1.0, 0.0]" fieldToInterp="tip.opacity" />
+    </Animation>
+    <Animation id="outAnim" duration="0.6" repeat="false" easeFunction="outQuad">
+      <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[1.0, 0.0]" fieldToInterp="welcomeRoot.opacity" />
+    </Animation>
+    <Timer id="progressTimer" duration="0.03" repeat="true" />
+    <Timer id="tipTimer" duration="4" repeat="true" />
+    <Timer id="readyTimer" duration="0.7" repeat="false" />
+    <Timer id="guardTimer" duration="60" repeat="false" />
+  </children>
+</component>

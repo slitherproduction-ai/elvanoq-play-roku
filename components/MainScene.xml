@@ -101,27 +101,8 @@
       <Label id="expiredButton" translation="[740,738]" width="440" height="72" horizAlign="center" vertAlign="center" text="OK   •   Verificar agora" />
       <Label id="expiredFooter" translation="[300,852]" width="1320" height="28" horizAlign="center" text="Voltar   •   Sair do aplicativo" />
     </Group>
-    <!-- Bem-vindo de volta (mesmo do Android TV, LG e MSX): fundo do login, a
-         lista em uso e uma barra de 1,2 s; entra sozinho, sem apertar nada. -->
-    <Group id="welcomeOverlay" visible="false">
-      <Poster uri="pkg:/images/elvanoq-login-tv-backdrop.jpg" width="1920" height="1080" />
-      <Poster uri="pkg:/images/hero_shade_left.png" width="2300" height="1080" />
-      <Poster uri="pkg:/images/elvanoq-logo-tagline.png" translation="[112,72]" width="400" height="97" loadDisplayMode="scaleToFit" />
-      <Poster uri="pkg:/images/status_dot.png" translation="[112,345]" width="14" height="14" blendColor="0x00D7FFFF" />
-      <Label id="welcomeStatus" translation="[140,332]" text="TV vinculada ao Portal" width="900" height="40" vertAlign="center" />
-      <Label id="welcomeTitle" translation="[112,380]" text="Bem-vindo de volta" width="1200" height="84" />
-      <Label id="welcomeSubtitle" translation="[112,470]" text="Entrando na sua lista…" width="1000" height="40" />
-      <RoundRect translation="[112,550]" width="760" height="190" color="0x0E1524EB" radius="24" />
-      <RoundRect translation="[142,580]" width="76" height="76" color="0x1A2438FF" radius="20" />
-      <Label id="welcomeInitial" translation="[142,580]" width="76" height="76" horizAlign="center" vertAlign="center" />
-      <Label id="welcomeName" translation="[242,584]" width="600" height="40" />
-      <Label id="welcomeInfo" translation="[242,626]" text="Lista em uso" width="600" height="30" />
-      <Rectangle translation="[142,690]" width="700" height="6" color="0xF4F8FF24" />
-      <Rectangle id="welcomeBar" translation="[142,690]" width="0" height="6" color="0x00D7FFFF" />
-    </Group>
-    <Animation id="welcomeAnimation" duration="1.2" repeat="false" easeFunction="outQuad">
-      <FloatFieldInterpolator key="[0.0, 1.0]" keyValue="[0.0, 700.0]" fieldToInterp="welcomeBar.width" />
-    </Animation>
+    <!-- Bem-vindo de volta (canvas 2026-11-25): componente WelcomeBack -->
+    <WelcomeBack id="welcomeBack" visible="false" />
     <!-- Escolha do idioma (canvas "Idioma do aplicativo", tela 10) -->
     <Group id="languageOverlay" visible="false" focusable="true">
       <Rectangle width="1920" height="1080" color="0x03060CC7" />
