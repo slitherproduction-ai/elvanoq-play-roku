@@ -1,5 +1,10 @@
 # Changelog — ELVANOQ Play Roku
 
+## 1.1.13 (build 13)
+
+- **Cancelar o login por código retoma a lista do Portal na hora** (paridade com a LG/Samsung de 25/11, "resume portal playlist after cancelled server-code login"): cancelar em qualquer etapa (código, usuário ou senha) passa pelo mesmo `cancelServerCodeLogin`, que limpa o código e o servidor digitados, marca a lista do Portal para ser buscada de novo e consulta a licença na hora. Antes, cancelar já no código só devolvia o foco e a TV esperava a consulta automática do minuto seguinte. "Verificar ativação" também volta a buscar a lista vinculada, e a mensagem com a licença ativa passa a ser "Licença ativa. Buscando sua lista no Portal…".
+- Simulador de pré-envio (`tests/roku_preflight_simulator.py`) acompanhando a versão (estava em 1.1.11).
+
 ## 1.1.11 (build 11)
 
 - **O app fechava logo depois de entrar em listas muito grandes** (EXIT_BRIGHTSCRIPT_CRASH, visto no ELVANOQ Roku Sim com a lista `ftspl26`): as Novidades da 1.1.9 baixam a lista completa de filmes para o `cachefs:`, e numa lista maior que o espaço livre a gravação falhava com ENOSPC e encerrava o canal. Agora o download só acontece com o cache tendo pelo menos 64 MB no total e 48 MB livres (`recentCacheHasRoom`, por `roFileSystem.GetVolumeInfo`); sem espaço, as Novidades ficam com a categoria de lançamentos, como antes da 1.1.9. O arquivo passa a ser o mesmo da Busca (`searchCachePath`), para não guardar duas cópias, e os arquivos antigos `elvanoq-recentes-*` são apagados. Reproduzido e conferido no simulador com uma lista de 140 mil filmes (37 MB): antes encerrava, agora abre a Início.

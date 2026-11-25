@@ -482,6 +482,8 @@ sub runActivationAction()
         section.Flush()
     end if
     if m.actionIndex = 1 then
+        ' Verificar ativacao tambem busca de novo a lista vinculada no Portal.
+        if m.manualSession <> true then m.playlistSynced = false
         m.status.text = "Verificando a ativação…"
         setStatusTone("connecting")
         requestPortal("roku-device-register")
@@ -695,7 +697,11 @@ sub showActivationState(state as String, message as String)
                 m.status.text = "Validando o acesso no servidor IPTV…"
                 setStatusTone("connecting")
             else
-                m.status.text = "Licença ativa. Entre com o código do servidor ou adicione sua lista pelo QR code."
+                if m.playlistSynced <> true and m.manualSession <> true then
+                    m.status.text = "Licença ativa. Buscando sua lista no Portal…"
+                else
+                    m.status.text = "Licença ativa. Entre com o código do servidor ou adicione sua lista pelo QR code."
+                end if
                 setStatusTone("active")
             end if
             return
@@ -791,6 +797,21 @@ sub onUserDataResult()
     openServerCodeKeyboard()
 end sub
 
+' Cancelar o login por codigo (em qualquer etapa) retoma a lista vinculada no
+' Portal na hora, como na LG/Samsung: a TV pede a licenca de novo e, ativa, busca
+' a lista (playlist-sync), em vez de ficar parada na ativacao ate o proximo ciclo.
+sub cancelServerCodeLogin()
+    m.codeLoginActive = false
+    m.serverCodeInput = ""
+    m.manualUsername = ""
+    m.resolvedHost = ""
+    if m.manualSession <> true then m.playlistSynced = false
+    m.status.text = "Retomando a lista vinculada no Portal…"
+    setStatusTone("connecting")
+    restoreActivationFocus()
+    requestPortal("roku-device-register")
+end sub
+
 sub openServerCodeKeyboard()
     m.codeLoginActive = true
     m.status.text = "Informe o código do servidor para continuar."
@@ -810,8 +831,7 @@ sub onServerCodeKeyboardSelected()
     m.top.dialog = invalid
     m.inputDialog = invalid
     if dialog = invalid or dialog.buttonSelected <> 0 then
-        m.codeLoginActive = false
-        restoreActivationFocus()
+        cancelServerCodeLogin()
         return
     end if
     code = normalizeServerCode(dialog.text)
@@ -880,11 +900,7 @@ sub onUsernameKeyboardSelected()
             showStoreConnect("Conexão cancelada.", "waiting")
             return
         end if
-        m.codeLoginActive = false
-        m.status.text = "Login por código cancelado."
-        setStatusTone("waiting")
-        restoreActivationFocus()
-        requestPortal("roku-device-register")
+        cancelServerCodeLogin()
         return
     end if
     m.manualUsername = safeTrim(dialog.text)
@@ -900,11 +916,7 @@ sub onPasswordKeyboardSelected()
             showStoreConnect("Conexão cancelada.", "waiting")
             return
         end if
-        m.codeLoginActive = false
-        m.status.text = "Login por código cancelado."
-        setStatusTone("waiting")
-        restoreActivationFocus()
-        requestPortal("roku-device-register")
+        cancelServerCodeLogin()
         return
     end if
     password = dialog.text
