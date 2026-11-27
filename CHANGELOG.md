@@ -1,5 +1,11 @@
 # Changelog — ELVANOQ Play Roku
 
+## 1.1.18 (build 18)
+
+- **DNS seguro** (igual a Android 2.17.83, LG 1.2.5, Samsung 1.2.6, MSX 1.2.12, Whale 1.0.6 e Vega 1.2.4; especificação `claude/dns-alternativo.md` do Projeto). Novo `source/ElvDns.brs`: quando um pedido Xtream falha com `-6` (o DNS da internet não achou o servidor), o `CatalogService` pergunta o IP ao Google (`https://8.8.8.8/resolve`), à Cloudflare (`https://1.1.1.1/dns-query`) e ao Portal (função `dns-resolve`), descarta `0.0.0.0`/`127.x`, guarda o IP no registro (`ElvDns`) por 6 h e repete pelo IP com o cabeçalho `Host` original. Enquanto valer, catálogo M3U/Xtream, busca, séries, filmes, guia (`SeriesService`, `VodInfoService`, `EpgService`) e o vídeo (`PlayerView`, `HttpHeaders`) vão pelo IP. Se nem pelo IP responder, a marcação é desfeita. Só `http://`. A conexão continua saindo da Roku (pedido do dono do servidor). Desligar: registro `ElvDns`, chave `mode` = `off`.
+- A testar na Roku: se o `Host` trocado é respeitado pelo `roUrlTransfer` e pelo `Video` (painéis que dependem dele).
+- Sobre: entrada da 1.1.18 no histórico.
+
 ## 1.1.17 (build 17)
 
 - **Acesso por código do servidor lembrado na Roku** (mesmo das versões LG, Samsung, MSX e Whale): ao reabrir, o "Bem-vindo de volta" aparecia e voltava para a ativação, porque usuário e senha do acesso por código ficavam só em memória. Agora código, servidor, usuário e senha ficam salvos (`code_login` no registro) só depois que a lista abre; na abertura, depois do registro do aparelho, o código é conferido no Portal (`roku-server-code-resolve`) e o app entra sozinho com o Bem-vindo na tela (licença pendente do Portal não encerra o Bem-vindo nesse caso). Sem internet usa o último servidor salvo; código cancelado ou recusado apaga o acesso salvo e volta para a ativação com o motivo; "Excluir login" apaga. Conferido no simulador (Bem-vindo → Tudo pronto → Início com o controle funcionando).

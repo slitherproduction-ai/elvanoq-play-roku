@@ -28,7 +28,7 @@ sub runTask()
     port = CreateObject("roMessagePort")
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
     transfer.SetMinimumTransferRate(1, 15)
-    transfer.SetUrl(host + "/player_api.php?username=" + parts[0] + "&password=" + parts[1] + "&action=get_vod_info&vod_id=" + vodId)
+    ElvDns_SetUrl(transfer, host + "/player_api.php?username=" + parts[0] + "&password=" + parts[1] + "&action=get_vod_info&vod_id=" + vodId)
     transfer.SetPort(port)
     transfer.EnableEncodings(true)
     if transfer.AsyncGetToString() = true then

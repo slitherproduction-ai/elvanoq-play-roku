@@ -200,7 +200,8 @@ sub onStreamChanged()
         url = preferredLiveUrl(url)
     end if
     content = CreateObject("roSGNode", "ContentNode")
-    content.url = url
+    ' DNS seguro: servidor que precisou do IP abre pelo IP (com o Host original).
+    ElvDns_ApplyToContent(content, url)
     content.title = m.top.contentTitle
     streamFormat = streamFormatForUrl(url)
     if streamFormat <> "" then content.streamFormat = streamFormat
@@ -1001,6 +1002,7 @@ function tryAlternateFormat() as Boolean
     m.telReopening = true
     content = CreateObject("roSGNode", "ContentNode")
     content.url = alternate
+    if m.currentContent.HttpHeaders <> invalid and m.currentContent.HttpHeaders.count() > 0 then content.HttpHeaders = m.currentContent.HttpHeaders
     content.title = m.currentContent.title
     content.streamFormat = alternateFormat
     content.live = m.currentContent.live
@@ -1405,7 +1407,7 @@ function tryNextCatchupUrl() as Boolean
     if nextIndex >= urls.count() then return false
     m.catchupIndex = nextIndex
     content = CreateObject("roSGNode", "ContentNode")
-    content.url = urls[nextIndex]
+    ElvDns_ApplyToContent(content, urls[nextIndex])
     content.title = m.top.contentTitle
     format = streamFormatForUrl(urls[nextIndex])
     if format <> "" then content.streamFormat = format

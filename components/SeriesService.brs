@@ -19,7 +19,7 @@ sub runTask()
     port = CreateObject("roMessagePort")
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
     transfer.SetMinimumTransferRate(1, 20)
-    transfer.SetUrl(m.top.apiUrl + "&action=get_series_info&series_id=" + m.top.seriesId)
+    ElvDns_SetUrl(transfer, m.top.apiUrl + "&action=get_series_info&series_id=" + m.top.seriesId)
     transfer.SetPort(port)
     transfer.EnableEncodings(true)
     if transfer.AsyncGetToString() <> true then

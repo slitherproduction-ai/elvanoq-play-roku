@@ -56,7 +56,7 @@ sub runTask()
     port = CreateObject("roMessagePort")
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
     transfer.SetMinimumTransferRate(1, 20)
-    transfer.SetUrl(sourceUrl)
+    ElvDns_SetUrl(transfer, sourceUrl)
     transfer.SetPort(port)
     transfer.EnableEncodings(true)
 
@@ -173,7 +173,21 @@ function xtreamFromGetPhp(url)
     return makeXtreamCredentials(host, username, password)
 end function
 
+' DNS seguro: se o DNS da internet nao achou o servidor (-6), descobre o IP
+' (Google, Cloudflare ou Portal) e repete uma vez pelo IP. Se nem pelo IP
+' responder, desfaz a marcacao. A conexao continua saindo da Roku.
 function xtreamApi(credentials, action, categoryId)
+    result = xtreamApiOnce(credentials, action, categoryId)
+    if result = invalid and m.lastXtreamCode = -6 then
+        if ElvDns_Learn(credentials.host) <> "" then
+            result = xtreamApiOnce(credentials, action, categoryId)
+            if result = invalid and m.lastXtreamCode <= 0 then ElvDns_Forget(credentials.host)
+        end if
+    end if
+    return result
+end function
+
+function xtreamApiOnce(credentials, action, categoryId)
     url = credentials.host + "/player_api.php?username=" + credentials.userEscaped + "&password=" + credentials.passEscaped
     if action <> "" then url = url + "&action=" + action
     if categoryId <> "" then url = url + "&category_id=" + CreateObject("roUrlTransfer").Escape(categoryId)
@@ -181,7 +195,7 @@ function xtreamApi(credentials, action, categoryId)
     port = CreateObject("roMessagePort")
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
     transfer.SetMinimumTransferRate(1, 20)
-    transfer.SetUrl(url)
+    ElvDns_SetUrl(transfer, url)
     transfer.SetPort(port)
     transfer.EnableEncodings(true)
     m.lastXtreamCode = 0
@@ -632,7 +646,7 @@ function ensureSearchFile(credentials, kind, path)
     port = CreateObject("roMessagePort")
     transfer.SetCertificatesFile("common:/certs/ca-bundle.crt")
     transfer.SetMinimumTransferRate(1, 20)
-    transfer.SetUrl(url)
+    ElvDns_SetUrl(transfer, url)
     transfer.SetPort(port)
     transfer.EnableEncodings(true)
     if transfer.AsyncGetToFile(partial) <> true then return false
