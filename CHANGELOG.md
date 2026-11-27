@@ -1,5 +1,9 @@
 # Changelog — ELVANOQ Play Roku
 
+## 1.1.17 (build 17)
+
+- **Acesso por código do servidor lembrado na Roku** (mesmo das versões LG, Samsung, MSX e Whale): ao reabrir, o "Bem-vindo de volta" aparecia e voltava para a ativação, porque usuário e senha do acesso por código ficavam só em memória. Agora código, servidor, usuário e senha ficam salvos (`code_login` no registro) só depois que a lista abre; na abertura, depois do registro do aparelho, o código é conferido no Portal (`roku-server-code-resolve`) e o app entra sozinho com o Bem-vindo na tela (licença pendente do Portal não encerra o Bem-vindo nesse caso). Sem internet usa o último servidor salvo; código cancelado ou recusado apaga o acesso salvo e volta para a ativação com o motivo; "Excluir login" apaga. Conferido no simulador (Bem-vindo → Tudo pronto → Início com o controle funcionando).
+
 ## 1.1.16 (build 16)
 
 - **Bem-vindo de volta** (design aprovado no canvas; igual a LG/Samsung/MSX/Whale; componente `WelcomeBack`): Roku licenciada com lista salva abre direto nesta tela, centralizada no fundo do login, enquanto confere a licença, conecta no servidor da lista e carrega o catálogo. Anel de progresso em volta do símbolo do ELVANOQ Play que avança com as etapas reais (26 quadros em `images/welcome/`), cometa, órbita e satélite girando com `Animation`, símbolo "respirando", saudação pela hora, nome da lista, etapa atual, totais no fim ("Tudo pronto") e dicas. Esmaece para a Início com o foco já nela. Licença negada/pendente, sem lista no Portal, falha de sincronização ou servidor IPTV recusando: some e a ativação aparece como antes (trava de 60 s). Voltar sai do app. Substitui o aviso antigo de 1,2 s. Conferido no simulador (lista do Portal, falha do servidor e foco na Início).

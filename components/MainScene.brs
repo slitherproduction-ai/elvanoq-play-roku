@@ -154,6 +154,7 @@ sub init()
     m.status.text = "Conectando ao Portal para ativação…"
     setStatusTone("connecting")
     startWelcomeBack()
+    resumeSavedCodeLogin()
     requestPortal("roku-device-register")
     m.registerTimer.control = "start"
     m.licenseTimer.control = "start"
@@ -258,6 +259,7 @@ end sub
 sub clearStorePlaylist()
     section = CreateObject("roRegistrySection", "ELVANOQPlay")
     section.Delete("store_playlist")
+    section.Delete("code_login")
     section.Delete("playlist_metadata")
     section.Flush()
 end sub
@@ -333,6 +335,12 @@ sub onStoreCatalogState()
         m.codeLoginActive = false
         if state.ok = true then
             m.catalogAuthenticated = true
+            if m.pendingCodeLogin <> invalid then
+                section = CreateObject("roRegistrySection", "ELVANOQPlay")
+                section.Write("code_login", FormatJson(m.pendingCodeLogin))
+                section.Flush()
+                m.pendingCodeLogin = invalid
+            end if
             setActivationVisible(false)
             m.homeStatus.visible = false
             finishWelcomeBack(state.counts)
@@ -382,6 +390,7 @@ sub onStoreDisconnect()
     m.appShell = invalid
     section = CreateObject("roRegistrySection", "ELVANOQPlay")
     section.Delete("playlist_metadata")
+    section.Delete("code_login")
     section.Write("login_removed", "true")
     section.Flush()
     if m.storeEdition then
@@ -659,6 +668,19 @@ sub onPortalResult(event as Object)
     ' Licença e sincronização não podem interromper credenciais/autenticação em andamento.
     if m.codeLoginActive = true and result.action <> "roku-server-code-resolve" then return
     if result.action = "roku-device-register" then
+        ' Acesso por código salvo: confere o código no Portal e entra sozinho.
+        if m.resumeCode <> invalid then
+            if result.ok <> true and result.state = "offline" then
+                resumeCodeWithHost("")
+                return
+            end if
+            if result.ok = true then
+                m.serverCodeInput = m.resumeCode.code
+                m.codeLoginActive = true
+                requestPortal("roku-server-code-resolve")
+                return
+            end if
+        end if
         if result.ok <> true then
             showActivationState(result.state, result.message)
             return
@@ -719,7 +741,8 @@ sub showActivationState(state as String, message as String)
     if welcomeActive() then
         if state = "active" then
             welcomeStep(1)
-        else if m.appShell = invalid or m.appShell.visible <> true then
+        else if (m.appShell = invalid or m.appShell.visible <> true) and m.manualSession <> true then
+            ' Acesso por código salvo: a licença do Portal não encerra o Bem-vindo enquanto a lista abre.
             endWelcomeBack()
         end if
     end if
@@ -887,6 +910,38 @@ sub onServerCodeKeyboardSelected()
 end sub
 
 sub handleServerCodeResult(result as Object)
+    if m.resumeCode <> invalid then
+        host = ""
+        if result.ok = true then host = serverHostFromPayload(result.payload)
+        if result.ok <> true and result.state <> "offline" then
+            forgetCodeLogin()
+            m.resumeCode = invalid
+            m.manualSession = false
+            m.codeLoginActive = false
+            m.serverCodeInput = ""
+            endWelcomeBack()
+            setActivationVisible(true)
+            if result.message <> invalid and result.message <> "" then m.status.text = result.message else m.status.text = "O acesso por código não vale mais. Entre novamente com o código do servidor."
+            setStatusTone("error")
+            restoreActivationFocus()
+            requestPortal("roku-license-status")
+            return
+        end if
+        if result.ok = true and host = "" then
+            forgetCodeLogin()
+            m.resumeCode = invalid
+            m.manualSession = false
+            m.codeLoginActive = false
+            endWelcomeBack()
+            setActivationVisible(true)
+            m.status.text = "O Portal não retornou um servidor compatível. Entre novamente com o código do servidor."
+            setStatusTone("error")
+            restoreActivationFocus()
+            return
+        end if
+        resumeCodeWithHost(host)
+        return
+    end if
     if result.ok <> true then
         m.codeLoginActive = false
         if result.message <> invalid and result.message <> "" and result.message <> "Não foi possível consultar o Portal." then
@@ -965,6 +1020,8 @@ sub onPasswordKeyboardSelected()
         connectStorePlaylist(playlist, true)
         return
     end if
+    ' Só fica salvo na TV depois que a lista abrir (onStoreCatalogState).
+    m.pendingCodeLogin = { code: m.serverCodeInput, host: m.resolvedHost, username: m.manualUsername, password: password }
     m.codeLoginActive = true
     m.manualSession = true
     m.playlistSynced = true
@@ -1350,4 +1407,57 @@ end sub
 sub onAppResumed()
     if m.top.appResumed <> true or m.codeLoginActive = true then return
     requestPortal("roku-license-status")
+end sub
+
+'---------- Acesso por código lembrado (igual às versões web 1.2.10) ----------
+' Antes usuário e senha ficavam só em memória: ao reabrir, o Bem-vindo de volta
+' aparecia (havia playlist_metadata) e voltava para o login. Agora o acesso fica
+' salvo (code_login) só depois que a lista abre; na abertura o código é
+' conferido no Portal (a revenda pode cancelar) e o app entra sozinho.
+sub resumeSavedCodeLogin()
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    if section.Read("login_removed") = "true" then return
+    raw = section.Read("code_login")
+    if raw = invalid or raw = "" then return
+    saved = ParseJson(raw)
+    if saved = invalid or type(saved) <> "roAssociativeArray" then return
+    for each key in ["code", "host", "username", "password"]
+        value = saved[key]
+        if value = invalid then return
+        if type(value) <> "roString" and type(value) <> "String" then return
+        if value = "" then return
+    end for
+    m.resumeCode = saved
+    m.manualSession = true
+    m.playlistSynced = true
+end sub
+
+' host vazio = Portal fora do ar: usa o último servidor salvo.
+sub resumeCodeWithHost(host as String)
+    saved = m.resumeCode
+    m.resumeCode = invalid
+    if saved = invalid then return
+    if host = "" then host = saved.host
+    welcomeStep(1)
+    m.pendingCodeLogin = { code: saved.code, host: host, username: saved.username, password: saved.password }
+    m.codeLoginActive = true
+    m.manualSession = true
+    m.playlistSynced = true
+    m.catalogAuthenticated = false
+    m.catalogAuthPending = true
+    m.status.text = "Validando usuário e senha no servidor IPTV…"
+    setStatusTone("connecting")
+    setActivationVisible(false)
+    openAppShell()
+    welcomeStep(2)
+    playlist = { source_type: "xtream", credentials: { host: host, username: saved.username, password: saved.password } }
+    if m.appShell <> invalid then m.appShell.callFunc("applyPlaylist", { display_name: "Acesso por código", server_code: saved.code, playlist: playlist })
+    m.serverCodeInput = ""
+end sub
+
+sub forgetCodeLogin()
+    section = CreateObject("roRegistrySection", "ELVANOQPlay")
+    section.Delete("code_login")
+    section.Flush()
+    m.pendingCodeLogin = invalid
 end sub
